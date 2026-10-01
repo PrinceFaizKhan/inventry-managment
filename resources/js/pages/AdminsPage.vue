@@ -1,0 +1,1 @@
+<script setup>import AdminTable from '../components/AdminTable.vue'; defineEmits(['notify'])</script><template><p class="eyebrow">Settings</p><h1>Users &amp; access</h1><p class="page-copy">View and manage people with access to your admin workspace.</p><AdminTable @notify="$emit('notify',$event)"/></template>

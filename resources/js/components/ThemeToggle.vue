@@ -1,0 +1,2 @@
+<script setup>import { Moon, Sun } from 'lucide-vue-next'; defineProps({modelValue:String}); defineEmits(['update:modelValue'])</script>
+<template><div class="theme"><button :class="{active:modelValue==='light'}" @click="$emit('update:modelValue','light')"><Sun :size="14"/><span>Light</span></button><button :class="{active:modelValue==='dark'}" @click="$emit('update:modelValue','dark')"><Moon :size="14"/><span>Dark</span></button></div></template>
