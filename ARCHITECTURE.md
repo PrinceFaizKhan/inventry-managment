@@ -37,6 +37,12 @@ Icons are resolved in `RecursiveMenuItem.vue` from an allowlisted backend identi
 
 Every current entry declares `permission: authenticated`. `MenuAuthorizer` provides the future role/permission extension point and denies any unresolved permission requirement by default. The navigation filter is presentation only. Each future module API endpoint must enforce its own authorization middleware, policy, or gate independently.
 
+## Registered permissions and roles
+
+Each module can register a permission hierarchy in `Modules/<Module>/Config/permissions.php`. A node needs a globally unique `key` and a `label`; nested `children` use the same schema. `PermissionRegistry` discovers and validates every file. Only leaf keys are persisted for a Custom role, so a future permission added to configuration remains ungranted until explicitly selected.
+
+`GET /api/permissions` supplies this tree to the shared recursive Vue permission component. `POST /api/roles` validates submitted keys against the registry and persists `name`, `access`, and the selected permissions in the `roles` table. Administration roles deliberately store no snapshot: they resolve to every current and future registered permission when authorization is added to user-role assignment.
+
 ## Current API boundaries
 
 Session login and logout are provided by `AuthController`. `GET /api/navigation` and `GET /api/admins` require Laravel authentication. A future mobile client can consume separately versioned Laravel API endpoints; its authentication strategy can be added without changing menu registration or the Vue layout.

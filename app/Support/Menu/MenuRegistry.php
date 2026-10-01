@@ -33,7 +33,7 @@ class MenuRegistry
         return $this->sort($entries);
     }
 
-    private function normalise(mixed $entry, array &$keys, string $path): ?array
+    private function normalise(mixed $entry, array &$keys, string $path): array
     {
         if (! is_array($entry)) {
             throw new MenuConfigurationException("Menu entry in [$path] must be an array.");
