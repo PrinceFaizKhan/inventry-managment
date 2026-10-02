@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref } from 'vue'
 import { Bold, Italic } from 'lucide-vue-next'
+import SelectControl from '../ui/SelectControl.vue'
+import type { SelectControlValue } from '../ui/SelectControl.vue'
 import type { AttributeOptionData } from '../../types/attributes'
 
 const props = defineProps<{
@@ -26,6 +28,7 @@ const numberStep = computed(() => {
   return precision === 0 ? '1' : `0.${'0'.repeat(precision - 1)}1`
 })
 const plainTextLength = computed(() => textValue.value.length)
+const attributeOptions = computed(() => props.options.map((option) => ({ value: option.code, label: option.label })))
 
 onBeforeUnmount(() => releaseFiles())
 
@@ -39,11 +42,16 @@ function formatEditor(command: 'bold' | 'italic'): void {
   updateText({ currentTarget: editor.value } as unknown as Event)
 }
 
-function toggleOption(code: string, event: Event): void {
-  const selected = new Set(selectedValues.value)
-  if ((event.target as HTMLInputElement).checked) selected.add(code)
-  else selected.delete(code)
-  selectedValues.value = [...selected]
+function setSingleOption(value: SelectControlValue): void {
+  selectedValues.value = typeof value === 'string' || typeof value === 'number' ? [String(value)] : []
+}
+
+function setMultipleOptions(value: SelectControlValue): void {
+  selectedValues.value = Array.isArray(value) ? value.map(String) : []
+}
+
+function setBooleanOption(value: SelectControlValue): void {
+  booleanValue.value = typeof value === 'string' ? value : ''
 }
 
 function releaseFiles(): void {
@@ -100,22 +108,41 @@ function previewFiles(event: Event): void {
       <small v-if="settings.rich_text && (settings.min_length || settings.max_length)" class="attribute-preview-help">Plain text length: {{ plainTextLength }}{{ settings.max_length ? ` / ${settings.max_length}` : '' }}</small>
     </template>
 
-    <select v-else-if="type === 'select'" :id="`preview-${code}`" v-model="selectedValues[0]" :required="required">
-      <option value="">Select an option</option>
-      <option v-for="option in options" :key="option.id ?? option.code" :value="option.code">{{ option.label }}</option>
-    </select>
+    <SelectControl
+      v-else-if="type === 'select' || type === 'radio'"
+      :mode="type === 'radio' ? 'radio' : 'single'"
+      :id="`preview-${code}`"
+      :model-value="selectedValues[0] || ''"
+      :options="attributeOptions"
+      placeholder="Select an option"
+      :name="`preview-${code}`"
+      :aria-label="name"
+      :required="required"
+      @update:model-value="setSingleOption"
+    />
 
-    <fieldset v-else-if="type === 'checkbox'" class="attribute-preview-options">
-      <label v-for="(option,index) in options" :key="option.id ?? option.code">
-        <input type="checkbox" :required="required && index === 0" :checked="selectedValues.includes(option.code)" @change="toggleOption(option.code,$event)"/>
-        {{ option.label }}
-      </label>
-    </fieldset>
+    <SelectControl
+      v-else-if="type === 'checkbox' || type === 'multiselect'"
+      :id="`preview-${code}`"
+      mode="multiple"
+      :model-value="selectedValues"
+      :options="attributeOptions"
+      placeholder="Select one or more options"
+      :required="required"
+      @update:model-value="setMultipleOptions"
+    />
 
-    <fieldset v-else-if="type === 'boolean'" class="attribute-preview-options">
-      <label><input v-model="booleanValue" type="radio" :name="`preview-${code}`" value="yes" :required="required"/> Yes</label>
-      <label><input v-model="booleanValue" type="radio" :name="`preview-${code}`" value="no"/> No</label>
-    </fieldset>
+    <SelectControl
+      v-else-if="type === 'boolean'"
+      :id="`preview-${code}`"
+      :model-value="booleanValue"
+      :options="[{ value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' }]"
+      mode="radio"
+      :name="`preview-${code}`"
+      :aria-label="name"
+      :required="required"
+      @update:model-value="setBooleanOption"
+    />
 
     <div v-else-if="type === 'money'" class="attribute-money-preview">
       <span>{{ settings.currency || 'Currency' }}</span>

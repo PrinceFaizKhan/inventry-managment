@@ -2,6 +2,8 @@
 import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { X } from 'lucide-vue-next'
 import type { GridFilter } from '../../types/grid'
+import SelectControl from '../ui/SelectControl.vue'
+import type { SelectControlValue } from '../ui/SelectControl.vue'
 
 const props = defineProps<{
   filters: GridFilter[]
@@ -30,13 +32,13 @@ onBeforeUnmount(() => {
   document.body.style.overflow = previousBodyOverflow
 })
 
-function updateFilter(key: string, event: Event): void {
-  const value = (event.target as HTMLSelectElement).value
-  if (value === '') {
+function updateFilter(key: string, value: SelectControlValue): void {
+  if (value === '' || value === null) {
     delete draft.value[key]
     return
   }
 
+  if (Array.isArray(value)) return
   draft.value[key] = value
 }
 
@@ -103,16 +105,13 @@ function handleKeydown(event: KeyboardEvent): void {
         <div class="filter-drawer__body">
           <label v-for="filter in filters" :key="filter.key" class="filter-drawer__field">
             <span>{{ filter.label }}</span>
-            <select :value="draft[filter.key] ?? ''" @change="updateFilter(filter.key, $event)">
-              <option value="">All {{ filter.label.toLowerCase() }}</option>
-              <option
-                v-for="option in options[filter.key] || []"
-                :key="option.value"
-                :value="option.value"
-              >
-                {{ option.label }}
-              </option>
-            </select>
+            <SelectControl
+              :model-value="draft[filter.key] ?? ''"
+              :options="options[filter.key] || []"
+              :placeholder="`All ${filter.label.toLowerCase()}`"
+              :aria-label="filter.label"
+              @update:model-value="updateFilter(filter.key,$event)"
+            />
           </label>
         </div>
 

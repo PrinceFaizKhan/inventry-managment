@@ -1,6 +1,6 @@
 export interface AttributeSettingDefinition {
   label: string
-  type: 'select' | 'multi_select' | 'integer' | 'decimal' | 'boolean'
+  type: 'select' | 'multi_select' | 'radio' | 'integer' | 'decimal' | 'boolean'
   default?: string | number | boolean | string[]
   min?: number
   max?: number

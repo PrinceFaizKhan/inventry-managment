@@ -66,6 +66,7 @@ async function submitBulk(action: string, changes: Record<string, string | numbe
   <section class="data-grid">
     <div class="data-grid__top">
       <div class="grid-page-actions"><slot name="title"/><button v-if="createAction && meta.actions[createAction.key]" class="button button--compact" type="button" @click="emit('create')"><Plus :size="16"/>{{ createAction.label }}</button></div>
+      <div v-if="$slots.title" class="grid-toolbar-separator" aria-hidden="true"></div>
       <GridToolbar ref="toolbar" :search="search" :placeholder="config.searchPlaceholder" :filter-count="activeFilters.length" :show-filters="filtersOpen" :total="meta.total" @search="updateSearch" @toggle-filters="filtersOpen=!filtersOpen"/>
       <div v-if="activeFilters.length" class="grid-chips"><button v-for="filter in activeFilters" :key="filter.key" type="button" @click="clearFilter(filter.key)">{{ filter.label }}: {{ filter.option }} <span>×</span></button></div>
       <BulkActionsMenu v-if="selectable" ref="bulkMenu" :count="selectedIds.length" :actions="configuredBulkActions" :allowed="meta.bulk_actions" @action="bulkAction" @clear="clearSelection"/>

@@ -93,6 +93,7 @@ class AttributeTypeRegistry
             $fieldRules = [];
             switch ($field['type']) {
                 case 'select':
+                case 'radio':
                     $fieldRules = ['required', 'string', Rule::in(array_keys($field['options']))];
                     break;
                 case 'currency':

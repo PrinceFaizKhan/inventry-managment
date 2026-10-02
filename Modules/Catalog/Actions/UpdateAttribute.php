@@ -47,8 +47,8 @@ class UpdateAttribute
     /** @param list<array{id?: int|null, code: string, label: string, sort_order: int}> $options */
     private function syncOptions(Attribute $attribute, array $options): void
     {
-        if (! in_array($attribute->type, ['select', 'checkbox'], true)) {
-            throw ValidationException::withMessages(['options' => 'Options are only available for Select and Checkbox attributes.']);
+        if (! in_array($attribute->type, ['select', 'multiselect', 'radio', 'checkbox'], true)) {
+            throw ValidationException::withMessages(['options' => 'Options are only available for Select, Multiselect, Radio and Checkbox attributes.']);
         }
 
         $existing = $attribute->options()->lockForUpdate()->get()->keyBy('id');

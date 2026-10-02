@@ -35,10 +35,20 @@ class AttributeModuleTest extends TestCase
     {
         $user = $this->userWithRole('administration');
 
-        $this->actingAs($user)->getJson('/api/catalog/attribute-types')
-            ->assertOk()
-            ->assertJsonPath('data.text', 'Text')
-            ->assertJsonMissingPath('data.text.settings');
+        $response = $this->actingAs($user)->getJson('/api/catalog/attribute-types')->assertOk();
+
+        $this->assertSame([
+            'text' => 'Text',
+            'textarea' => 'Textarea',
+            'boolean' => 'Boolean',
+            'checkbox' => 'Checkbox',
+            'select' => 'Select',
+            'multiselect' => 'Multiselect',
+            'image' => 'Image',
+            'gallery' => 'Gallery',
+            'radio' => 'Radio',
+            'money' => 'Money',
+        ], $response->json('data'));
     }
 
     public function test_create_rejects_a_name_that_generates_an_invalid_code_with_a_field_error(): void
@@ -182,6 +192,32 @@ class AttributeModuleTest extends TestCase
         $this->assertDatabaseHas('attribute_options', ['id' => $first->id, 'code' => 'red', 'sort_order' => 1]);
     }
 
+    public function test_multiselect_and_radio_attributes_save_configured_options(): void
+    {
+        $user = $this->userWithRole('administration');
+        $this->actingAs($user);
+
+        foreach (['multiselect', 'radio'] as $type) {
+            $attribute = Attribute::factory()->create(['type' => $type]);
+
+            $this->putJson("/api/catalog/attributes/{$attribute->id}", [
+                'name' => $attribute->name,
+                'required' => false,
+                'settings' => [],
+                'options' => [
+                    ['code' => 'first', 'label' => 'First', 'sort_order' => 0],
+                    ['code' => 'second', 'label' => 'Second', 'sort_order' => 1],
+                ],
+            ])->assertOk();
+
+            $this->assertDatabaseHas('attribute_options', [
+                'attribute_id' => $attribute->id,
+                'code' => 'first',
+                'label' => 'First',
+            ]);
+        }
+    }
+
     public function test_update_rejects_duplicate_option_codes_without_changing_saved_options(): void
     {
         $user = $this->userWithRole('administration');
@@ -212,6 +248,18 @@ class AttributeModuleTest extends TestCase
             'required' => false,
             'settings' => ['max_images' => 4],
         ])->assertUnprocessable()->assertJsonValidationErrors(['settings.max_images']);
+    }
+
+    public function test_url_validation_rejects_inapplicable_text_length_settings(): void
+    {
+        $user = $this->userWithRole('administration');
+        $attribute = Attribute::factory()->create(['type' => 'text']);
+
+        $this->actingAs($user)->putJson("/api/catalog/attributes/{$attribute->id}", [
+            'name' => $attribute->name,
+            'required' => false,
+            'settings' => ['validation' => 'url', 'min_length' => 5],
+        ])->assertUnprocessable()->assertJsonValidationErrors(['settings.min_length']);
     }
 
     public function test_attribute_grid_searches_and_filters_using_allowlisted_fields(): void

@@ -34,7 +34,7 @@ class UpdateAttributeRequest extends FormRequest
             $rules["settings.$field"] = ['sometimes'];
         }
 
-        if (in_array($attribute->type, ['select', 'checkbox'], true)) {
+        if (in_array($attribute->type, ['select', 'multiselect', 'radio', 'checkbox'], true)) {
             $rules['options'] = ['required', 'array', 'max:100'];
             $rules['options.*.id'] = ['sometimes', 'nullable', 'integer', 'min:1', 'distinct'];
             $rules['options.*.code'] = ['required', 'string', 'max:120', 'regex:/^[a-z][a-z0-9_]*$/', 'distinct'];

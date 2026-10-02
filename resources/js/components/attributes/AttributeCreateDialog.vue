@@ -3,6 +3,7 @@ import { computed, nextTick, onMounted, ref } from 'vue'
 import { X } from 'lucide-vue-next'
 import { request } from '../../lib/http'
 import { isValidAttributeCode, normalizeAttributeCode } from '../../modules/catalog/attributeCode'
+import SelectControl from '../ui/SelectControl.vue'
 
 const emit = defineEmits<{ close: []; created: [id: number]; notify: [message: string] }>()
 const name = ref('')
@@ -13,6 +14,7 @@ const saving = ref(false)
 const errors = ref<Record<string, string>>({})
 const nameInput = ref<HTMLInputElement | null>(null)
 const code = computed(() => normalizeAttributeCode(name.value))
+const typeOptions = computed(() => Object.entries(types.value).map(([value, label]) => ({ value, label })))
 const codeError = computed(() => name.value.trim() !== '' && !isValidAttributeCode(code.value)
   ? 'This name does not produce a valid attribute code.'
   : errors.value.code)
@@ -76,10 +78,15 @@ function handleKeydown(event: KeyboardEvent): void {
 
         <label class="attribute-form-field">
           <span>Type <b>*</b></span>
-          <select v-model="type" required :disabled="loadingTypes" :aria-invalid="!!errors.type">
-            <option value="" disabled>Select type</option>
-            <option v-for="(label, key) in types" :key="key" :value="key">{{ label }}</option>
-          </select>
+          <SelectControl
+            :model-value="type"
+            :options="typeOptions"
+            placeholder="Select type"
+            :disabled="loadingTypes"
+            :invalid="!!errors.type"
+            aria-label="Attribute type"
+            @update:model-value="type=String($event || '')"
+          />
           <small v-if="errors.type" class="attribute-error">{{ errors.type }}</small>
         </label>
 

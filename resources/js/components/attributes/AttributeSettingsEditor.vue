@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import SelectControl from '../ui/SelectControl.vue'
 import type { AttributeSettingDefinition } from '../../types/attributes'
 
 const props = defineProps<{
@@ -32,29 +33,35 @@ function update(key: string, value: unknown): void {
   emit('update:settings', next)
 }
 
-function toggleMultiSelect(key: string, value: string, event: Event): void {
-  const selected = new Set((fieldValue(key, props.fields[key]) as string[]) || [])
-  if ((event.target as HTMLInputElement).checked) selected.add(value)
-  else selected.delete(value)
-  update(key, [...selected])
+function selectOptions(field: AttributeSettingDefinition): { value: string; label: string }[] {
+  return Object.entries(field.options || {}).map(([value, label]) => ({ value, label }))
 }
 </script>
 
 <template>
   <div class="attribute-settings-fields">
     <div v-for="[key, field] in visibleFields" :key="key" class="attribute-setting">
-      <label v-if="field.type !== 'boolean' && field.type !== 'multi_select'" :for="`attribute-setting-${key}`">{{ field.label }}</label>
+      <label v-if="field.type !== 'boolean'" :for="`attribute-setting-${key}`">{{ field.label }}</label>
 
-      <select
+      <SelectControl
         v-if="field.type === 'select'"
         :id="`attribute-setting-${key}`"
-        :value="fieldValue(key, field)"
-        :aria-invalid="!!errors[`settings.${key}`]"
-        @change="update(key, ($event.target as HTMLSelectElement).value)"
-      >
-        <option v-if="field.default === undefined && !fieldValue(key, field)" value="">Select {{ field.label.toLowerCase() }}</option>
-        <option v-for="(label, option) in field.options || {}" :key="option" :value="option">{{ label }}</option>
-      </select>
+        :model-value="fieldValue(key, field) as string"
+        :options="selectOptions(field)"
+        :placeholder="`Select ${field.label.toLowerCase()}`"
+        :invalid="!!errors[`settings.${key}`]"
+        @update:model-value="update(key, $event)"
+      />
+
+      <SelectControl
+        v-else-if="field.type === 'radio'"
+        :id="`attribute-setting-${key}`"
+        mode="radio"
+        :model-value="fieldValue(key, field) as string"
+        :options="selectOptions(field)"
+        :aria-label="field.label"
+        @update:model-value="update(key, $event)"
+      />
 
       <input
         v-else-if="field.type === 'integer' || field.type === 'decimal'"
@@ -73,13 +80,17 @@ function toggleMultiSelect(key: string, value: string, event: Event): void {
         <span>{{ field.label }}</span>
       </label>
 
-      <fieldset v-else-if="field.type === 'multi_select'" class="attribute-setting-options" :aria-invalid="!!errors[`settings.${key}`]">
-        <legend>{{ field.label }}</legend>
-        <label v-for="(label, option) in field.options || {}" :key="option" class="attribute-setting-check">
-          <input type="checkbox" :checked="((fieldValue(key, field) as string[]) || []).includes(option)" @change="toggleMultiSelect(key, option, $event)"/>
-          <span>{{ label }}</span>
-        </label>
-      </fieldset>
+      <SelectControl
+        v-else-if="field.type === 'multi_select'"
+        :id="`attribute-setting-${key}`"
+        mode="multiple"
+        :model-value="fieldValue(key, field) as string[]"
+        :options="selectOptions(field)"
+        :placeholder="`Select ${field.label.toLowerCase()}`"
+        :invalid="!!errors[`settings.${key}`]"
+        searchable
+        @update:model-value="update(key, $event)"
+      />
 
       <small v-if="errors[`settings.${key}`]" class="attribute-error">{{ errors[`settings.${key}`] }}</small>
       <small v-if="key === 'rich_text' && Boolean(fieldValue(key, field))" class="attribute-help">Text length checks use the plain text content.</small>

@@ -22,7 +22,7 @@ const required = ref(false)
 const settings = ref<Record<string, unknown>>({})
 const options = ref<AttributeOptionData[]>([])
 const currentType = computed(() => attribute.value ? types.value[attribute.value.type] : undefined)
-const configurableOptions = computed(() => ['select', 'checkbox'].includes(attribute.value?.type || ''))
+const configurableOptions = computed(() => ['select', 'multiselect', 'radio', 'checkbox'].includes(attribute.value?.type || ''))
 
 onMounted(loadAttribute)
 
@@ -96,6 +96,11 @@ async function save(): Promise<void> {
               <label class="attribute-form-field attribute-type-field"><span>Type</span><input :value="currentType.label" readonly/></label>
             </div>
           </section>
+          <section v-if="configurableOptions" class="attribute-panel attribute-options-panel">
+            <h2>Options</h2>
+            <p class="attribute-panel-copy">Option codes stay stable after creation. Labels and order can be changed.</p>
+            <AttributeOptionsEditor :options="options" :errors="errors" @update:options="options=$event"/>
+          </section>
         </div>
 
         <div class="attribute-edit-side">
@@ -122,12 +127,6 @@ async function save(): Promise<void> {
           </section>
 
         </div>
-
-        <section v-if="configurableOptions" class="attribute-panel attribute-options-panel">
-          <h2>Options</h2>
-          <p class="attribute-panel-copy">Option codes stay stable after creation. Labels and order can be changed.</p>
-          <AttributeOptionsEditor :options="options" :errors="errors" @update:options="options=$event"/>
-        </section>
       </form>
     </template>
   </section>
