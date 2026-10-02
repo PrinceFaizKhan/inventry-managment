@@ -8,8 +8,6 @@ return [
         'route' => 'catalog.products',
         'sort' => 20,
         'permission' => 'authenticated',
-        'enabled' => false,
-        'coming_soon' => true,
         'children' => [
             [
                 'key' => 'catalog.attributes',
@@ -17,9 +15,7 @@ return [
                 'icon' => 'sliders-horizontal',
                 'route' => 'catalog.attributes',
                 'sort' => 10,
-                'permission' => 'authenticated',
-                'enabled' => false,
-                'coming_soon' => true,
+                'permission' => 'catalog.attributes.view',
             ],
             [
                 'key' => 'catalog.product-types',

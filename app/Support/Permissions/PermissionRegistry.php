@@ -41,6 +41,11 @@ class PermissionRegistry
         return $keys;
     }
 
+    public function has(string $key): bool
+    {
+        return in_array($key, $this->keys(), true);
+    }
+
     private function normalise(mixed $node, array &$keys, string $path): array
     {
         if (! is_array($node) || ! isset($node['key'], $node['label']) || ! is_string($node['key']) || ! is_string($node['label'])) {

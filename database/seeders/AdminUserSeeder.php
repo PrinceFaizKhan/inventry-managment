@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -13,7 +14,12 @@ class AdminUserSeeder extends Seeder
      */
     public function run(): void
     {
-        User::query()->updateOrCreate(
+        $administrationRole = Role::query()->updateOrCreate(
+            ['name' => 'Administration'],
+            ['access' => 'administration', 'permissions' => []],
+        );
+
+        $administrator = User::query()->firstOrCreate(
             ['email' => 'admin@haseentelecom.test'],
             [
                 'name' => 'Haseen Ahmed',
@@ -21,5 +27,8 @@ class AdminUserSeeder extends Seeder
                 'email_verified_at' => now(),
             ],
         );
+
+        $administrator->role()->associate($administrationRole);
+        $administrator->save();
     }
 }

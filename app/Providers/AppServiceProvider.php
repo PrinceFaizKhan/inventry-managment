@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Support\Grid\GridRegistry;
 use App\Support\Menu\MenuAuthorizer;
 use App\Support\Menu\MenuRegistry;
 use App\Support\Permissions\PermissionRegistry;
@@ -21,6 +22,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->singleton(MenuAuthorizer::class);
         $this->app->singleton(MenuRegistry::class);
+        $this->app->singleton(GridRegistry::class);
         $this->app->singleton(PermissionRegistry::class);
     }
 

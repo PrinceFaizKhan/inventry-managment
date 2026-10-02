@@ -1,0 +1,2 @@
+<script setup lang="ts">defineProps<{ type: 'loading' | 'empty' | 'error'; message?: string }>()</script>
+<template><div class="grid-state" :class="`grid-state--${type}`"><span v-if="type === 'loading'" class="grid-spinner"></span><strong>{{ type === 'loading' ? 'Loading results…' : type === 'empty' ? 'No results found' : 'Unable to load results' }}</strong><p v-if="type === 'empty'">Try changing your search or filters.</p><p v-else-if="type === 'error'">{{ message }}</p></div></template>
