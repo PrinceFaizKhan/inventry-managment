@@ -1,27 +1,65 @@
+# Logs & Debugging
 *.log
-.DS_Store
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Environment & Secrets
 .env
 .env.backup
 .env.production
-.phpactor.json
-.phpunit.result.cache
-/.codex
-/.cursor/
-/.idea
-/.nova
-/.phpunit.cache
-/.vscode
-/.zed
+.env.*.local
+.env.local
 /auth.json
+
+# Local SQLite Databases
+/inventry
+*.sqlite
+*.sqlite-journal
+*.sqlite-shm
+*.sqlite-wal
+
+# Dependencies & Package Managers
 /node_modules
+/vendor
+
+# Build Artifacts & Caches
 /public/build
 /public/fonts-manifest.dev.json
 /public/hot
 /public/storage
+/.vite
+*.tsbuildinfo
+
+# Testing
+.phpunit.result.cache
+/.phpunit.cache
+
+# Laravel Storage & Keys
 /storage/*.key
 /storage/pail
-/vendor
+
+# IDE & Editor Specific
+/.idea
+/.vscode
+/.cursor/
+/.zed
+/.nova
+/.codex
+/.gemini/
+.phpactor.json
 _ide_helper.php
+_ide_helper_models.php
+.phpstorm.meta.php
 Homestead.json
 Homestead.yaml
+
+# OS Generated
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
 Thumbs.db
+ehthumbs.db
