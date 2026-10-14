@@ -1,7 +1,7 @@
 @extends('admin::layouts.admin')
 
-@section('title', __('catalog.attributes::app.title') ?? 'Edit Attribute')
-@section('crumb', __('catalog.attributes::app.title') ?? 'Edit Attribute')
+@section('title', 'Edit Attribute')
+@section('crumb', 'Edit Attribute')
 
 @section('content')
 <div class="attribute-edit-page">

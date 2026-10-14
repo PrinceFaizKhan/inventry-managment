@@ -3,18 +3,15 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
-use Modules\Admin\Http\Controllers\AdminAuthController;
+use Modules\Admin\Http\Controllers\User\SessionController;
 
 Route::get('/', function () {
     if (auth()->check()) {
         return redirect('/dashboard');
     }
 
-    return view('app');
+    return app(SessionController::class)->create();
 })->name('login');
-Route::post('/login', [AdminAuthController::class, 'store'])->middleware(['throttle:login']);
-Route::post('/logout', [AdminAuthController::class, 'destroy'])->middleware('auth');
-Route::get('/api/bootstrap', [AdminAuthController::class, 'bootstrap'])->middleware('web');
 
 Route::middleware('auth')->prefix('api')->group(function () {
 

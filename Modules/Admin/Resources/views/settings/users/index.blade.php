@@ -1,7 +1,7 @@
 @extends('admin::layouts.admin')
 
-@section('title', __('settings.users::app.title') ?? 'Users')
-@section('crumb', __('settings.users::app.title') ?? 'Users')
+@section('title', 'Users')
+@section('crumb', 'Users')
 
 @section('content')
 <div class="users-page">

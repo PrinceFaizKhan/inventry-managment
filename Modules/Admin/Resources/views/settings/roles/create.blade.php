@@ -1,7 +1,7 @@
 @extends('admin::layouts.admin')
 
-@section('title', __('settings.roles::app.title') ?? 'Create Role')
-@section('crumb', __('settings.roles::app.title') ?? 'Create Role')
+@section('title', 'Create Role')
+@section('crumb', 'Create Role')
 
 @section('content')
 <div class="roles-page">
