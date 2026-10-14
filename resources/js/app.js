@@ -1,18 +1,32 @@
 import { createApp } from 'vue'
-import { createRouter, createWebHistory } from 'vue-router'
-import App from './App.vue'
-import DashboardPage from './pages/DashboardPage.vue'
-import AdminsPage from './pages/AdminsPage.vue'
-import RolesPage from './pages/RolesPage.vue'
-import AttributesPage from './pages/AttributesPage.vue'
-import AttributeEditPage from './pages/AttributeEditPage.vue'
 import '../css/app.css'
+import LoginView from '../../Modules/Admin/Resources/js/components/LoginView.vue'
 
-const router = createRouter({ history: createWebHistory(), routes: [
-    { path: '/', name: 'dashboard', component: DashboardPage, meta: { title: 'Dashboard' } },
-    { path: '/settings/users', name: 'users', component: AdminsPage, meta: { title: 'Users & access' } },
-    { path: '/settings/roles/create', name: 'roles', component: RolesPage, meta: { title: 'Roles' } },
-    { path: '/catalog/attributes', name: 'catalog.attributes', component: AttributesPage, meta: { title: 'Attributes', activeMenu: 'catalog.attributes', breadcrumbs: ['Catalog', 'Attributes'] } },
-    { path: '/catalog/attributes/:id/edit', name: 'catalog.attributes.edit', component: AttributeEditPage, meta: { title: 'Edit attribute', activeMenu: 'catalog.attributes', breadcrumbs: ['Catalog', 'Attributes', 'Edit'] } },
-] })
-createApp(App).use(router).mount('#app')
+/**
+ * Register all Vue components from independent Modules and shared UI library.
+ */
+function registerAllComponents(app) {
+  // Auto-discover components from all independent Modules
+  const moduleComponents = import.meta.glob('../../Modules/**/Resources/js/**/*.vue', { eager: true })
+  for (const [path, mod] of Object.entries(moduleComponents)) {
+    if (mod && typeof mod === 'object' && 'default' in mod) {
+      const fileName = path.split('/').pop()?.replace(/\.\w+$/, '')
+      if (fileName) {
+        app.component(fileName, mod.default)
+        const kebab = fileName.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase()
+        if (kebab !== fileName) {
+          app.component(kebab, mod.default)
+        }
+      }
+    }
+  }
+}
+
+const appElement = typeof document !== 'undefined' ? document.getElementById('app') : null
+
+if (appElement) {
+  const hasContent = appElement.children.length > 0 || appElement.innerHTML.trim().length > 0
+  const app = hasContent ? createApp({}) : createApp(LoginView)
+  registerAllComponents(app)
+  app.mount('#app')
+}

@@ -1,0 +1,26 @@
+{
+    "name": "inventry/sales",
+    "description": "Sales Connector Module for Inventry / UnoPim Admin",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Inventry Team"
+        }
+    ],
+    "require": {
+        "php": "^8.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\Sales\\": ""
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Modules\\Sales\\Providers\\SalesServiceProvider"
+            ]
+        }
+    }
+}

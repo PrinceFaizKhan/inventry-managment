@@ -2,6 +2,7 @@
 
 namespace Modules\Catalog\Attributes;
 
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -11,7 +12,15 @@ class AttributeTypeRegistry
     /** @return array<string, array{label: string, settings: array<string, array<string, mixed>>}> */
     public function definitions(): array
     {
-        return require base_path('Modules/Catalog/Config/attribute_types.php');
+        $all = [];
+        foreach (File::glob(base_path('Modules/*/Config/attribute_types.php')) as $path) {
+            $types = require $path;
+            if (is_array($types)) {
+                $all = array_merge($all, $types);
+            }
+        }
+
+        return $all ?: require base_path('Modules/Catalog/Config/attribute_types.php');
     }
 
     /** @return list<string> */

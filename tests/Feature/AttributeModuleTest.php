@@ -290,6 +290,59 @@ class AttributeModuleTest extends TestCase
         $this->assertDatabaseMissing('attribute_options', ['id' => $option->id]);
     }
 
+    public function test_update_can_toggle_is_filterable_flag(): void
+    {
+        $user = $this->userWithRole('administration');
+        $attribute = Attribute::factory()->create(['name' => 'Brand', 'code' => 'brand', 'is_filterable' => false]);
+
+        $this->actingAs($user)->putJson("/api/catalog/attributes/{$attribute->id}", [
+            'name' => 'Brand',
+            'required' => false,
+            'is_filterable' => true,
+            'settings' => ['validation' => 'any'],
+        ])->assertOk();
+
+        $this->assertDatabaseHas('attributes', [
+            'id' => $attribute->id,
+            'is_filterable' => true,
+        ]);
+    }
+
+    public function test_attribute_grid_can_filter_by_is_filterable(): void
+    {
+        $user = $this->userWithRole('administration');
+        Attribute::factory()->create(['name' => 'Brand', 'code' => 'brand', 'is_filterable' => true]);
+        Attribute::factory()->create(['name' => 'Internal Note', 'code' => 'internal_note', 'is_filterable' => false]);
+
+        $this->actingAs($user)->getJson('/api/grids/attributes?filter[is_filterable]=1')
+            ->assertOk()
+            ->assertJsonPath('meta.total', 1)
+            ->assertJsonPath('data.0.code', 'brand')
+            ->assertJsonPath('data.0.is_filterable', true);
+
+        $this->actingAs($user)->getJson('/api/grids/attributes?filter[is_filterable]=0')
+            ->assertOk()
+            ->assertJsonPath('meta.total', 1)
+            ->assertJsonPath('data.0.code', 'internal_note')
+            ->assertJsonPath('data.0.is_filterable', false);
+    }
+
+    public function test_filterable_endpoint_returns_only_filterable_attributes(): void
+    {
+        $user = $this->userWithRole('administration');
+        $filterable = Attribute::factory()->create(['name' => 'Color', 'code' => 'color', 'type' => 'select', 'is_filterable' => true]);
+        AttributeOption::factory()->for($filterable)->create(['code' => 'red', 'label' => 'Red', 'sort_order' => 0]);
+        Attribute::factory()->create(['name' => 'Internal Note', 'code' => 'internal_note', 'type' => 'textarea', 'is_filterable' => false]);
+
+        $this->actingAs($user)->getJson('/api/catalog/attributes/filterable')
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.code', 'color')
+            ->assertJsonPath('data.0.is_filterable', true)
+            ->assertJsonCount(1, 'data.0.options')
+            ->assertJsonPath('data.0.options.0.code', 'red');
+    }
+
     /** @param list<string> $permissions */
     private function userWithRole(string $access, array $permissions = []): User
     {

@@ -3,8 +3,8 @@
 namespace Modules\Catalog\Policies;
 
 use App\Models\User;
-use App\Support\Menu\MenuAuthorizer;
 use Modules\Catalog\Models\Attribute;
+use Modules\Core\Support\Menu\MenuAuthorizer;
 
 class AttributePolicy
 {

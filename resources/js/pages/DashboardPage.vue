@@ -1,1 +1,0 @@
-<template><p class="eyebrow">Dashboard</p><h1>Welcome back.</h1><p class="page-copy">Here’s a quick look at your Haseen Telecom workspace.</p><section class="empty"><span>✦</span><h2>Your workspace is ready</h2><p>Start by adding products, tracking inventory, or recording your first sale.</p></section></template>

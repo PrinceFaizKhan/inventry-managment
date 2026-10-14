@@ -27,7 +27,15 @@ class AttributeFactory extends Factory
             'code' => AttributeCodeGenerator::fromName($name),
             'type' => 'text',
             'required' => false,
+            'is_filterable' => false,
             'settings' => ['validation' => 'any'],
         ];
+    }
+
+    public function filterable(): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'is_filterable' => true,
+        ]);
     }
 }

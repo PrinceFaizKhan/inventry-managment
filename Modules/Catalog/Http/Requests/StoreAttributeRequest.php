@@ -26,6 +26,8 @@ class StoreAttributeRequest extends FormRequest
             'type' => ['required', 'string', Rule::in($types->keys())],
             'code' => ['prohibited'],
             'required' => ['prohibited'],
+            'is_filterable' => ['prohibited'],
+            'is_filter' => ['prohibited'],
             'settings' => ['prohibited'],
             'options' => ['prohibited'],
         ];

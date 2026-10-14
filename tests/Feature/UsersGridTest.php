@@ -4,8 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\Role;
 use App\Models\User;
-use App\Support\Grid\GridRegistry;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Modules\Core\Support\Grid\GridRegistry;
 use Tests\Support\SelectableUsersGridRegistry;
 use Tests\TestCase;
 

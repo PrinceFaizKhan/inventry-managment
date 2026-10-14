@@ -3,11 +3,11 @@
 namespace Modules\Catalog\Grid;
 
 use App\Models\User;
-use App\Support\Grid\GridDataProvider;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Modules\Catalog\Attributes\AttributeTypeRegistry;
 use Modules\Catalog\Models\Attribute;
+use Modules\Core\Support\Grid\GridDataProvider;
 
 class AttributesGridProvider implements GridDataProvider
 {
@@ -16,7 +16,7 @@ class AttributesGridProvider implements GridDataProvider
     /** @param array<string, mixed> $parameters @param array<string, mixed> $definition */
     public function query(array $parameters, array $definition): Builder
     {
-        $query = Attribute::query()->select(['id', 'name', 'code', 'type', 'required', 'created_at']);
+        $query = Attribute::query()->select(['id', 'name', 'code', 'type', 'required', 'is_filterable', 'created_at']);
         if ($parameters['search'] !== '') {
             $query->where(function (Builder $query) use ($parameters): void {
                 $query->where('name', 'like', '%'.$parameters['search'].'%')
@@ -28,6 +28,9 @@ class AttributesGridProvider implements GridDataProvider
         }
         if (isset($parameters['filters']['required'])) {
             $query->where('required', filter_var($parameters['filters']['required'], FILTER_VALIDATE_BOOLEAN));
+        }
+        if (isset($parameters['filters']['is_filterable'])) {
+            $query->where('is_filterable', filter_var($parameters['filters']['is_filterable'], FILTER_VALIDATE_BOOLEAN));
         }
 
         return $query
@@ -45,6 +48,7 @@ class AttributesGridProvider implements GridDataProvider
             'type' => $this->types->definitions()[$model->type]['label'],
             'type_key' => $model->type,
             'required' => $model->required,
+            'is_filterable' => $model->is_filterable,
         ];
     }
 
@@ -61,6 +65,10 @@ class AttributesGridProvider implements GridDataProvider
                 ['value' => '1', 'label' => 'Yes'],
                 ['value' => '0', 'label' => 'No'],
             ],
+            'is_filterable' => [
+                ['value' => '1', 'label' => 'Yes'],
+                ['value' => '0', 'label' => 'No'],
+            ],
         ];
     }
 
@@ -69,6 +77,7 @@ class AttributesGridProvider implements GridDataProvider
         return match ($filter) {
             'type' => is_string($value) && array_key_exists($value, $this->types->definitions()),
             'required' => in_array((string) $value, ['0', '1'], true),
+            'is_filterable' => in_array((string) $value, ['0', '1'], true),
             default => false,
         };
     }

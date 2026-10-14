@@ -1,0 +1,26 @@
+{
+    "name": "inventry/inventory",
+    "description": "Inventory Connector Module for Inventry / UnoPim Admin",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Inventry Team"
+        }
+    ],
+    "require": {
+        "php": "^8.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\Inventory\\": ""
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Modules\\Inventory\\Providers\\InventoryServiceProvider"
+            ]
+        }
+    }
+}

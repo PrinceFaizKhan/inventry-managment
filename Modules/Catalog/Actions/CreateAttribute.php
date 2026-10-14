@@ -27,6 +27,7 @@ class CreateAttribute
                 'code' => $code,
                 'type' => $data['type'],
                 'required' => false,
+                'is_filterable' => false,
                 'settings' => $this->types->defaults($data['type']),
             ]));
         } catch (QueryException $exception) {

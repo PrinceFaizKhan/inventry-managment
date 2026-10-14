@@ -2,7 +2,7 @@
 
 namespace Tests\Support;
 
-use App\Support\Grid\GridRegistry;
+use Modules\Core\Support\Grid\GridRegistry;
 use Modules\Settings\Actions\UsersBulkActions;
 use Modules\Settings\Grid\UsersGridProvider;
 

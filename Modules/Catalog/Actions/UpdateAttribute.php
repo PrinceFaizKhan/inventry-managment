@@ -23,9 +23,14 @@ class UpdateAttribute
                     ? $this->types->validateSettings($attribute->type, $data['settings'])
                     : (array) $attribute->settings;
 
+                $isFilterable = array_key_exists('is_filterable', $data)
+                    ? (bool) $data['is_filterable']
+                    : (array_key_exists('is_filter', $data) ? (bool) $data['is_filter'] : $attribute->is_filterable);
+
                 $attribute->fill([
                     'name' => $data['name'],
                     'required' => $data['required'],
+                    'is_filterable' => $isFilterable,
                     'settings' => $settings,
                 ])->save();
 

@@ -3,10 +3,10 @@
 namespace Modules\Settings\Actions;
 
 use App\Models\User;
-use App\Support\Grid\GridBulkActionHandler;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use Modules\Core\Support\Grid\GridBulkActionHandler;
 
 class UsersBulkActions implements GridBulkActionHandler
 {

@@ -3,7 +3,9 @@
 namespace Modules\Catalog\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Modules\Catalog\Actions\CreateAttribute;
 use Modules\Catalog\Actions\UpdateAttribute;
@@ -14,6 +16,51 @@ use Modules\Catalog\Models\Attribute;
 
 class AttributeController extends Controller
 {
+    public function index(Request $request): View|JsonResponse
+    {
+        Gate::authorize('viewAny', Attribute::class);
+
+        if ($request->wantsJson()) {
+            return response()->json(['data' => Attribute::all()]);
+        }
+
+        return view('catalog.attributes::index');
+    }
+
+    public function create(AttributeTypeRegistry $types): View
+    {
+        Gate::authorize('create', Attribute::class);
+
+        return view('catalog.attributes::create', [
+            'types' => $types->typeOptions(),
+        ]);
+    }
+
+    public function edit(Attribute $attribute, AttributeTypeRegistry $types): View
+    {
+        Gate::authorize('update', $attribute);
+
+        return view('catalog.attributes::edit', [
+            'attribute' => [
+                'id' => $attribute->id,
+                'name' => $attribute->name,
+                'code' => $attribute->code,
+                'type' => $attribute->type,
+                'required' => $attribute->required,
+                'is_filterable' => $attribute->is_filterable,
+                'settings' => $attribute->settings?->getArrayCopy() ?? [],
+                'options' => $attribute->options->map(fn ($opt): array => [
+                    'id' => $opt->id,
+                    'code' => $opt->code,
+                    'label' => $opt->label,
+                    'sort_order' => $opt->sort_order,
+                ])->all(),
+            ],
+            'types' => $types->frontendDefinitions(),
+            'currencies' => config('currencies', []),
+        ]);
+    }
+
     public function types(AttributeTypeRegistry $types): JsonResponse
     {
         Gate::authorize('create', Attribute::class);
@@ -26,6 +73,34 @@ class AttributeController extends Controller
         Gate::authorize('create', Attribute::class);
 
         return response()->json(['data' => $create->execute($request->validated())], 201);
+    }
+
+    public function filterable(): JsonResponse
+    {
+        Gate::authorize('viewAny', Attribute::class);
+
+        $attributes = Attribute::query()
+            ->filterable()
+            ->with(['options'])
+            ->orderBy('name')
+            ->get();
+
+        return response()->json([
+            'data' => $attributes->map(fn (Attribute $attr): array => [
+                'id' => $attr->id,
+                'name' => $attr->name,
+                'code' => $attr->code,
+                'type' => $attr->type,
+                'required' => $attr->required,
+                'is_filterable' => true,
+                'options' => $attr->options->map(fn ($opt): array => [
+                    'id' => $opt->id,
+                    'code' => $opt->code,
+                    'label' => $opt->label,
+                    'sort_order' => $opt->sort_order,
+                ])->all(),
+            ]),
+        ]);
     }
 
     public function show(Attribute $attribute, AttributeTypeRegistry $types): JsonResponse
@@ -41,6 +116,7 @@ class AttributeController extends Controller
                 'code' => $attribute->code,
                 'type' => $attribute->type,
                 'required' => $attribute->required,
+                'is_filterable' => $attribute->is_filterable,
                 'settings' => $settings?->getArrayCopy() ?? [],
                 'options' => $attribute->options->map(fn ($option): array => [
                     'id' => $option->id,

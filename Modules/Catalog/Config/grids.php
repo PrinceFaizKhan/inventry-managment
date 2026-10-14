@@ -13,10 +13,12 @@ return [[
         'code' => 'code',
         'type' => 'type',
         'required' => 'required',
+        'is_filterable' => 'is_filterable',
     ],
     'filters' => [
         'type' => ['type' => 'select'],
         'required' => ['type' => 'select'],
+        'is_filterable' => ['type' => 'select'],
     ],
     'page_sizes' => [10, 25, 50],
     'default_sort' => 'name',

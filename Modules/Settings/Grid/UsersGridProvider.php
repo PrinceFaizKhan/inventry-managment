@@ -5,9 +5,9 @@ namespace Modules\Settings\Grid;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\User as Actor;
-use App\Support\Grid\GridDataProvider;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Modules\Core\Support\Grid\GridDataProvider;
 
 class UsersGridProvider implements GridDataProvider
 {
