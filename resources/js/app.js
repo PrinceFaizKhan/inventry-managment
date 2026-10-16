@@ -64,6 +64,9 @@ app.config.globalProperties.$axios = {
   put: (url, data, opts) => request(url, { method: 'PUT', body: JSON.stringify(data), ...opts }),
   delete: (url, opts) => request(url, { method: 'DELETE', ...opts }),
 }
+window.request = request
+window.axios = app.config.globalProperties.$axios
+
 
 /**
  * Register all Vue components from independent Modules and shared UI library.

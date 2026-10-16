@@ -39,11 +39,11 @@
                 $menuItems = app(\Modules\Core\Support\Menu\MenuRegistry::class)->for($user);
             @endphp
 
-            <!-- Vue Sidebar Navigation Component -->
-            <sidebar-nav
-                :items='@json($menuItems)'
-                current-path="{{ request()->path() }}"
-            ></sidebar-nav>
+            <!-- UnoPim Blade Sidebar Navigation Component -->
+            <x-admin::layouts.sidebar
+                :items="$menuItems"
+                :current-path="request()->path()"
+            />
 
             <footer>
                 {!! view_event_render('sidebar.bottom') !!}
@@ -76,8 +76,8 @@
                     <!-- Theme Toggle Component -->
                     <theme-toggle></theme-toggle>
 
-                    <!-- Vue Language Switcher Component -->
-                    <language-toggle></language-toggle>
+                    <!-- Language Switcher Component -->
+                    <x-admin::language-toggle />
 
                     @auth
                         @php
@@ -88,14 +88,14 @@
                                 'role' => $adminUser?->role?->name ?? 'Administrator',
                             ];
                         @endphp
-                        <profile-dropdown
-                            :user='@json($profileData)'
-                            account-url="{{ route('admin.account.edit') }}"
-                            users-url="{{ route('settings.users') }}"
-                            attributes-url="{{ url('catalog/attributes') }}"
-                            logout-url="{{ route('admin.session.destroy') }}"
-                            csrf-token="{{ csrf_token() }}"
-                        ></profile-dropdown>
+                        <x-admin::dropdown.profile
+                            :user="$profileData"
+                            :account-url="route('admin.account.edit')"
+                            :users-url="route('settings.users')"
+                            :attributes-url="url('catalog/attributes')"
+                            :logout-url="route('admin.session.destroy')"
+                            :csrf-token="csrf_token()"
+                        />
                     @endauth
                 </div>
             </header>

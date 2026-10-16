@@ -64,6 +64,8 @@ class CoreServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        $this->loadViewsFrom(__DIR__.'/../Resources/views', 'core');
+
         // Register blade directive for view_event_render
         Blade::directive('view_event_render', function ($expression) {
             return "<?php echo view_event_render({$expression}); ?>";
