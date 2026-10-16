@@ -25,9 +25,10 @@ class AdminServiceProvider extends ServiceProvider
         if (is_dir($viewsDir)) {
             $this->loadViewsFrom($viewsDir, 'admin');
 
-            $attributesViews = $viewsDir.'/catalog/attributes';
+            $attributesViews = $viewsDir.'/attributes';
             if (is_dir($attributesViews)) {
                 $this->loadViewsFrom($attributesViews, 'catalog.attributes');
+                $this->loadViewsFrom($attributesViews, 'attributes');
             }
 
             $usersViews = $viewsDir.'/settings/users';

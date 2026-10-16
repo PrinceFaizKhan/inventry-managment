@@ -62,6 +62,10 @@ class TranslationController extends Controller
                 foreach ($data as $k => $v) {
                     $messages["{$namespace}.{$k}"] = $v;
                     $messages["{$namespace}::{$k}"] = $v;
+                    if (in_array($namespace, ['attribute', 'attributes'], true)) {
+                        $messages["catalog.attributes.{$k}"] = $v;
+                        $messages["catalog.attributes::{$k}"] = $v;
+                    }
                     // Also expose root key if not already defined
                     if (! isset($messages[$k])) {
                         $messages[$k] = $v;

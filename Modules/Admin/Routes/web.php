@@ -12,8 +12,8 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::get('/admin/dashboard', [DashboardController::class, 'index']);
 });
 
-// Catalog Admin Routes
-require __DIR__.'/catalog-routes.php';
+// Attribute Admin Routes
+require __DIR__.'/attribute-routes.php';
 
 // Settings Admin Routes
 require __DIR__.'/settings-routes.php';

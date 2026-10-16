@@ -6,8 +6,8 @@ use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\Admin\Providers\AdminServiceProvider;
-use Modules\Catalog\Attributes\Providers\AttributesServiceProvider;
-use Modules\Catalog\Models\Attribute;
+use Modules\Attribute\Models\Attribute;
+use Modules\Attribute\Providers\AttributeServiceProvider;
 use Modules\Core\Support\Grid\GridRegistry;
 use Modules\Core\Support\ViewEvent\ViewRenderEventManager;
 use Modules\Settings\Users\Providers\UsersServiceProvider;
@@ -47,7 +47,7 @@ class ModularSubmenuAndLocalizationTest extends TestCase
     public function test_sub_menu_service_providers_are_registered(): void
     {
         $this->assertTrue($this->app->providerIsLoaded(AdminServiceProvider::class));
-        $this->assertTrue($this->app->providerIsLoaded(AttributesServiceProvider::class));
+        $this->assertTrue($this->app->providerIsLoaded(AttributeServiceProvider::class));
         $this->assertTrue($this->app->providerIsLoaded(UsersServiceProvider::class));
     }
 

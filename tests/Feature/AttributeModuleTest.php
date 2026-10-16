@@ -5,8 +5,8 @@ namespace Tests\Feature;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Modules\Catalog\Models\Attribute;
-use Modules\Catalog\Models\AttributeOption;
+use Modules\Attribute\Models\Attribute;
+use Modules\Attribute\Models\AttributeOption;
 use Tests\TestCase;
 
 class AttributeModuleTest extends TestCase

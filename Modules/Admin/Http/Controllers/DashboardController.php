@@ -8,7 +8,7 @@ use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Modules\Catalog\Models\Attribute;
+use Modules\Attribute\Models\Attribute;
 use Modules\Inventory\Providers\InventoryServiceProvider;
 use Modules\Sales\Providers\SalesServiceProvider;
 

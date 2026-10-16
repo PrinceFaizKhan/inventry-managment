@@ -9,6 +9,12 @@
 
     {!! view_event_render('unopim.admin.layout.head.before') !!}
 
+    <script>
+        if (localStorage.getItem('ht-theme') === 'dark' || (!localStorage.getItem('ht-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            document.documentElement.classList.add('dark');
+        }
+    </script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,7 +26,7 @@
 <body class="min-h-screen bg-[var(--page)] text-[var(--text)] font-sans antialiased">
     {!! view_event_render('unopim.admin.layout.body.before') !!}
 
-    <div id="app" class="min-h-screen flex flex-col justify-center items-center py-12 px-4 sm:px-6 lg:px-8">
+    <div id="app">
         {{ $slot ?? '' }}
         @yield('content')
     </div>
