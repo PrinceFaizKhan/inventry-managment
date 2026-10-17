@@ -11,6 +11,12 @@ return [[
     'bulk_handler' => UsersBulkActions::class,
     'searchable' => ['users.name', 'users.email'],
     'sorts' => ['name' => 'users.name', 'email' => 'users.email', 'role' => 'roles.name', 'status' => 'users.status'],
+    'columns' => [
+        ['index' => 'name', 'label' => 'User', 'sortable' => true, 'searchable' => true],
+        ['index' => 'email', 'label' => 'Email', 'sortable' => true, 'searchable' => true],
+        ['index' => 'role', 'label' => 'Role', 'sortable' => true],
+        ['index' => 'status', 'label' => 'Status', 'sortable' => true, 'align' => 'center'],
+    ],
     'filters' => ['role_id' => ['type' => 'select'], 'status' => ['type' => 'select']],
     'page_sizes' => [10, 25, 50],
     'default_sort' => 'name',

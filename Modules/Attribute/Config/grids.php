@@ -15,6 +15,13 @@ return [[
         'required' => 'required',
         'is_filterable' => 'is_filterable',
     ],
+    'columns' => [
+        ['index' => 'code', 'label' => 'Code', 'sortable' => true, 'searchable' => true],
+        ['index' => 'name', 'label' => 'Name', 'sortable' => true, 'searchable' => true],
+        ['index' => 'type', 'label' => 'Type', 'sortable' => true],
+        ['index' => 'required', 'label' => 'Required', 'sortable' => true, 'align' => 'center'],
+        ['index' => 'is_filterable', 'label' => 'Filterable', 'sortable' => true, 'align' => 'center'],
+    ],
     'filters' => [
         'type' => ['type' => 'select'],
         'required' => ['type' => 'select'],
