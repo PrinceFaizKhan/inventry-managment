@@ -23,9 +23,8 @@ class DashboardTest extends TestCase
 
         $response->assertOk()
             ->assertSee('Admin Workspace')
-            ->assertSee('External Pluggable Connectors')
-            ->assertSee('Sales Connector')
-            ->assertSee('Inventory Connector');
+            ->assertSee('Catalog Attributes')
+            ->assertSee('Staff & Administrators', false);
     }
 
     public function test_authenticated_user_can_access_dashboard_json_stats(): void
@@ -41,10 +40,6 @@ class DashboardTest extends TestCase
                     'total_users',
                     'total_roles',
                     'filterable_attributes',
-                    'connectors' => [
-                        'sales',
-                        'inventory',
-                    ],
                 ],
             ]);
     }

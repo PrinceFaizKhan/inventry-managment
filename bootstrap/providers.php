@@ -6,10 +6,8 @@ use Modules\Attribute\Models\Attribute;
 use Modules\Attribute\Models\AttributeOption;
 use Modules\Attribute\Providers\AttributeServiceProvider;
 use Modules\Core\Providers\CoreServiceProvider;
-use Modules\Inventory\Providers\InventoryServiceProvider;
 use Modules\Product\Providers\ProductsServiceProvider;
 use Modules\ProductTypes\Providers\ProductTypesServiceProvider;
-use Modules\Sales\Providers\SalesServiceProvider;
 use Modules\Settings\Providers\SettingsServiceProvider;
 use Modules\Settings\Roles\Providers\RolesServiceProvider;
 use Modules\Settings\Users\Providers\UsersServiceProvider;
@@ -43,8 +41,4 @@ return [
     SettingsServiceProvider::class,
     UsersServiceProvider::class,
     RolesServiceProvider::class,
-
-    // External Pluggable Connectors (Can be extracted to independent Git packages)
-    SalesServiceProvider::class,
-    InventoryServiceProvider::class,
 ];

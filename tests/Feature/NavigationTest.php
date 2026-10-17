@@ -16,8 +16,9 @@ class NavigationTest extends TestCase
         $response = $this->actingAs(User::factory()->create())->getJson('/api/navigation');
 
         $response->assertOk()->assertJsonPath('data.0.key', 'dashboard');
-        $this->assertSame('settings', $response->json('data.4.key'));
-        $this->assertSame('settings.users', $response->json('data.4.children.0.key'));
+        $settings = collect($response->json('data'))->firstWhere('key', 'settings');
+        $this->assertNotNull($settings);
+        $this->assertSame('settings.users', $settings['children'][0]['key']);
     }
 
     public function test_navigation_requires_authentication(): void

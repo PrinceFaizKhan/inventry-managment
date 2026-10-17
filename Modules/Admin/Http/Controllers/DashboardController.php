@@ -9,8 +9,6 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Modules\Attribute\Models\Attribute;
-use Modules\Inventory\Providers\InventoryServiceProvider;
-use Modules\Sales\Providers\SalesServiceProvider;
 
 class DashboardController extends Controller
 {
@@ -24,18 +22,6 @@ class DashboardController extends Controller
             'total_users' => User::query()->count(),
             'total_roles' => Role::query()->count(),
             'filterable_attributes' => class_exists(Attribute::class) ? Attribute::query()->where('is_filterable', true)->count() : 0,
-            'connectors' => [
-                'sales' => [
-                    'name' => 'Sales Connector',
-                    'installed' => class_exists(SalesServiceProvider::class),
-                    'status' => 'Pluggable External Module',
-                ],
-                'inventory' => [
-                    'name' => 'Inventory Connector',
-                    'installed' => class_exists(InventoryServiceProvider::class),
-                    'status' => 'Pluggable External Module',
-                ],
-            ],
         ];
 
         if ($request->wantsJson()) {

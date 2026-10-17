@@ -13,7 +13,7 @@
                 Welcome, {{ auth()->user()?->name ?? 'Admin' }}!
             </h1>
             <p class="page-copy text-sm text-[var(--muted)] mt-1">
-                UnoPim Admin workspace overview, catalog metrics, and external pluggable connectors.
+                UnoPim Admin workspace overview, catalog metrics, and system configuration.
             </p>
         </div>
 
@@ -29,7 +29,7 @@
     </div>
 
     <!-- Stats Grid -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <!-- Attributes Count -->
         <div class="p-5 rounded-xl border border-[var(--border)] bg-[var(--card)] shadow-sm hover:border-[var(--teal)] transition-colors">
             <div class="flex items-center justify-between mb-3">
@@ -71,81 +71,6 @@
                 <span>Granular permission profiles</span>
             </div>
         </div>
-
-        <!-- Connectors Count -->
-        <div class="p-5 rounded-xl border border-[var(--border)] bg-[var(--card)] shadow-sm hover:border-[var(--teal)] transition-colors">
-            <div class="flex items-center justify-between mb-3">
-                <span class="text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">External Connectors</span>
-                <span class="w-8 h-8 rounded-lg bg-[var(--soft)] text-[var(--teal)] grid place-items-center">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="8" x="2" y="2" rx="2"/><path d="M14 2c1.1 0 2 .9 2 2v4c0 1.1-.9 2-2 2"/><path d="M20 2c1.1 0 2 .9 2 2v4c0 1.1-.9 2-2 2"/><rect width="8" height="8" x="2" y="14" rx="2"/><path d="M6 10v4"/><path d="M14 14c1.1 0 2 .9 2 2v4c0 1.1-.9 2-2 2"/><path d="M20 14c1.1 0 2 .9 2 2v4c0 1.1-.9 2-2 2"/></svg>
-                </span>
-            </div>
-            <div class="text-3xl font-bold tracking-tight text-[var(--teal)]">2</div>
-            <div class="mt-2 flex items-center text-xs text-[var(--muted)] gap-1">
-                <span class="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
-                <span>Pluggable Git packages ready</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- External Pluggable Connectors Section -->
-    <div class="p-6 rounded-xl border border-[var(--border)] bg-[var(--card)] shadow-sm">
-        <div class="flex items-center justify-between mb-4">
-            <div>
-                <h2 class="text-lg font-bold text-[var(--text)] tracking-tight">External Pluggable Connectors</h2>
-                <p class="text-xs text-[var(--muted)] mt-0.5">
-                    Independent modular packages decoupled from Admin core, ready to be extracted into standalone Git repositories.
-                </p>
-            </div>
-            <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                Decoupled Architecture
-            </span>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-            <!-- Sales Connector Card -->
-            <div class="p-4 rounded-lg border border-[var(--border)] bg-[var(--page)] flex items-start justify-between gap-3">
-                <div class="flex items-start gap-3">
-                    <div class="w-10 h-10 rounded-lg bg-[var(--card)] border border-[var(--border)] grid place-items-center text-[var(--teal)] flex-shrink-0">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-                    </div>
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <h3 class="font-semibold text-sm text-[var(--text)]">Sales Connector</h3>
-                            <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-[var(--soft)] text-[var(--teal)]">Pluggable</span>
-                        </div>
-                        <p class="text-xs text-[var(--muted)] mt-1">Package: <code>inventry/sales</code></p>
-                        <p class="text-xs text-[var(--muted)] mt-0.5">Isolated ServiceProvider with independent menu, permissions, and routes.</p>
-                    </div>
-                </div>
-                <div class="text-right">
-                    <span class="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Active
-                    </span>
-                </div>
-            </div>
-
-            <!-- Inventory Connector Card -->
-            <div class="p-4 rounded-lg border border-[var(--border)] bg-[var(--page)] flex items-start justify-between gap-3">
-                <div class="flex items-start gap-3">
-                    <div class="w-10 h-10 rounded-lg bg-[var(--card)] border border-[var(--border)] grid place-items-center text-[var(--teal)] flex-shrink-0">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
-                    </div>
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <h3 class="font-semibold text-sm text-[var(--text)]">Inventory Connector</h3>
-                            <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-[var(--soft)] text-[var(--teal)]">Pluggable</span>
-                        </div>
-                        <p class="text-xs text-[var(--muted)] mt-1">Package: <code>inventry/inventory</code></p>
-                        <p class="text-xs text-[var(--muted)] mt-0.5">Isolated ServiceProvider with independent menu, permissions, and routes.</p>
-                    </div>
-                </div>
-                <div class="text-right">
-                    <span class="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Active
-                    </span>
-                </div>
-            </div>
         </div>
     </div>
 
