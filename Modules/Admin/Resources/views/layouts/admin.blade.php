@@ -39,7 +39,7 @@
                 $menuItems = app(\Modules\Core\Support\Menu\MenuRegistry::class)->for($user);
             @endphp
 
-            <!-- UnoPim Blade Sidebar Navigation Component -->
+            <!-- Blade Sidebar Navigation Component -->
             <x-admin::layouts.sidebar
                 :items="$menuItems"
                 :current-path="request()->path()"

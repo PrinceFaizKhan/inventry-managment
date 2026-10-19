@@ -24,7 +24,6 @@
 
     <x-admin::datagrid
         src="/api/grids/attributes"
-        :selectable="true"
         search-placeholder="Search by code or name..."
     >
         <template #cell-code="{ row }">
@@ -39,13 +38,6 @@
             <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-[var(--soft)] text-[var(--teal)]">
                 @{{ row.type }}
             </span>
-        </template>
-        <template #row-actions="{ row }">
-            <div class="inline-flex items-center gap-1.5 justify-end">
-                <a :href="'/catalog/attributes/' + row.id + '/edit'" class="px-2.5 py-1 rounded border border-[var(--border)] bg-[var(--card)] hover:border-[var(--teal)] text-[var(--text)] hover:text-[var(--teal)] transition-colors">
-                    Edit
-                </a>
-            </div>
         </template>
     </x-admin::datagrid>
 

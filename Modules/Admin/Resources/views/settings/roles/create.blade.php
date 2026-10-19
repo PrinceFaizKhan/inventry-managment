@@ -49,7 +49,7 @@
             @{{ globalError }}
         </div>
 
-        <!-- Two Column Layout matching UnoPim -->
+        <!-- Two Column Layout -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
             <!-- Left Main Column: Permissions & Access Control -->
             <div class="lg:col-span-2 space-y-6">

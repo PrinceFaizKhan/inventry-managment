@@ -95,3 +95,9 @@ html[dir=rtl] .bulk-menu{right:auto;left:0}
   html[dir=rtl] .app-body{margin-right:0}
 }
 
+/* Dashboard spacing & cards */
+.dashboard-page {
+  width: 100%;
+  max-width: 1400px;
+}
+

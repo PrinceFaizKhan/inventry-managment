@@ -7,7 +7,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? 'Sign In · Haseen Telecom' }}</title>
 
-    {!! view_event_render('unopim.admin.layout.head.before') !!}
+    {!! view_event_render('layout.head.before') !!}
 
     <script>
         if (localStorage.getItem('ht-theme') === 'dark' || (!localStorage.getItem('ht-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -21,17 +21,17 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    {!! view_event_render('unopim.admin.layout.head') !!}
+    {!! view_event_render('layout.head') !!}
 </head>
 <body class="min-h-screen bg-[var(--page)] text-[var(--text)] font-sans antialiased">
-    {!! view_event_render('unopim.admin.layout.body.before') !!}
+    {!! view_event_render('layout.body.before') !!}
 
     <div id="app">
         {{ $slot ?? '' }}
         @yield('content')
     </div>
 
-    {!! view_event_render('unopim.admin.layout.body.after') !!}
+    {!! view_event_render('layout.body.after') !!}
     @stack('scripts')
 </body>
 </html>

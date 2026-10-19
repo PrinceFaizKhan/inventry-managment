@@ -32,7 +32,7 @@ return [
     // Admin & Auth Connector
     AdminServiceProvider::class,
 
-    // Domain Modules (Decoupled root level packages like UnoPim)
+    // Domain Modules (Decoupled root level packages)
     AttributeServiceProvider::class,
     ProductsServiceProvider::class,
     ProductTypesServiceProvider::class,

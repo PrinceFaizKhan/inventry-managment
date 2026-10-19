@@ -17,7 +17,6 @@
 
     <x-admin::datagrid
         src="/api/grids/users"
-        :selectable="true"
         search-placeholder="Search by name or email..."
     >
         <template #cell-name="{ row }">

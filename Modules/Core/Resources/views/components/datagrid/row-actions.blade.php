@@ -1,33 +1,116 @@
-<v-row-actions></v-row-actions>
+@props([
+    'row' => null,
+    'actions' => null,
+])
+
+<v-row-actions
+    :row='@json($row)'
+    {{ $attributes }}
+></v-row-actions>
 
 @pushOnce('scripts')
+<!-- Ensure action-button scripts are registered -->
+<div style="display:none">
+    <x-core::button.action />
+</div>
+
 <script type="text/x-template" id="v-row-actions-template">
-    <div class="grid-row-actions">
-        <button
-            v-for="action in actions.filter((item) => item.key !== 'create' && (allowed[item.key] !== false))"
-            :key="action.key"
-            type="button"
-            :aria-label="`${action.label} row`"
-            @click="$emit('action', action, row)"
-        >
-            <svg v-if="action.icon === 'pencil'" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
-            <svg v-else-if="action.icon === 'trash'" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
-            <span v-else>@{{ action.label }}</span>
-        </button>
-        <span v-if="!actions.some((item) => item.key !== 'create' && (allowed[item.key] !== false))">—</span>
+    <div class="inline-flex items-center gap-1 justify-end">
+        <!-- Active / Deactive Status Toggle Button -->
+        <v-action-button
+            v-if="hasStatusToggle"
+            type="toggle_status"
+            :active="isCurrentlyActive"
+            @click="$emit('toggle-status', row)"
+        ></v-action-button>
+
+        <!-- Edit Action Button -->
+        <v-action-button
+            v-if="hasEditAction"
+            type="edit"
+            :href="editUrl"
+            @click="!editUrl && $emit('edit', row)"
+        ></v-action-button>
+
+        <!-- Delete Action Button -->
+        <v-action-button
+            v-if="hasDeleteAction"
+            type="delete"
+            @click="$emit('delete', row)"
+        ></v-action-button>
+
+        <!-- Additional Custom Dynamic Actions -->
+        <template v-for="action in customActions" :key="action.key">
+            <v-action-button
+                :type="action.icon || action.key"
+                :title="action.label"
+                :href="action.url"
+                @click="!action.url && $emit('action', action, row)"
+            ></v-action-button>
+        </template>
     </div>
 </script>
+
 <script type="module">
-    const rowActionsComponent = {
+    const RowActionsComponent = {
         template: '#v-row-actions-template',
         props: {
-            row: { type: Object, required: true },
-            actions: { type: Array, default: () => [] },
-            allowed: { type: Object, default: () => ({}) }
+            row: {
+                type: Object,
+                required: true
+            },
+            actions: {
+                type: [Array, Object],
+                default: () => ({})
+            },
+            editUrl: {
+                type: String,
+                default: null
+            },
+            showStatusToggle: {
+                type: Boolean,
+                default: true
+            },
+            rowKey: {
+                type: String,
+                default: 'id'
+            }
         },
-        emits: ['action']
+        emits: ['edit', 'delete', 'toggle-status', 'action'],
+        computed: {
+            isCurrentlyActive() {
+                if (!this.row) return false;
+                const val = this.row.status !== undefined ? this.row.status : this.row.is_active;
+                return val === true || val === 1 || val === '1' || val === 'active' || val === 'enabled';
+            },
+            hasStatusToggle() {
+                if (!this.showStatusToggle || !this.row) return false;
+                const hasStatusField = this.row.status !== undefined || this.row.is_active !== undefined;
+                if (!hasStatusField) return false;
+                if (this.actions?.toggle_status !== undefined) return Boolean(this.actions.toggle_status);
+                if (this.actions?.activate !== undefined || this.actions?.deactivate !== undefined) return true;
+                return true;
+            },
+            hasEditAction() {
+                if (this.row?.edit_url || this.editUrl) return true;
+                if (this.actions?.edit !== undefined) return Boolean(this.actions.edit);
+                return true;
+            },
+            hasDeleteAction() {
+                if (this.row?.delete_url) return true;
+                if (this.actions?.delete !== undefined) return Boolean(this.actions.delete);
+                return true;
+            },
+            customActions() {
+                if (Array.isArray(this.actions)) {
+                    return this.actions.filter(a => !['edit', 'delete', 'activate', 'deactivate', 'toggle_status'].includes(a.key));
+                }
+                return [];
+            }
+        }
     };
-    app.component('v-row-actions', rowActionsComponent);
-    app.component('row-actions', rowActionsComponent);
+
+    app.component('v-row-actions', RowActionsComponent);
+    app.component('row-actions', RowActionsComponent);
 </script>
 @endpushOnce

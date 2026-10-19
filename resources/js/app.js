@@ -3,7 +3,7 @@ import '../css/app.css'
 import { request } from '../../Modules/Core/Resources/js/lib/http'
 
 /**
- * Global Vue application instance matching UnoPim architecture.
+ * Global Vue application instance matching modular architecture.
  * Exposing on window.app allows Blade views to register inline components
  * via app.component('v-...', { template: '#...', ... }) before mounting.
  */

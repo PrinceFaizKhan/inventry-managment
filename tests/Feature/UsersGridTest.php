@@ -162,4 +162,48 @@ class UsersGridTest extends TestCase
         $this->assertDatabaseMissing('users', ['id' => $selected->id]);
         $this->assertDatabaseHas('users', ['id' => $unselected->id]);
     }
+
+    public function test_user_status_can_be_toggled_between_active_and_inactive(): void
+    {
+        $actor = User::factory()->create();
+        $target = User::factory()->create(['status' => 'active']);
+
+        $res1 = $this->actingAs($actor)->postJson("/api/settings/users/{$target->id}/toggle-status");
+        $res1->assertOk()
+            ->assertJsonPath('status', 'inactive')
+            ->assertJsonPath('message', "User {$target->name} deactivated successfully.");
+
+        $this->assertDatabaseHas('users', ['id' => $target->id, 'status' => 'inactive']);
+
+        $res2 = $this->actingAs($actor)->postJson("/api/settings/users/{$target->id}/toggle-status");
+        $res2->assertOk()
+            ->assertJsonPath('status', 'active')
+            ->assertJsonPath('message', "User {$target->name} activated successfully.");
+
+        $this->assertDatabaseHas('users', ['id' => $target->id, 'status' => 'active']);
+    }
+
+    public function test_user_cannot_deactivate_their_own_account(): void
+    {
+        $actor = User::factory()->create(['status' => 'active']);
+
+        $res = $this->actingAs($actor)->postJson("/api/settings/users/{$actor->id}/toggle-status");
+        $res->assertStatus(422)
+            ->assertJsonPath('message', 'You cannot deactivate your own account.');
+
+        $this->assertDatabaseHas('users', ['id' => $actor->id, 'status' => 'active']);
+    }
+
+    public function test_cannot_deactivate_last_active_super_admin(): void
+    {
+        $superAdminRole = Role::query()->create(['name' => 'Super Admin', 'access' => 'all', 'permissions' => []]);
+        $actor = User::factory()->create();
+        $soloSuperAdmin = User::factory()->create(['status' => 'active', 'role_id' => $superAdminRole->id]);
+
+        $res = $this->actingAs($actor)->postJson("/api/settings/users/{$soloSuperAdmin->id}/toggle-status");
+        $res->assertStatus(422)
+            ->assertJsonPath('message', 'At least one active Super Admin must remain.');
+
+        $this->assertDatabaseHas('users', ['id' => $soloSuperAdmin->id, 'status' => 'active']);
+    }
 }

@@ -11,7 +11,7 @@ class AdminSessionTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_guest_can_view_unopim_admin_login_page(): void
+    public function test_guest_can_view_admin_login_page(): void
     {
         $response = $this->get('/login');
 

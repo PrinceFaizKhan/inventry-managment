@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Gate;
 use Modules\Attribute\Actions\CreateAttribute;
 use Modules\Attribute\Actions\UpdateAttribute;
 use Modules\Attribute\AttributeTypeRegistry;
+use Modules\Attribute\DataGrids\AttributeDataGrid;
 use Modules\Attribute\Http\Requests\StoreAttributeRequest;
 use Modules\Attribute\Http\Requests\UpdateAttributeRequest;
 use Modules\Attribute\Models\Attribute;
@@ -20,11 +21,7 @@ class AttributeController extends Controller
     {
         Gate::authorize('viewAny', Attribute::class);
 
-        if ($request->wantsJson()) {
-            return response()->json(['data' => Attribute::all()]);
-        }
-
-        return view('admin::attributes.index');
+        return AttributeDataGrid::make()->render('admin::attributes.index');
     }
 
     public function create(AttributeTypeRegistry $types): View

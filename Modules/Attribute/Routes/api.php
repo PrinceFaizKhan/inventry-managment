@@ -11,3 +11,5 @@ Route::prefix('catalog')->group(function () {
     Route::put('/attributes/{attribute}', [AttributeController::class, 'update']);
     Route::delete('/attributes/{attribute}', [AttributeController::class, 'destroy']);
 });
+
+Route::delete('/attributes/{attribute}', [AttributeController::class, 'destroy']);
