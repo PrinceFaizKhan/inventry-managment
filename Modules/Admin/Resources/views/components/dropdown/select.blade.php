@@ -1,3 +1,3 @@
-<x-core::dropdown.select {{ $attributes }}>
+<x-admin::select {{ $attributes }}>
     {{ $slot }}
-</x-core::dropdown.select>
+</x-admin::select>

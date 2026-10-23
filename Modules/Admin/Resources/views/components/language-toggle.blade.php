@@ -17,17 +17,24 @@
 </script>
 
 <script type="module">
-    import { useI18n } from '/resources/js/lib/i18n.js';
-
     const languageToggleComponent = {
         template: '#v-language-toggle-template',
         setup() {
-            const { locale, setLocale, supportedLocales } = useI18n();
-            return { locale, setLocale, supportedLocales };
+            const i18n = typeof window.useI18n === 'function' ? window.useI18n() : { locale: 'en-IN', setLocale: () => {}, supportedLocales: [] };
+            return {
+                locale: i18n.locale,
+                setLocale: i18n.setLocale,
+                supportedLocales: i18n.supportedLocales
+            };
         }
     };
 
-    app.component('v-language-toggle', languageToggleComponent);
-    app.component('language-toggle', languageToggleComponent);
+    if (typeof window.registerVueComponent === 'function') {
+        window.registerVueComponent('v-language-toggle', languageToggleComponent);
+        window.registerVueComponent('language-toggle', languageToggleComponent);
+    } else if (window.app && window.app.component) {
+        window.app.component('v-language-toggle', languageToggleComponent);
+        window.app.component('language-toggle', languageToggleComponent);
+    }
 </script>
 @endpushOnce

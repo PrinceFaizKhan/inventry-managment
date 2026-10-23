@@ -22,6 +22,16 @@
                 document.body.classList.add('sidebar-expanded');
             });
         }
+
+        // Global component registration queue to prevent race conditions
+        window.__pendingComponents = window.__pendingComponents || [];
+        window.registerVueComponent = function(name, component) {
+            if (window.app && typeof window.app.component === 'function') {
+                window.app.component(name, component);
+            } else {
+                window.__pendingComponents.push([name, component]);
+            }
+        };
     </script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
@@ -140,7 +150,7 @@
                         {!! view_event_render('header.right') !!}
 
                         <!-- Theme Toggle Component -->
-                        <theme-toggle></theme-toggle>
+                        <x-admin::theme-toggle />
 
                         <!-- Language Switcher Component -->
                         <x-admin::language-toggle />
@@ -177,9 +187,21 @@
 
         </div>
 
+    <!-- Global Admin UI Primitives Registration (Blade + Vue x-template) -->
+    <div style="display:none" aria-hidden="true">
+        <x-admin::select />
+        <x-admin::toggle />
+        <x-admin::textarea />
+        <x-admin::rich-text />
+        <x-admin::theme-toggle />
     </div>
 
     {!! view_event_render('layout.body.after') !!}
     @stack('scripts')
+    <script type="module">
+        if (typeof window.mountApp === 'function') {
+            window.mountApp();
+        }
+    </script>
 </body>
 </html>

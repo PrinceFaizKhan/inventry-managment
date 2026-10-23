@@ -113,7 +113,6 @@ html.dark {
 .sidebar .sidebar-collapse-btn{display:none}
 .sidebar .nav-label-text{display:none}
 .sidebar .nav-chevron{display:none}
-.sidebar .nav-accordion-children{display:none}
 .sidebar .sidebar-version-text{display:none}
 
 /* Sidebar Expanded (250px Navigation Studio) */
@@ -122,7 +121,6 @@ body.sidebar-expanded .sidebar .sidebar-brand-text,html.sidebar-expanded .sideba
 body.sidebar-expanded .sidebar .sidebar-collapse-btn,html.sidebar-expanded .sidebar .sidebar-collapse-btn{display:flex}
 body.sidebar-expanded .sidebar .nav-label-text,html.sidebar-expanded .sidebar .nav-label-text{display:inline-block}
 body.sidebar-expanded .sidebar .nav-chevron,html.sidebar-expanded .sidebar .nav-chevron{display:block}
-body.sidebar-expanded .sidebar .nav-accordion-children,html.sidebar-expanded .sidebar .nav-accordion-children{display:block!important}
 body.sidebar-expanded .sidebar .nav-tooltip,html.sidebar-expanded .sidebar .nav-tooltip{display:none!important}
 body.sidebar-expanded .sidebar .nav-flyout-panel,html.sidebar-expanded .sidebar .nav-flyout-panel{display:none!important}
 body.sidebar-expanded .sidebar .sidebar-version-text,html.sidebar-expanded .sidebar .sidebar-version-text{display:inline-block}

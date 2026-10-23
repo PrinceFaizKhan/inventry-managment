@@ -14,6 +14,16 @@
             document.documentElement.setAttribute('data-theme', 'dark');
             document.documentElement.classList.add('dark');
         }
+
+        // Global component registration queue to prevent race conditions
+        window.__pendingComponents = window.__pendingComponents || [];
+        window.registerVueComponent = function(name, component) {
+            if (window.app && typeof window.app.component === 'function') {
+                window.app.component(name, component);
+            } else {
+                window.__pendingComponents.push([name, component]);
+            }
+        };
     </script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
@@ -33,5 +43,10 @@
 
     {!! view_event_render('layout.body.after') !!}
     @stack('scripts')
+    <script type="module">
+        if (typeof window.mountApp === 'function') {
+            window.mountApp();
+        }
+    </script>
 </body>
 </html>

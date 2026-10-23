@@ -194,7 +194,12 @@
         }
     };
 
-    app.component('v-profile-dropdown', profileDropdownComponent);
-    app.component('profile-dropdown', profileDropdownComponent);
+    if (typeof window.registerVueComponent === 'function') {
+        window.registerVueComponent('v-profile-dropdown', profileDropdownComponent);
+        window.registerVueComponent('profile-dropdown', profileDropdownComponent);
+    } else if (window.app && window.app.component) {
+        window.app.component('v-profile-dropdown', profileDropdownComponent);
+        window.app.component('profile-dropdown', profileDropdownComponent);
+    }
 </script>
 @endpushOnce

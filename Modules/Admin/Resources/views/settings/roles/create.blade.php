@@ -63,13 +63,11 @@
                         <label class="block text-xs font-semibold text-[var(--text)] mb-1.5">
                             Permissions Access <span class="text-[var(--teal)]">*</span>
                         </label>
-                        <select
+                        <v-select
                             v-model="access"
-                            class="w-full h-10 px-3.5 rounded-lg border border-[var(--border)] bg-[var(--card)] text-sm text-[var(--text)] focus:outline-none focus:border-[var(--teal)]"
-                        >
-                            <option value="administration">All (Full Administration)</option>
-                            <option value="custom">Custom Permissions</option>
-                        </select>
+                            :options="accessOptions"
+                            :searchable="false"
+                        ></v-select>
                     </div>
 
                     <!-- All Access Banner -->
@@ -194,6 +192,10 @@
                 name: '',
                 description: '',
                 access: 'administration',
+                accessOptions: [
+                    { value: 'administration', label: 'All (Full Administration)' },
+                    { value: 'custom', label: 'Custom Permissions' },
+                ],
                 selectedPermissions: [],
                 permissionNodes: [],
                 loadingNodes: false,

@@ -19,67 +19,27 @@ const app = createApp({
 
 window.app = app
 
-import { ToggleComponent } from './components/ui/toggle'
-import { TextareaComponent } from './components/ui/textarea'
-import { SelectComponent } from './components/ui/select'
-import { RichTextComponent } from './components/ui/rich-text'
+// Process any components registered before app.js was ready
+window.registerVueComponent = function(name, component) {
+  app.component(name, component)
+}
 
-/**
- * Register global UI primitives matching Haseen Telecom Zero .vue architectural standard.
- */
-app.component('v-toggle', ToggleComponent)
-app.component('ui-toggle', ToggleComponent)
-app.component('toggle-switch', ToggleComponent)
-app.component('ToggleSwitch', ToggleComponent)
+if (window.__pendingComponents && Array.isArray(window.__pendingComponents)) {
+  window.__pendingComponents.forEach(([name, component]) => {
+    app.component(name, component)
+  })
+  window.__pendingComponents = []
+}
 
-app.component('v-textarea', TextareaComponent)
-app.component('ui-textarea', TextareaComponent)
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import Placeholder from '@tiptap/extension-placeholder'
+import Link from '@tiptap/extension-link'
+import { useI18n } from '../../Modules/Core/Resources/js/lib/i18n'
 
-app.component('v-select', SelectComponent)
-app.component('ui-select', SelectComponent)
-
-app.component('v-rich-text', RichTextComponent)
-app.component('rich-text-editor', RichTextComponent)
-
-// Register global theme-toggle component matching Haseen Telecom design
-app.component('theme-toggle', {
-  template: `
-    <div class="theme">
-      <button :class="{ active: theme === 'light' }" type="button" @click="setTheme('light')" title="Light Mode">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-        <span>Light</span>
-      </button>
-      <button :class="{ active: theme === 'dark' }" type="button" @click="setTheme('dark')" title="Dark Mode">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-        <span>Dark</span>
-      </button>
-    </div>
-  `,
-  data() {
-    return {
-      theme: localStorage.getItem('ht-theme') || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'),
-    }
-  },
-  mounted() {
-    this.applyTheme(this.theme)
-  },
-  methods: {
-    setTheme(t) {
-      this.theme = t
-      localStorage.setItem('ht-theme', t)
-      this.applyTheme(t)
-    },
-    applyTheme(t) {
-      if (t === 'dark') {
-        document.documentElement.setAttribute('data-theme', 'dark')
-        document.documentElement.classList.add('dark')
-      } else {
-        document.documentElement.removeAttribute('data-theme')
-        document.documentElement.classList.remove('dark')
-      }
-    },
-  },
-})
+// Expose Tiptap and useI18n globally for Blade+Vue x-templates in Modules/Admin
+window.Tiptap = { Editor, StarterKit, Placeholder, Link }
+window.useI18n = useI18n
 app.config.globalProperties.$axios = {
   get: (url, opts) => request(url, { method: 'GET', ...opts }),
   post: (url, data, opts) => request(url, { method: 'POST', body: JSON.stringify(data), headers: { 'Content-Type': 'application/json', ...(opts?.headers || {}) }, ...opts }),
@@ -165,13 +125,29 @@ document.addEventListener('keydown', function (e) {
 })
 
 /**
- * Mount the application on window load event so that all inline Vue components
- * defined in Blade views have been registered on window.app first.
+ * Mount the application ensuring all inline Vue components defined in Blade
+ * views have finished registering.
  */
-window.addEventListener('load', function () {
+function mountApp() {
   const appElement = document.getElementById('app')
-  if (appElement) {
+  if (appElement && !appElement.__vue_app__) {
+    // Process any remaining pending components just in case
+    if (window.__pendingComponents && Array.isArray(window.__pendingComponents)) {
+      window.__pendingComponents.forEach(([name, component]) => {
+        app.component(name, component)
+      })
+      window.__pendingComponents = []
+    }
     app.mount('#app')
   }
-})
+}
+
+window.mountApp = mountApp
+
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+  setTimeout(mountApp, 0)
+} else {
+  document.addEventListener('DOMContentLoaded', () => setTimeout(mountApp, 0))
+  window.addEventListener('load', mountApp)
+}
 

@@ -136,17 +136,13 @@
                             <label class="block text-xs font-semibold text-[var(--text)] mb-1.5">
                                 @{{ availableSettings.validation.label || 'Validation' }}
                             </label>
-                            <select
+                            <v-select
                                 v-model="settings.validation"
+                                :options="availableSettings.validation.options"
                                 @change="onValidationChange"
-                                class="w-full h-10 px-3.5 rounded-lg border border-[var(--border)] bg-[var(--card)] text-sm text-[var(--text)] focus:outline-none focus:border-[var(--teal)]"
-                                :class="errors['settings.validation'] ? 'border-red-500' : ''"
-                            >
-                                <option v-for="(optLabel, optVal) in availableSettings.validation.options" :key="optVal" :value="optVal">
-                                    @{{ optLabel }}
-                                </option>
-                            </select>
-                            <p v-if="errors['settings.validation']" class="mt-1 text-xs text-red-600">@{{ errors['settings.validation'] }}</p>
+                                placeholder="Select validation..."
+                                :error="errors['settings.validation']"
+                            ></v-select>
                         </div>
 
                         <!-- Minimum & Maximum Length (for any, email, letters_only, alphanumeric, slug, phone) -->

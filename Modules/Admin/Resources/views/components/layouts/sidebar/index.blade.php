@@ -52,7 +52,7 @@
                 </div>
             </div>
 
-            <!-- B. Parent Item With Submenus (Flyout in compact mode / Accordion in expanded mode) -->
+            <!-- B. Parent Item With Submenus (Accordion Navigation) -->
             <div
                 v-else
                 class="nav-group-wrapper relative group/item w-full"
@@ -98,16 +98,21 @@
                     </svg>
                 </button>
 
-                <!-- 1. Inline Accordion Children (Shown when sidebar is EXPANDED) -->
+                <!-- Hover Tooltip (Only shown in collapsed 68px mode) -->
+                <div class="nav-tooltip fixed left-[72px] rtl:left-auto rtl:right-[72px] px-2.5 py-1.5 rounded-lg bg-[var(--card)] border border-[var(--border)] text-xs font-semibold text-[var(--text)] whitespace-nowrap shadow-xl opacity-0 pointer-events-none group-hover/item:opacity-100 transition-opacity z-50">
+                    @{{ item.label }}
+                </div>
+
+                <!-- Submenu Accordion Children -->
                 <div
-                    v-if="isExpanded && isGroupOpen(item.key)"
+                    v-show="isGroupOpen(item.key)"
                     class="nav-accordion-children pl-8 pr-1 py-1 space-y-1 relative before:content-[''] before:absolute before:left-5 before:top-2 before:bottom-2 before:w-px before:bg-[var(--border)]"
                 >
                     <template v-for="child in item.children" :key="child.key">
                         <a
                             v-if="child.coming_soon"
                             href="javascript:void(0)"
-                            class="flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium text-[var(--muted)] opacity-50 cursor-not-allowed"
+                            class="flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium text-[var(--muted)] opacity-50 cursor-not-allowed select-none"
                         >
                             <span class="truncate">@{{ child.label }}</span>
                             <span class="px-1.5 py-0.2 rounded text-[9px] font-mono bg-[var(--border)]">Soon</span>
@@ -116,7 +121,7 @@
                         <a
                             v-else
                             :href="getUrl(child.route)"
-                            class="flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition-colors"
+                            class="flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition-colors select-none"
                             :class="[
                                 isItemActive(child.key, child.route)
                                     ? 'bg-[var(--soft)] text-[var(--teal)] font-bold'
@@ -127,46 +132,6 @@
                             <svg v-if="isItemActive(child.key, child.route)" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" class="text-[var(--teal)] flex-shrink-0"><polyline points="20 6 9 17 4 12"/></svg>
                         </a>
                     </template>
-                </div>
-
-                <!-- 2. Floating Flyout Panel (Shown when sidebar is COLLAPSED / 68px) -->
-                <div
-                    v-if="!isExpanded && isGroupOpen(item.key)"
-                    @click.stop
-                    class="nav-flyout-panel absolute left-full top-0 ml-2 rtl:left-auto rtl:right-full rtl:mr-2 w-56 p-2 rounded-2xl bg-[var(--card)] border border-[var(--border)] shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-150"
-                >
-                    <div class="px-3 py-1.5 mb-1.5 border-b border-[var(--border)]/60 flex items-center justify-between">
-                        <span class="text-[11px] font-bold uppercase tracking-wider text-[var(--muted)]">@{{ item.label }}</span>
-                        <button type="button" @click.stop="activeGroup = null" class="text-[var(--muted)] hover:text-[var(--text)] text-sm font-bold p-0.5">&times;</button>
-                    </div>
-
-                    <div class="space-y-1">
-                        <template v-for="child in item.children" :key="child.key">
-                            <a
-                                v-if="child.coming_soon"
-                                href="javascript:void(0)"
-                                class="flex items-center justify-between px-3 py-1.5 rounded-xl text-xs font-medium text-[var(--muted)] opacity-50 cursor-not-allowed"
-                            >
-                                <span>@{{ child.label }}</span>
-                                <span class="px-1.5 py-0.2 rounded text-[9px] font-mono bg-[var(--border)]">Soon</span>
-                            </a>
-
-                            <a
-                                v-else
-                                :href="getUrl(child.route)"
-                                @click="activeGroup = null"
-                                class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-colors"
-                                :class="[
-                                    isItemActive(child.key, child.route)
-                                        ? 'bg-[var(--soft)] text-[var(--teal)] font-bold'
-                                        : 'text-[var(--text)] hover:bg-[var(--border)]/30'
-                                ]"
-                            >
-                                <span>@{{ child.label }}</span>
-                                <svg v-if="isItemActive(child.key, child.route)" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" class="text-[var(--teal)]"><polyline points="20 6 9 17 4 12"/></svg>
-                            </a>
-                        </template>
-                    </div>
                 </div>
 
             </div>
@@ -202,72 +167,63 @@
         },
         data() {
             return {
-                activeGroup: null,
                 openGroups: {},
-                isExpanded: typeof document !== 'undefined' && (document.body.classList.contains('sidebar-expanded') || document.documentElement.classList.contains('sidebar-expanded'))
+                isExpanded: true
             };
         },
         created() {
+            this.updateExpandedState();
             this.items.forEach(item => {
                 if (item.children && item.children.length > 0) {
-                    // Parent is ONLY open by default if one of its children is currently active
+                    // Parent is ONLY open by default if one of its children is currently active!
                     this.openGroups[item.key] = this.isGroupActive(item);
                 }
             });
         },
         mounted() {
-            document.addEventListener('click', this.handleOutsideClick);
-            document.addEventListener('keydown', this.handleKeydown);
+            this.updateExpandedState();
             window.addEventListener('ht-sidebar-toggled', this.handleSidebarToggled);
             
-            // Sync initial state
-            this.updateExpandedState();
             const observer = new MutationObserver(() => this.updateExpandedState());
-            observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
-            observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+            if (document.body) observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+            if (document.documentElement) observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
             this._observer = observer;
         },
         beforeUnmount() {
-            document.removeEventListener('click', this.handleOutsideClick);
-            document.removeEventListener('keydown', this.handleKeydown);
             window.removeEventListener('ht-sidebar-toggled', this.handleSidebarToggled);
             if (this._observer) this._observer.disconnect();
         },
         methods: {
             updateExpandedState() {
+                if (typeof document === 'undefined') return;
                 this.isExpanded = document.body.classList.contains('sidebar-expanded') || document.documentElement.classList.contains('sidebar-expanded');
             },
             handleSidebarToggled(e) {
-                this.isExpanded = Boolean(e.detail?.expanded);
-            },
-            handleOutsideClick(e) {
-                if (!this.isExpanded && this.activeGroup) {
-                    const nav = this.$refs.navRef;
-                    if (nav && !nav.contains(e.target)) {
-                        this.activeGroup = null;
-                    }
-                }
-            },
-            handleKeydown(e) {
-                if (e.key === 'Escape') {
-                    this.activeGroup = null;
+                if (e.detail && typeof e.detail.expanded !== 'undefined') {
+                    this.isExpanded = Boolean(e.detail.expanded);
+                } else {
+                    this.updateExpandedState();
                 }
             },
             isGroupOpen(key) {
-                if (this.isExpanded) {
-                    return Boolean(this.openGroups[key]);
-                }
-                return this.activeGroup === key;
+                return Boolean(this.openGroups[key]);
             },
             toggleGroup(key) {
-                if (this.isExpanded) {
+                // If sidebar is currently collapsed, expanding it lets user view the menu cleanly
+                if (!this.isExpanded && typeof window.toggleSidebar === 'function') {
+                    window.toggleSidebar();
                     this.openGroups = {
                         ...this.openGroups,
-                        [key]: !this.isGroupOpen(key)
+                        [key]: true
                     };
-                } else {
-                    this.activeGroup = this.activeGroup === key ? null : key;
+                    return;
                 }
+
+                // If already expanded, smoothly toggle accordion open/close
+                this.openGroups = {
+                    ...this.openGroups,
+                    [key]: !this.isGroupOpen(key)
+                };
             },
             getIconSvg(icon) {
                 return ICONS[icon] || '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg>';
@@ -303,7 +259,7 @@
                 return false;
             },
             isGroupActive(item) {
-                // If item has children, it is ONLY active if at least one child is active!
+                // Parent is ONLY active if at least one child is active!
                 if (item.children && item.children.length > 0) {
                     return item.children.some(child => this.isItemActive(child.key, child.route));
                 }
@@ -316,7 +272,12 @@
         }
     };
 
-    app.component('v-sidebar-nav', sidebarNavComponent);
-    app.component('sidebar-nav', sidebarNavComponent);
+    if (typeof window.registerVueComponent === 'function') {
+        window.registerVueComponent('v-sidebar-nav', sidebarNavComponent);
+        window.registerVueComponent('sidebar-nav', sidebarNavComponent);
+    } else if (window.app && window.app.component) {
+        window.app.component('v-sidebar-nav', sidebarNavComponent);
+        window.app.component('sidebar-nav', sidebarNavComponent);
+    }
 </script>
 @endpushOnce

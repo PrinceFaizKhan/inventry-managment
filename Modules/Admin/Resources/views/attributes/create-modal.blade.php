@@ -29,11 +29,11 @@
                 aria-labelledby="modal-attribute-create-title"
             >
                 <div
-                    class="relative w-full max-w-lg rounded-2xl border border-[var(--border)] bg-[var(--card)] shadow-2xl overflow-hidden transition-all duration-200 transform scale-100 animate-in fade-in zoom-in-95"
+                    class="relative w-full max-w-lg rounded-2xl border border-[var(--border)] bg-[var(--card)] shadow-2xl transition-all duration-200 transform scale-100 animate-in fade-in zoom-in-95"
                     @click.stop
                 >
                     <!-- Modal Header -->
-                    <div class="px-6 py-4 border-b border-[var(--border)] flex items-center justify-between bg-[var(--page)]/50">
+                    <div class="px-6 py-4 border-b border-[var(--border)] flex items-center justify-between bg-[var(--page)]/50 rounded-t-2xl">
                         <div class="flex items-center gap-3">
                             <div class="w-9 h-9 rounded-xl bg-[var(--soft)] text-[var(--teal)] border border-[var(--teal)]/20 flex items-center justify-center flex-shrink-0 shadow-xs">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -115,17 +115,12 @@
                             <label class="block text-xs font-semibold text-[var(--text)] mb-1.5">
                                 Type <span class="text-[var(--teal)]">*</span>
                             </label>
-                            <select
+                            <v-select
                                 v-model="type"
-                                required
-                                class="w-full h-10 px-3.5 rounded-xl border border-[var(--border)] bg-[var(--page)] text-xs text-[var(--text)] focus:outline-none focus:border-[var(--teal)] transition-all cursor-pointer"
-                                :class="errors.type ? 'border-red-500' : ''"
-                            >
-                                <option v-for="(label, key) in formattedTypes" :key="key" :value="key">
-                                    @{{ label }}
-                                </option>
-                            </select>
-                            <p v-if="errors.type" class="mt-1 text-[11px] text-red-500 font-medium">@{{ errors.type }}</p>
+                                :options="formattedTypes"
+                                placeholder="Select attribute type..."
+                                :error="errors.type"
+                            ></v-select>
                         </div>
 
                         <!-- Modal Actions Footer -->

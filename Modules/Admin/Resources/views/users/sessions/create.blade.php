@@ -18,8 +18,8 @@
             </div>
 
             <div class="flex items-center gap-2">
-                <theme-toggle></theme-toggle>
-                <language-toggle></language-toggle>
+                <x-admin::theme-toggle />
+                <x-admin::language-toggle />
             </div>
         </header>
 
