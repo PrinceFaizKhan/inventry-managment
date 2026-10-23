@@ -343,6 +343,62 @@ class AttributeModuleTest extends TestCase
             ->assertJsonPath('data.0.options.0.code', 'red');
     }
 
+    public function test_text_attribute_accepts_new_validation_types_and_regex_settings(): void
+    {
+        $user = $this->userWithRole('administration');
+        $attribute = Attribute::factory()->create(['type' => 'text']);
+
+        $response = $this->actingAs($user)->putJson("/api/catalog/attributes/{$attribute->id}", [
+            'name' => $attribute->name,
+            'required' => false,
+            'settings' => [
+                'validation' => 'regex',
+                'regex_pattern' => '^[A-Z0-9_-]+$',
+            ],
+        ]);
+
+        $response->assertOk();
+        $this->assertSame('regex', $attribute->fresh()->settings['validation']);
+        $this->assertSame('^[A-Z0-9_-]+$', $attribute->fresh()->settings['regex_pattern']);
+    }
+
+    public function test_text_attribute_rejects_invalid_regex_pattern(): void
+    {
+        $user = $this->userWithRole('administration');
+        $attribute = Attribute::factory()->create(['type' => 'text']);
+
+        $this->actingAs($user)->putJson("/api/catalog/attributes/{$attribute->id}", [
+            'name' => $attribute->name,
+            'required' => false,
+            'settings' => [
+                'validation' => 'regex',
+                'regex_pattern' => '[invalid(regex',
+            ],
+        ])->assertUnprocessable()->assertJsonValidationErrors(['settings.regex_pattern']);
+    }
+
+    public function test_text_attribute_accepts_alphanumeric_slug_and_phone_validations(): void
+    {
+        $user = $this->userWithRole('administration');
+        $attribute = Attribute::factory()->create(['type' => 'text']);
+
+        foreach (['alphanumeric', 'slug', 'phone'] as $validationType) {
+            $this->actingAs($user)->putJson("/api/catalog/attributes/{$attribute->id}", [
+                'name' => $attribute->name,
+                'required' => false,
+                'settings' => [
+                    'validation' => $validationType,
+                    'min_length' => 2,
+                    'max_length' => 50,
+                ],
+            ])->assertOk();
+
+            $this->assertSame($validationType, $attribute->fresh()->settings['validation']);
+            $this->assertSame(2, $attribute->fresh()->settings['min_length']);
+            $this->assertSame(50, $attribute->fresh()->settings['max_length']);
+        }
+    }
+
     /** @param list<string> $permissions */
     private function userWithRole(string $access, array $permissions = []): User
     {

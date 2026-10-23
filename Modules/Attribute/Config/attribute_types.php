@@ -4,12 +4,29 @@ return [
     'text' => [
         'label' => 'Text',
         'settings' => [
-            'validation' => ['label' => 'Validation', 'type' => 'select', 'default' => 'any', 'options' => ['any' => 'Any text', 'numeric' => 'Numeric', 'decimal' => 'Decimal', 'email' => 'Email', 'url' => 'URL', 'letters_only' => 'Letters only']],
-            'min_length' => ['label' => 'Minimum text length', 'type' => 'integer', 'min' => 0, 'applies_to' => ['any', 'email', 'letters_only']],
-            'max_length' => ['label' => 'Maximum text length', 'type' => 'integer', 'min' => 1, 'applies_to' => ['any', 'email', 'letters_only']],
+            'validation' => [
+                'label' => 'Validation',
+                'type' => 'select',
+                'default' => 'any',
+                'options' => [
+                    'any' => 'Any text',
+                    'numeric' => 'Numeric',
+                    'decimal' => 'Decimal',
+                    'email' => 'Email',
+                    'url' => 'URL',
+                    'letters_only' => 'Letters only',
+                    'alphanumeric' => 'Alphanumeric',
+                    'regex' => 'Regular Expression',
+                    'slug' => 'Slug / Identifier',
+                    'phone' => 'Phone Number',
+                ],
+            ],
+            'min_length' => ['label' => 'Minimum text length', 'type' => 'integer', 'min' => 0, 'applies_to' => ['any', 'email', 'letters_only', 'alphanumeric', 'slug', 'phone']],
+            'max_length' => ['label' => 'Maximum text length', 'type' => 'integer', 'min' => 1, 'applies_to' => ['any', 'email', 'letters_only', 'alphanumeric', 'slug', 'phone']],
             'min_value' => ['label' => 'Minimum value', 'type' => 'decimal', 'applies_to' => ['numeric', 'decimal']],
             'max_value' => ['label' => 'Maximum value', 'type' => 'decimal', 'applies_to' => ['numeric', 'decimal']],
             'decimal_precision' => ['label' => 'Decimal precision', 'type' => 'integer', 'min' => 0, 'max' => 8, 'applies_to' => ['decimal']],
+            'regex_pattern' => ['label' => 'Regex pattern', 'type' => 'text', 'applies_to' => ['regex']],
         ],
     ],
     'textarea' => [

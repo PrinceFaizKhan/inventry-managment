@@ -13,10 +13,15 @@
         </div>
         <div class="flex items-center gap-2">
             {!! view_event_render('catalog.attributes.header.actions') !!}
-            <a href="{{ url('catalog/attributes/create') }}" class="button button--primary inline-flex items-center gap-2">
+            <button
+                type="button"
+                onclick="window.dispatchEvent(new CustomEvent('ht-open-create-attribute'))"
+                class="button button--primary inline-flex items-center gap-2 cursor-pointer shadow-sm hover:scale-[1.02] active:scale-[0.98] transition-transform"
+                title="Create New Attribute"
+            >
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                 <span>Create Attribute</span>
-            </a>
+            </button>
         </div>
     </div>
 
@@ -42,6 +47,8 @@
     </x-admin::datagrid>
 
     <div class="hidden" aria-hidden="true"><attributes-list></attributes-list></div>
+
+    @include('admin::attributes.create-modal', ['types' => $types ?? []])
 
     {!! view_event_render('catalog.attributes.grid.after') !!}
 </div>

@@ -17,11 +17,13 @@ use Modules\Attribute\Models\Attribute;
 
 class AttributeController extends Controller
 {
-    public function index(Request $request): View|JsonResponse
+    public function index(Request $request, AttributeTypeRegistry $types): View|JsonResponse
     {
         Gate::authorize('viewAny', Attribute::class);
 
-        return AttributeDataGrid::make()->render('admin::attributes.index');
+        return AttributeDataGrid::make()->render('admin::attributes.index', [
+            'types' => $types->typeOptions(),
+        ]);
     }
 
     public function create(AttributeTypeRegistry $types): View

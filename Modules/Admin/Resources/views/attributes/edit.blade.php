@@ -14,7 +14,7 @@
         back-url="{{ url('catalog/attributes') }}"
         csrf-token="{{ csrf_token() }}"
     ></v-edit-attributes>
-
+ 
     <div class="hidden" aria-hidden="true">
         <attribute-edit-form
             :initial-attribute='@json($attribute)'
@@ -24,6 +24,7 @@
             csrf-token="{{ csrf_token() }}"
         ></attribute-edit-form>
     </div>
+
 
     {!! view_event_render('catalog.attributes.edit.after') !!}
 </div>
@@ -120,6 +121,150 @@
                     </div>
                 </div>
 
+                <!-- Settings & Validations Card -->
+                <div v-if="hasSettings" class="p-5 rounded-xl border border-[var(--border)] bg-[var(--card)] shadow-sm space-y-4">
+                    <div class="border-b border-[var(--border)] pb-2.5">
+                        <h2 class="text-base font-bold text-[var(--text)]">
+                            Settings & Validations
+                        </h2>
+                        <p class="text-xs text-[var(--muted)]">Configure validation rules and input constraints for this attribute.</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <!-- Validation Mode Dropdown (for text type) -->
+                        <div v-if="availableSettings.validation">
+                            <label class="block text-xs font-semibold text-[var(--text)] mb-1.5">
+                                @{{ availableSettings.validation.label || 'Validation' }}
+                            </label>
+                            <select
+                                v-model="settings.validation"
+                                @change="onValidationChange"
+                                class="w-full h-10 px-3.5 rounded-lg border border-[var(--border)] bg-[var(--card)] text-sm text-[var(--text)] focus:outline-none focus:border-[var(--teal)]"
+                                :class="errors['settings.validation'] ? 'border-red-500' : ''"
+                            >
+                                <option v-for="(optLabel, optVal) in availableSettings.validation.options" :key="optVal" :value="optVal">
+                                    @{{ optLabel }}
+                                </option>
+                            </select>
+                            <p v-if="errors['settings.validation']" class="mt-1 text-xs text-red-600">@{{ errors['settings.validation'] }}</p>
+                        </div>
+
+                        <!-- Minimum & Maximum Length (for any, email, letters_only, alphanumeric, slug, phone) -->
+                        <div v-if="isFieldVisible('min_length') || isFieldVisible('max_length')" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div v-if="isFieldVisible('min_length')">
+                                <label class="block text-xs font-semibold text-[var(--text)] mb-1.5">
+                                    @{{ availableSettings.min_length.label || 'Minimum Length' }}
+                                </label>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    v-model.number="settings.min_length"
+                                    @input="errors['settings.min_length'] = null; saved = false"
+                                    placeholder="e.g. 0"
+                                    class="w-full h-10 px-3.5 rounded-lg border border-[var(--border)] bg-[var(--card)] text-sm text-[var(--text)] focus:outline-none focus:border-[var(--teal)]"
+                                    :class="errors['settings.min_length'] ? 'border-red-500' : ''"
+                                />
+                                <p v-if="errors['settings.min_length']" class="mt-1 text-xs text-red-600">@{{ errors['settings.min_length'] }}</p>
+                            </div>
+
+                            <div v-if="isFieldVisible('max_length')">
+                                <label class="block text-xs font-semibold text-[var(--text)] mb-1.5">
+                                    @{{ availableSettings.max_length.label || 'Maximum Length' }}
+                                </label>
+                                <input
+                                    type="number"
+                                    min="1"
+                                    v-model.number="settings.max_length"
+                                    @input="errors['settings.max_length'] = null; saved = false"
+                                    placeholder="e.g. 255"
+                                    class="w-full h-10 px-3.5 rounded-lg border border-[var(--border)] bg-[var(--card)] text-sm text-[var(--text)] focus:outline-none focus:border-[var(--teal)]"
+                                    :class="errors['settings.max_length'] ? 'border-red-500' : ''"
+                                />
+                                <p v-if="errors['settings.max_length']" class="mt-1 text-xs text-red-600">@{{ errors['settings.max_length'] }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Minimum & Maximum Value (for numeric and decimal) -->
+                        <div v-if="isFieldVisible('min_value') || isFieldVisible('max_value')" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div v-if="isFieldVisible('min_value')">
+                                <label class="block text-xs font-semibold text-[var(--text)] mb-1.5">
+                                    @{{ availableSettings.min_value.label || 'Minimum Value' }}
+                                </label>
+                                <input
+                                    type="text"
+                                    v-model="settings.min_value"
+                                    @input="errors['settings.min_value'] = null; saved = false"
+                                    placeholder="e.g. 0"
+                                    class="w-full h-10 px-3.5 rounded-lg border border-[var(--border)] bg-[var(--card)] text-sm text-[var(--text)] focus:outline-none focus:border-[var(--teal)]"
+                                    :class="errors['settings.min_value'] ? 'border-red-500' : ''"
+                                />
+                                <p v-if="errors['settings.min_value']" class="mt-1 text-xs text-red-600">@{{ errors['settings.min_value'] }}</p>
+                            </div>
+
+                            <div v-if="isFieldVisible('max_value')">
+                                <label class="block text-xs font-semibold text-[var(--text)] mb-1.5">
+                                    @{{ availableSettings.max_value.label || 'Maximum Value' }}
+                                </label>
+                                <input
+                                    type="text"
+                                    v-model="settings.max_value"
+                                    @input="errors['settings.max_value'] = null; saved = false"
+                                    placeholder="e.g. 1000"
+                                    class="w-full h-10 px-3.5 rounded-lg border border-[var(--border)] bg-[var(--card)] text-sm text-[var(--text)] focus:outline-none focus:border-[var(--teal)]"
+                                    :class="errors['settings.max_value'] ? 'border-red-500' : ''"
+                                />
+                                <p v-if="errors['settings.max_value']" class="mt-1 text-xs text-red-600">@{{ errors['settings.max_value'] }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Decimal Precision (for decimal) -->
+                        <div v-if="isFieldVisible('decimal_precision')">
+                            <label class="block text-xs font-semibold text-[var(--text)] mb-1.5">
+                                @{{ availableSettings.decimal_precision.label || 'Decimal Precision' }}
+                            </label>
+                            <input
+                                type="number"
+                                min="0"
+                                max="8"
+                                v-model.number="settings.decimal_precision"
+                                @input="errors['settings.decimal_precision'] = null; saved = false"
+                                placeholder="e.g. 2"
+                                class="w-full h-10 px-3.5 rounded-lg border border-[var(--border)] bg-[var(--card)] text-sm text-[var(--text)] focus:outline-none focus:border-[var(--teal)]"
+                                :class="errors['settings.decimal_precision'] ? 'border-red-500' : ''"
+                            />
+                            <p class="mt-1 text-[11px] text-[var(--muted)]">Number of digits allowed after the decimal point (0 - 8).</p>
+                            <p v-if="errors['settings.decimal_precision']" class="mt-1 text-xs text-red-600">@{{ errors['settings.decimal_precision'] }}</p>
+                        </div>
+
+                        <!-- Regex Pattern (for regex) -->
+                        <div v-if="isFieldVisible('regex_pattern')">
+                            <label class="block text-xs font-semibold text-[var(--text)] mb-1.5">
+                                @{{ availableSettings.regex_pattern.label || 'Regex Pattern' }}
+                            </label>
+                            <input
+                                type="text"
+                                v-model="settings.regex_pattern"
+                                @input="errors['settings.regex_pattern'] = null; saved = false"
+                                placeholder="^[A-Z0-9_-]+$"
+                                class="w-full h-10 px-3.5 rounded-lg border border-[var(--border)] bg-[var(--card)] text-sm font-mono text-[var(--text)] focus:outline-none focus:border-[var(--teal)]"
+                                :class="errors['settings.regex_pattern'] ? 'border-red-500' : ''"
+                            />
+                            <p class="mt-1 text-[11px] text-[var(--muted)]">Regular expression pattern without enclosing slashes (e.g. <code>^[A-Z0-9_-]+$</code>).</p>
+                            <p v-if="errors['settings.regex_pattern']" class="mt-1 text-xs text-red-600">@{{ errors['settings.regex_pattern'] }}</p>
+                        </div>
+
+                        <!-- Rich Text Editor (for textarea) -->
+                        <div v-if="availableSettings.rich_text">
+                            <v-toggle
+                                v-model="settings.rich_text"
+                                label="Enable Rich-Text Editor (WYSIWYG)"
+                                description="Allow rich HTML formatting for this textarea"
+                                @change="saved = false"
+                            />
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Options Management (for select, multiselect, radio, checkbox) -->
                 <div v-if="supportsOptions" class="p-5 rounded-xl border border-[var(--border)] bg-[var(--card)] shadow-sm space-y-4">
                     <div class="flex items-center justify-between border-b border-[var(--border)] pb-2.5">
@@ -178,18 +323,12 @@
                     </h2>
 
                     <!-- Is Required Toggle -->
-                    <label class="flex items-center justify-between cursor-pointer select-none">
-                        <div>
-                            <span class="block text-xs font-semibold text-[var(--text)]">Is Required</span>
-                            <span class="text-[11px] text-[var(--muted)]">Require value before saving catalog items</span>
-                        </div>
-                        <input
-                            type="checkbox"
-                            v-model="required"
-                            @change="saved = false"
-                            class="rounded border-[var(--border)] text-[var(--teal)] focus:ring-[var(--teal)] w-4 h-4"
-                        />
-                    </label>
+                    <v-toggle
+                        v-model="required"
+                        label="Is Required"
+                        description="Require value before saving catalog items"
+                        @change="saved = false"
+                    />
                 </div>
 
                 <!-- Configurations Accordion Card -->
@@ -199,18 +338,12 @@
                     </h2>
 
                     <!-- Is Filterable Toggle -->
-                    <label class="flex items-center justify-between cursor-pointer select-none">
-                        <div>
-                            <span class="block text-xs font-semibold text-[var(--text)]">Is Filterable</span>
-                            <span class="text-[11px] text-[var(--muted)]">Allow filtering products by this attribute</span>
-                        </div>
-                        <input
-                            type="checkbox"
-                            v-model="isFilterable"
-                            @change="saved = false"
-                            class="rounded border-[var(--border)] text-[var(--teal)] focus:ring-[var(--teal)] w-4 h-4"
-                        />
-                    </label>
+                    <v-toggle
+                        v-model="isFilterable"
+                        label="Is Filterable"
+                        description="Allow filtering products by this attribute"
+                        @change="saved = false"
+                    />
                 </div>
             </div>
         </div>
@@ -265,6 +398,17 @@
                 }
                 return key;
             },
+            typeDef() {
+                if (!this.attr || !this.initialTypes) return null;
+                return this.initialTypes[this.attr.type] || null;
+            },
+            hasSettings() {
+                return Boolean(this.typeDef && this.typeDef.settings && Object.keys(this.typeDef.settings).length > 0);
+            },
+            availableSettings() {
+                if (!this.typeDef || !this.typeDef.settings) return {};
+                return this.typeDef.settings;
+            },
             supportsOptions() {
                 if (!this.attr) return false;
                 return ['select', 'multiselect', 'radio', 'checkbox'].includes(this.attr.type);
@@ -273,9 +417,53 @@
         mounted() {
             if (!this.attr && this.attributeId) {
                 this.loadAttribute();
+            } else {
+                this.initSettingsDefaults();
             }
         },
         methods: {
+            initSettingsDefaults() {
+                if (!this.settings) {
+                    this.settings = {};
+                }
+                if (this.availableSettings.validation && !this.settings.validation) {
+                    this.settings.validation = this.availableSettings.validation.default || 'any';
+                }
+            },
+            onValidationChange() {
+                this.saved = false;
+                const mode = this.settings.validation || 'any';
+                for (const [key, field] of Object.entries(this.availableSettings)) {
+                    if (field.applies_to && !field.applies_to.includes(mode)) {
+                        delete this.settings[key];
+                    }
+                }
+            },
+            isFieldVisible(key) {
+                const field = this.availableSettings[key];
+                if (!field) return false;
+                if (!field.applies_to) return true;
+                const mode = this.settings.validation || 'any';
+                return field.applies_to.includes(mode);
+            },
+            prepareSettings() {
+                if (!this.hasSettings) return {};
+                const prepared = {};
+                const mode = this.settings.validation || (this.availableSettings.validation ? this.availableSettings.validation.default || 'any' : null);
+
+                for (const [key, field] of Object.entries(this.availableSettings)) {
+                    if (field.applies_to && !field.applies_to.includes(mode)) {
+                        continue;
+                    }
+                    const val = this.settings[key];
+                    if (val !== undefined && val !== null && val !== '') {
+                        prepared[key] = val;
+                    } else if (key === 'validation' && mode) {
+                        prepared[key] = mode;
+                    }
+                }
+                return prepared;
+            },
             async loadAttribute() {
                 try {
                     const res = await this.$axios.get(`/api/catalog/attributes/${this.attributeId}`);
@@ -286,6 +474,7 @@
                         this.isFilterable = Boolean(res.data.is_filterable);
                         this.settings = res.data.settings || {};
                         this.options = res.data.options ? res.data.options.map(o => ({ ...o })) : [];
+                        this.initSettingsDefaults();
                     }
                 } catch (e) {
                     console.error(e);
@@ -322,7 +511,7 @@
                         name: this.name.trim(),
                         required: Boolean(this.required),
                         is_filterable: Boolean(this.isFilterable),
-                        settings: this.settings,
+                        settings: this.prepareSettings(),
                     };
 
                     if (this.supportsOptions) {

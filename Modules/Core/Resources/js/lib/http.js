@@ -16,6 +16,10 @@ export async function request(url, options = {}) {
     finalHeaders['X-CSRF-TOKEN'] = csrf
   }
 
+  if (restOptions.body && !(typeof FormData !== 'undefined' && restOptions.body instanceof FormData) && !finalHeaders['Content-Type']) {
+    finalHeaders['Content-Type'] = 'application/json'
+  }
+
   const response = await fetch(url, {
     credentials: 'same-origin',
     ...restOptions,

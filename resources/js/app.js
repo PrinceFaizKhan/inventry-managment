@@ -19,6 +19,28 @@ const app = createApp({
 
 window.app = app
 
+import { ToggleComponent } from './components/ui/toggle'
+import { TextareaComponent } from './components/ui/textarea'
+import { SelectComponent } from './components/ui/select'
+import { RichTextComponent } from './components/ui/rich-text'
+
+/**
+ * Register global UI primitives matching Haseen Telecom Zero .vue architectural standard.
+ */
+app.component('v-toggle', ToggleComponent)
+app.component('ui-toggle', ToggleComponent)
+app.component('toggle-switch', ToggleComponent)
+app.component('ToggleSwitch', ToggleComponent)
+
+app.component('v-textarea', TextareaComponent)
+app.component('ui-textarea', TextareaComponent)
+
+app.component('v-select', SelectComponent)
+app.component('ui-select', SelectComponent)
+
+app.component('v-rich-text', RichTextComponent)
+app.component('rich-text-editor', RichTextComponent)
+
 // Register global theme-toggle component matching Haseen Telecom design
 app.component('theme-toggle', {
   template: `
@@ -60,8 +82,8 @@ app.component('theme-toggle', {
 })
 app.config.globalProperties.$axios = {
   get: (url, opts) => request(url, { method: 'GET', ...opts }),
-  post: (url, data, opts) => request(url, { method: 'POST', body: JSON.stringify(data), ...opts }),
-  put: (url, data, opts) => request(url, { method: 'PUT', body: JSON.stringify(data), ...opts }),
+  post: (url, data, opts) => request(url, { method: 'POST', body: JSON.stringify(data), headers: { 'Content-Type': 'application/json', ...(opts?.headers || {}) }, ...opts }),
+  put: (url, data, opts) => request(url, { method: 'PUT', body: JSON.stringify(data), headers: { 'Content-Type': 'application/json', ...(opts?.headers || {}) }, ...opts }),
   delete: (url, opts) => request(url, { method: 'DELETE', ...opts }),
 }
 window.request = request
@@ -90,22 +112,55 @@ function registerAllComponents(application) {
 registerAllComponents(app)
 
 window.toggleSidebar = function () {
+  const isMobile = window.innerWidth <= 768
   const sidebar = document.getElementById('admin-sidebar')
   const backdrop = document.getElementById('sidebar-backdrop')
-  if (sidebar) sidebar.classList.toggle('open')
-  if (backdrop) backdrop.classList.toggle('open')
+
+  if (isMobile) {
+    if (sidebar) sidebar.classList.toggle('open')
+    if (backdrop) backdrop.classList.toggle('open')
+  } else {
+    const isCurrentlyExpanded = document.documentElement.classList.contains('sidebar-expanded') || document.body.classList.contains('sidebar-expanded')
+    const nextState = !isCurrentlyExpanded
+    document.documentElement.classList.toggle('sidebar-expanded', nextState)
+    document.body.classList.toggle('sidebar-expanded', nextState)
+    localStorage.setItem('ht-sidebar-expanded', nextState ? 'true' : 'false')
+    window.dispatchEvent(new CustomEvent('ht-sidebar-toggled', { detail: { expanded: nextState } }))
+  }
 }
 
 window.closeSidebar = function () {
+  const isMobile = window.innerWidth <= 768
   const sidebar = document.getElementById('admin-sidebar')
   const backdrop = document.getElementById('sidebar-backdrop')
   if (sidebar) sidebar.classList.remove('open')
   if (backdrop) backdrop.classList.remove('open')
+  if (!isMobile) {
+    document.documentElement.classList.remove('sidebar-expanded')
+    document.body.classList.remove('sidebar-expanded')
+    localStorage.setItem('ht-sidebar-expanded', 'false')
+    window.dispatchEvent(new CustomEvent('ht-sidebar-toggled', { detail: { expanded: false } }))
+  }
+}
+
+// Restore saved desktop sidebar expanded state on initial load
+if (typeof window !== 'undefined' && window.innerWidth > 768) {
+  if (localStorage.getItem('ht-sidebar-expanded') === 'false') {
+    document.documentElement.classList.remove('sidebar-expanded')
+    document.body.classList.remove('sidebar-expanded')
+  } else {
+    document.documentElement.classList.add('sidebar-expanded')
+    document.body.classList.add('sidebar-expanded')
+  }
 }
 
 document.addEventListener('keydown', function (e) {
   if (e.key === 'Escape') {
     window.closeSidebar()
+  }
+  if ((e.metaKey || e.ctrlKey) && e.key === '\\') {
+    e.preventDefault()
+    window.toggleSidebar()
   }
 })
 

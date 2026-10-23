@@ -20,6 +20,11 @@
         "@laravel/multiplex": "^0.4.1"
     },
     "dependencies": {
+        "@tiptap/core": "^3.32.0",
+        "@tiptap/extension-link": "^3.32.0",
+        "@tiptap/extension-placeholder": "^3.32.0",
+        "@tiptap/starter-kit": "^3.32.0",
+        "@tiptap/vue-3": "^3.32.0",
         "@vitejs/plugin-vue": "^6.0.9",
         "lucide-vue-next": "^1.0.0",
         "vue": "^3.5.43",

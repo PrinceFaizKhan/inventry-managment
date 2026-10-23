@@ -127,6 +127,15 @@ class AttributeTypeRegistry
                 case 'decimal':
                     $fieldRules = ['sometimes', 'nullable', 'string', 'regex:/^-?\\d{1,12}(?:\\.\\d{1,8})?$/'];
                     break;
+                case 'text':
+                    $fieldRules = ['sometimes', 'nullable', 'string', 'max:255'];
+                    break;
+            }
+
+            if ($key === 'regex_pattern' && ! empty($value)) {
+                if (@preg_match('/'.str_replace('/', '\/', (string) $value).'/', '') === false) {
+                    $errors["settings.$key"][] = 'The regex pattern is invalid.';
+                }
             }
 
             $rules["settings.$key"] = $fieldRules;
