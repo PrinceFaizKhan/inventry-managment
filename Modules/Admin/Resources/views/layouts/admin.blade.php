@@ -26,12 +26,23 @@
         // Global component registration queue to prevent race conditions
         window.__pendingComponents = window.__pendingComponents || [];
         window.registerVueComponent = function(name, component) {
-            if (window.app && typeof window.app.component === 'function') {
+            if (window.app && typeof window.app.component === 'function' && window.app._context) {
                 window.app.component(name, component);
             } else {
                 window.__pendingComponents.push([name, component]);
             }
         };
+
+        // Define var app and window.app early so:
+        // 1) DOM element does NOT overwrite window.app with an HTMLDivElement
+        // 2) Any script calling app.component(...) buffers gracefully without throwing TypeError
+        var app = {
+            component: function(name, component) {
+                window.registerVueComponent(name, component);
+                return app;
+            }
+        };
+        window.app = app;
     </script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
@@ -155,24 +166,22 @@
                         <!-- Language Switcher Component -->
                         <x-admin::language-toggle />
 
-                        @auth
-                            @php
-                                $adminUser = auth()->user();
-                                $profileData = [
-                                    'name' => $adminUser?->name ?? 'Admin',
-                                    'email' => $adminUser?->email ?? '',
-                                    'role' => $adminUser?->role?->name ?? 'Administrator',
-                                ];
-                            @endphp
-                            <x-admin::dropdown.profile
-                                :user="$profileData"
-                                :account-url="route('admin.account.edit')"
-                                :users-url="route('settings.users')"
-                                :attributes-url="url('catalog/attributes')"
-                                :logout-url="route('admin.session.destroy')"
-                                :csrf-token="csrf_token()"
-                            />
-                        @endauth
+                        @php
+                            $adminUser = auth()->user();
+                            $profileData = [
+                                'name' => $adminUser?->name ?? 'Admin',
+                                'email' => $adminUser?->email ?? 'admin@haseentelecom.com',
+                                'role' => $adminUser?->role?->name ?? 'Administrator',
+                            ];
+                        @endphp
+                        <x-admin::dropdown.profile
+                            :user="$profileData"
+                            :account-url="route('admin.account.edit')"
+                            :users-url="route('settings.users')"
+                            :attributes-url="url('catalog/attributes')"
+                            :logout-url="route('admin.session.destroy')"
+                            :csrf-token="csrf_token()"
+                        />
                     </div>
 
                 </div>
@@ -186,6 +195,7 @@
             </main>
 
         </div>
+    </div>
 
     <!-- Global Admin UI Primitives Registration (Blade + Vue x-template) -->
     <div style="display:none" aria-hidden="true">
@@ -193,14 +203,19 @@
         <x-admin::toggle />
         <x-admin::textarea />
         <x-admin::rich-text />
-        <x-admin::theme-toggle />
     </div>
 
     {!! view_event_render('layout.body.after') !!}
     @stack('scripts')
-    <script type="module">
+    <script>
         if (typeof window.mountApp === 'function') {
             window.mountApp();
+        } else {
+            window.addEventListener('load', function() {
+                if (typeof window.mountApp === 'function') {
+                    window.mountApp();
+                }
+            });
         }
     </script>
 </body>

@@ -51,7 +51,8 @@
     </div>
 </script>
 
-<script type="module">
+<script>
+(function() {
     const RowActionsComponent = {
         template: '#v-row-actions-template',
         props: {
@@ -110,7 +111,13 @@
         }
     };
 
-    app.component('v-row-actions', RowActionsComponent);
-    app.component('row-actions', RowActionsComponent);
+    if (typeof window.registerVueComponent === 'function') {
+        window.registerVueComponent('v-row-actions', RowActionsComponent);
+        window.registerVueComponent('row-actions', RowActionsComponent);
+    } else if (window.app && typeof window.app.component === 'function') {
+        window.app.component('v-row-actions', RowActionsComponent);
+        window.app.component('row-actions', RowActionsComponent);
+    }
+})();
 </script>
 @endpushOnce

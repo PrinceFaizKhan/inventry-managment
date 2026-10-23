@@ -144,10 +144,9 @@ function mountApp() {
 
 window.mountApp = mountApp
 
-if (document.readyState === 'complete' || document.readyState === 'interactive') {
-  setTimeout(mountApp, 0)
+if (document.readyState === 'complete') {
+  mountApp()
 } else {
-  document.addEventListener('DOMContentLoaded', () => setTimeout(mountApp, 0))
   window.addEventListener('load', mountApp)
 }
 

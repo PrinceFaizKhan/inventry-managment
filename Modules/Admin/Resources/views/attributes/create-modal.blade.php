@@ -150,7 +150,8 @@
     </teleport>
 </script>
 
-<script type="module">
+<script>
+(function() {
     const AttributeCreateModalComponent = {
         template: '#v-attribute-create-modal-template',
         props: {
@@ -310,8 +311,15 @@
         }
     };
 
-    app.component('attribute-create-modal', AttributeCreateModalComponent);
-    app.component('v-attribute-create-modal', AttributeCreateModalComponent);
-    app.component('v-create-attributes', AttributeCreateModalComponent);
+    if (typeof window.registerVueComponent === 'function') {
+        window.registerVueComponent('attribute-create-modal', AttributeCreateModalComponent);
+        window.registerVueComponent('v-attribute-create-modal', AttributeCreateModalComponent);
+        window.registerVueComponent('v-create-attributes', AttributeCreateModalComponent);
+    } else if (window.app && typeof window.app.component === 'function') {
+        window.app.component('attribute-create-modal', AttributeCreateModalComponent);
+        window.app.component('v-attribute-create-modal', AttributeCreateModalComponent);
+        window.app.component('v-create-attributes', AttributeCreateModalComponent);
+    }
+})();
 </script>
 @endpushOnce

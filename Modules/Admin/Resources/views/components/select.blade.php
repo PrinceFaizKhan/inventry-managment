@@ -176,7 +176,8 @@
     </div>
 </script>
 
-<script type="module">
+<script>
+(function() {
     const SelectComponent = {
         template: '#v-select-template',
         props: {
@@ -390,5 +391,6 @@
         window.app.component('v-select', SelectComponent);
         window.app.component('ui-select', SelectComponent);
     }
+})();
 </script>
 @endPushOnce

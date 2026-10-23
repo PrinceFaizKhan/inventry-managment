@@ -73,7 +73,8 @@
     </div>
 </script>
 
-<script type="module">
+<script>
+(function() {
     const ToggleComponent = {
         template: '#v-toggle-template',
         props: {
@@ -155,5 +156,6 @@
         window.app.component('toggle-switch', ToggleComponent);
         window.app.component('ToggleSwitch', ToggleComponent);
     }
+})();
 </script>
 @endPushOnce

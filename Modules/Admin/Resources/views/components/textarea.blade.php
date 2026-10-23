@@ -75,7 +75,8 @@
     </div>
 </script>
 
-<script type="module">
+<script>
+(function() {
     const TextareaComponent = {
         template: '#v-textarea-template',
         props: {
@@ -183,5 +184,6 @@
         window.app.component('v-textarea', TextareaComponent);
         window.app.component('ui-textarea', TextareaComponent);
     }
+})();
 </script>
 @endPushOnce

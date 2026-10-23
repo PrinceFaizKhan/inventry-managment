@@ -4,7 +4,7 @@
 ])
 
 <v-sidebar-nav
-    :items='@json($items)'
+    :items='@json($items, JSON_HEX_APOS)'
     current-path="{{ $currentPath ?: request()->path() }}"
 ></v-sidebar-nav>
 
@@ -140,7 +140,8 @@
     </nav>
 </script>
 
-<script type="module">
+<script>
+(function() {
     const ICONS = {
         'layout-dashboard': '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>',
         'package': '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>',
@@ -173,12 +174,13 @@
         },
         created() {
             this.updateExpandedState();
-            this.items.forEach(item => {
-                if (item.children && item.children.length > 0) {
-                    // Parent is ONLY open by default if one of its children is currently active!
-                    this.openGroups[item.key] = this.isGroupActive(item);
-                }
-            });
+            if (Array.isArray(this.items)) {
+                this.items.forEach(item => {
+                    if (item && item.children && item.children.length > 0) {
+                        this.openGroups[item.key] = this.isGroupActive(item);
+                    }
+                });
+            }
         },
         mounted() {
             this.updateExpandedState();
@@ -209,7 +211,6 @@
                 return Boolean(this.openGroups[key]);
             },
             toggleGroup(key) {
-                // If sidebar is currently collapsed, expanding it lets user view the menu cleanly
                 if (!this.isExpanded && typeof window.toggleSidebar === 'function') {
                     window.toggleSidebar();
                     this.openGroups = {
@@ -219,7 +220,6 @@
                     return;
                 }
 
-                // If already expanded, smoothly toggle accordion open/close
                 this.openGroups = {
                     ...this.openGroups,
                     [key]: !this.isGroupOpen(key)
@@ -259,7 +259,6 @@
                 return false;
             },
             isGroupActive(item) {
-                // Parent is ONLY active if at least one child is active!
                 if (item.children && item.children.length > 0) {
                     return item.children.some(child => this.isItemActive(child.key, child.route));
                 }
@@ -279,5 +278,6 @@
         window.app.component('v-sidebar-nav', sidebarNavComponent);
         window.app.component('sidebar-nav', sidebarNavComponent);
     }
+})();
 </script>
 @endpushOnce

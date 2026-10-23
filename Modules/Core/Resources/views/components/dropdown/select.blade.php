@@ -167,7 +167,8 @@
     </div>
 </script>
 
-<script type="module">
+<script>
+(function() {
     const DropdownSelectComponent = {
         template: '#v-dropdown-select-template',
         props: {
@@ -334,8 +335,15 @@
         }
     };
 
-    app.component('v-dropdown-select', DropdownSelectComponent);
-    app.component('v-single-select', DropdownSelectComponent);
-    app.component('app-select', DropdownSelectComponent);
+    if (typeof window.registerVueComponent === 'function') {
+        window.registerVueComponent('v-dropdown-select', DropdownSelectComponent);
+        window.registerVueComponent('v-single-select', DropdownSelectComponent);
+        window.registerVueComponent('app-select', DropdownSelectComponent);
+    } else if (window.app && typeof window.app.component === 'function') {
+        window.app.component('v-dropdown-select', DropdownSelectComponent);
+        window.app.component('v-single-select', DropdownSelectComponent);
+        window.app.component('app-select', DropdownSelectComponent);
+    }
+})();
 </script>
 @endpushOnce

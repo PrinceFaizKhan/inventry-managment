@@ -196,7 +196,8 @@
     </div>
 </script>
 
-<script type="module">
+<script>
+(function() {
     const RichTextComponent = {
         template: '#v-rich-text-template',
         props: {
@@ -331,5 +332,6 @@
         window.app.component('v-rich-text', RichTextComponent);
         window.app.component('rich-text-editor', RichTextComponent);
     }
+})();
 </script>
 @endPushOnce

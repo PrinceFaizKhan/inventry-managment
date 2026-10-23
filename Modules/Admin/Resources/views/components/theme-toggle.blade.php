@@ -7,10 +7,13 @@
     <div class="theme flex items-center p-0.5 rounded-xl border border-[var(--border)] bg-[var(--card)] shadow-xs">
         <button
             type="button"
-            :class="{ active: theme === 'light' }"
             @click="setTheme('light')"
             class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer"
-            :class="theme === 'light' ? 'bg-[var(--soft)] text-[var(--teal)] font-bold shadow-xs' : 'text-[var(--muted)] hover:text-[var(--text)]'"
+            :class="[
+                theme === 'light'
+                    ? 'active bg-[var(--soft)] text-[var(--teal)] font-bold shadow-xs'
+                    : 'text-[var(--muted)] hover:text-[var(--text)]'
+            ]"
             title="Light Mode"
             aria-label="Light Mode"
         >
@@ -29,10 +32,13 @@
         </button>
         <button
             type="button"
-            :class="{ active: theme === 'dark' }"
             @click="setTheme('dark')"
             class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer"
-            :class="theme === 'dark' ? 'bg-[var(--soft)] text-[var(--teal)] font-bold shadow-xs' : 'text-[var(--muted)] hover:text-[var(--text)]'"
+            :class="[
+                theme === 'dark'
+                    ? 'active bg-[var(--soft)] text-[var(--teal)] font-bold shadow-xs'
+                    : 'text-[var(--muted)] hover:text-[var(--text)]'
+            ]"
             title="Dark Mode"
             aria-label="Dark Mode"
         >
@@ -44,7 +50,8 @@
     </div>
 </script>
 
-<script type="module">
+<script>
+(function() {
     const ThemeToggleComponent = {
         template: '#v-theme-toggle-template',
         data() {
@@ -80,5 +87,6 @@
         window.app.component('theme-toggle', ThemeToggleComponent);
         window.app.component('v-theme-toggle', ThemeToggleComponent);
     }
+})();
 </script>
 @endpushOnce

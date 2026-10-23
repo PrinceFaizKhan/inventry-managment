@@ -8,7 +8,7 @@
 ])
 
 <v-profile-dropdown
-    :user='@json($user)'
+    :user='@json($user, JSON_HEX_APOS)'
     account-url="{{ $accountUrl }}"
     users-url="{{ $usersUrl }}"
     attributes-url="{{ $attributesUrl }}"
@@ -132,7 +132,8 @@
     </div>
 </script>
 
-<script type="module">
+<script>
+(function() {
     const profileDropdownComponent = {
         template: '#v-profile-dropdown-template',
         props: {
@@ -201,5 +202,6 @@
         window.app.component('v-profile-dropdown', profileDropdownComponent);
         window.app.component('profile-dropdown', profileDropdownComponent);
     }
+})();
 </script>
 @endpushOnce

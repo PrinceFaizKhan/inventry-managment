@@ -16,7 +16,8 @@
     </div>
 </script>
 
-<script type="module">
+<script>
+(function() {
     const languageToggleComponent = {
         template: '#v-language-toggle-template',
         setup() {
@@ -36,5 +37,6 @@
         window.app.component('v-language-toggle', languageToggleComponent);
         window.app.component('language-toggle', languageToggleComponent);
     }
+})();
 </script>
 @endpushOnce

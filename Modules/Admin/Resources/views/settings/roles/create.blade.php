@@ -184,7 +184,8 @@
     </form>
 </script>
 
-<script type="module">
+<script>
+(function() {
     const CreateRoleComponent = {
         template: '#v-create-user-role-template',
         data() {
@@ -281,8 +282,14 @@
         },
     };
 
-    app.component('v-create-user-role', CreateRoleComponent);
-    app.component('roles-form', CreateRoleComponent);
+    if (typeof window.registerVueComponent === 'function') {
+        window.registerVueComponent('v-create-user-role', CreateRoleComponent);
+        window.registerVueComponent('roles-form', CreateRoleComponent);
+    } else if (window.app && typeof window.app.component === 'function') {
+        window.app.component('v-create-user-role', CreateRoleComponent);
+        window.app.component('roles-form', CreateRoleComponent);
+    }
+})();
 </script>
 @endPushOnce
 @endsection

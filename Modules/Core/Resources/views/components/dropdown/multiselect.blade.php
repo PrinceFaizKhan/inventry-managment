@@ -214,7 +214,8 @@
     </div>
 </script>
 
-<script type="module">
+<script>
+(function() {
     const DropdownMultiSelectComponent = {
         template: '#v-dropdown-multiselect-template',
         props: {
@@ -372,8 +373,15 @@
         }
     };
 
-    app.component('v-dropdown-multiselect', DropdownMultiSelectComponent);
-    app.component('v-multi-select', DropdownMultiSelectComponent);
-    app.component('app-multiselect', DropdownMultiSelectComponent);
+    if (typeof window.registerVueComponent === 'function') {
+        window.registerVueComponent('v-dropdown-multiselect', DropdownMultiSelectComponent);
+        window.registerVueComponent('v-multi-select', DropdownMultiSelectComponent);
+        window.registerVueComponent('app-multiselect', DropdownMultiSelectComponent);
+    } else if (window.app && typeof window.app.component === 'function') {
+        window.app.component('v-dropdown-multiselect', DropdownMultiSelectComponent);
+        window.app.component('v-multi-select', DropdownMultiSelectComponent);
+        window.app.component('app-multiselect', DropdownMultiSelectComponent);
+    }
+})();
 </script>
 @endpushOnce

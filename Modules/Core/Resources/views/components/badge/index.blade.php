@@ -104,7 +104,8 @@
     </span>
 </script>
 
-<script type="module">
+<script>
+(function() {
     const StatusBadgeComponent = {
         template: '#v-status-badge-template',
         props: {
@@ -174,8 +175,15 @@
         }
     };
 
-    app.component('v-status-badge', StatusBadgeComponent);
-    app.component('v-badge', StatusBadgeComponent);
-    app.component('status-badge', StatusBadgeComponent);
+    if (typeof window.registerVueComponent === 'function') {
+        window.registerVueComponent('v-status-badge', StatusBadgeComponent);
+        window.registerVueComponent('v-badge', StatusBadgeComponent);
+        window.registerVueComponent('status-badge', StatusBadgeComponent);
+    } else if (window.app && typeof window.app.component === 'function') {
+        window.app.component('v-status-badge', StatusBadgeComponent);
+        window.app.component('v-badge', StatusBadgeComponent);
+        window.app.component('status-badge', StatusBadgeComponent);
+    }
+})();
 </script>
 @endpushOnce

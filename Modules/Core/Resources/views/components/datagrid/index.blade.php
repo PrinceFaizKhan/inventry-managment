@@ -35,7 +35,7 @@
 </div>
 
 <v-datagrid
-    :initial-config="{{ json_encode($initialConfig) }}"
+    :initial-config='@json($initialConfig, JSON_HEX_APOS)'
     {{ $attributes }}
 >
     {{ $slot }}
@@ -529,7 +529,8 @@
     </div>
 </script>
 
-<script type="module">
+<script>
+(function() {
     const DataGridComponent = {
         template: '#v-datagrid-template',
         props: {
@@ -1039,7 +1040,13 @@
         }
     };
 
-    app.component('v-datagrid', DataGridComponent);
-    app.component('data-grid', DataGridComponent);
+    if (typeof window.registerVueComponent === 'function') {
+        window.registerVueComponent('v-datagrid', DataGridComponent);
+        window.registerVueComponent('data-grid', DataGridComponent);
+    } else if (window.app && typeof window.app.component === 'function') {
+        window.app.component('v-datagrid', DataGridComponent);
+        window.app.component('data-grid', DataGridComponent);
+    }
+})();
 </script>
 @endpushOnce

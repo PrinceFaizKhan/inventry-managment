@@ -18,12 +18,20 @@
         // Global component registration queue to prevent race conditions
         window.__pendingComponents = window.__pendingComponents || [];
         window.registerVueComponent = function(name, component) {
-            if (window.app && typeof window.app.component === 'function') {
+            if (window.app && typeof window.app.component === 'function' && window.app._context) {
                 window.app.component(name, component);
             } else {
                 window.__pendingComponents.push([name, component]);
             }
         };
+
+        var app = {
+            component: function(name, component) {
+                window.registerVueComponent(name, component);
+                return app;
+            }
+        };
+        window.app = app;
     </script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
@@ -43,9 +51,15 @@
 
     {!! view_event_render('layout.body.after') !!}
     @stack('scripts')
-    <script type="module">
+    <script>
         if (typeof window.mountApp === 'function') {
             window.mountApp();
+        } else {
+            window.addEventListener('load', function() {
+                if (typeof window.mountApp === 'function') {
+                    window.mountApp();
+                }
+            });
         }
     </script>
 </body>

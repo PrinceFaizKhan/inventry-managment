@@ -122,7 +122,8 @@
     </component>
 </script>
 
-<script type="module">
+<script>
+(function() {
     const ActionButtonComponent = {
         template: '#v-action-button-template',
         props: {
@@ -204,7 +205,13 @@
         }
     };
 
-    app.component('v-action-button', ActionButtonComponent);
-    app.component('action-button', ActionButtonComponent);
+    if (typeof window.registerVueComponent === 'function') {
+        window.registerVueComponent('v-action-button', ActionButtonComponent);
+        window.registerVueComponent('action-button', ActionButtonComponent);
+    } else if (window.app && typeof window.app.component === 'function') {
+        window.app.component('v-action-button', ActionButtonComponent);
+        window.app.component('action-button', ActionButtonComponent);
+    }
+})();
 </script>
 @endpushOnce

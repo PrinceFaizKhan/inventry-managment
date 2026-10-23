@@ -346,7 +346,8 @@
     </form>
 </script>
 
-<script type="module">
+<script>
+(function() {
     const EditAttributesComponent = {
         template: '#v-edit-attributes-template',
         props: {
@@ -535,8 +536,14 @@
         }
     };
 
-    app.component('v-edit-attributes', EditAttributesComponent);
-    app.component('attribute-edit-form', EditAttributesComponent);
+    if (typeof window.registerVueComponent === 'function') {
+        window.registerVueComponent('v-edit-attributes', EditAttributesComponent);
+        window.registerVueComponent('attribute-edit-form', EditAttributesComponent);
+    } else if (window.app && typeof window.app.component === 'function') {
+        window.app.component('v-edit-attributes', EditAttributesComponent);
+        window.app.component('attribute-edit-form', EditAttributesComponent);
+    }
+})();
 </script>
 @endPushOnce
 @endsection
