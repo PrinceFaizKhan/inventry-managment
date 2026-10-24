@@ -31,6 +31,28 @@ return [
                 ],
             ],
             [
+                'key' => 'catalog.attribute-groups',
+                'label' => 'Attribute Groups',
+                'children' => [
+                    [
+                        'key' => 'catalog.attribute-groups.view',
+                        'label' => 'View',
+                    ],
+                    [
+                        'key' => 'catalog.attribute-groups.create',
+                        'label' => 'Create',
+                    ],
+                    [
+                        'key' => 'catalog.attribute-groups.edit',
+                        'label' => 'Edit',
+                    ],
+                    [
+                        'key' => 'catalog.attribute-groups.delete',
+                        'label' => 'Delete',
+                    ],
+                ],
+            ],
+            [
                 'key' => 'catalog.product-types',
                 'label' => 'Product Types',
                 'children' => [

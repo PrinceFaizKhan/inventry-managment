@@ -241,6 +241,9 @@
                 if (key === 'catalog.attributes') {
                     return current.startsWith('catalog/attributes') || current.startsWith('attributes');
                 }
+                if (key === 'catalog.attribute-groups') {
+                    return current.startsWith('catalog/attribute-groups');
+                }
                 if (key === 'catalog.product-types') {
                     return current.startsWith('catalog/product-types');
                 }

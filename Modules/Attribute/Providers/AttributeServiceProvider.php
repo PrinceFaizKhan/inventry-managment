@@ -6,7 +6,8 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Modules\Attribute\AttributeTypeRegistry;
-use Modules\Attribute\Models\Attribute;
+use Modules\Attribute\Models\AttributeGroup;
+use Modules\Attribute\Policies\AttributeGroupPolicy;
 use Modules\Attribute\Policies\AttributePolicy;
 
 class AttributeServiceProvider extends ServiceProvider
@@ -36,5 +37,6 @@ class AttributeServiceProvider extends ServiceProvider
         }
 
         Gate::policy(Attribute::class, AttributePolicy::class);
+        Gate::policy(AttributeGroup::class, AttributeGroupPolicy::class);
     }
 }

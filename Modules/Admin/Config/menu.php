@@ -39,6 +39,18 @@ return [
         'children' => [],
     ],
     [
+        'key' => 'catalog.attribute-groups',
+        'label' => 'Attribute Groups',
+        'icon' => 'boxes',
+        'route' => 'catalog/attribute-groups',
+        'sort' => 15,
+        'permission' => 'authenticated',
+        'parent' => 'catalog',
+        'enabled' => true,
+        'coming_soon' => false,
+        'children' => [],
+    ],
+    [
         'key' => 'catalog.product-types',
         'label' => 'Product Types',
         'icon' => 'tags',

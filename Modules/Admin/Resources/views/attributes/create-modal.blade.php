@@ -207,8 +207,10 @@
             }
         },
         mounted() {
-            window.addEventListener('ht-open-create-attribute', this.open);
-            window.addEventListener('keydown', this.handleKeydown);
+            this._handleOpen = () => this.open();
+            this._handleKeydown = (e) => this.handleKeydown(e);
+            window.addEventListener('ht-open-create-attribute', this._handleOpen);
+            window.addEventListener('keydown', this._handleKeydown);
 
             // Fetch types asynchronously if none passed via props
             if (!this.types || Object.keys(this.types).length === 0) {
@@ -222,8 +224,8 @@
             }
         },
         beforeUnmount() {
-            window.removeEventListener('ht-open-create-attribute', this.open);
-            window.removeEventListener('keydown', this.handleKeydown);
+            if (this._handleOpen) window.removeEventListener('ht-open-create-attribute', this._handleOpen);
+            if (this._handleKeydown) window.removeEventListener('keydown', this._handleKeydown);
         },
         methods: {
             async fetchTypes() {

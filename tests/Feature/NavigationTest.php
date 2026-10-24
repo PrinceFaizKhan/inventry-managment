@@ -38,6 +38,7 @@ class NavigationTest extends TestCase
         $this->assertNotNull($catalog);
         $catalogChildren = array_column($catalog['children'], 'key');
         $this->assertContains('catalog.attributes', $catalogChildren);
+        $this->assertContains('catalog.attribute-groups', $catalogChildren);
         $this->assertContains('catalog.product-types', $catalogChildren);
         $this->assertContains('catalog.products', $catalogChildren);
 

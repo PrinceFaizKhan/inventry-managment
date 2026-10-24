@@ -16,7 +16,7 @@ class RoleApiTest extends TestCase
         $this->actingAs(User::factory()->create())
             ->getJson('/api/permissions')
             ->assertOk()
-            ->assertJsonPath('count', 20)
+            ->assertJsonPath('count', 24)
             ->assertJsonPath('data.0.key', 'catalog');
     }
 
