@@ -326,13 +326,21 @@
                                     :name="'cell-' + (col.index || col.key)"
                                     :row="row"
                                     :value="row[col.index || col.key]"
+                                    :toggle-status="() => confirmToggleRowStatus(row)"
                                 >
                                     <!-- Smart Default Fallback Formatters via modular v-status-badge -->
                                     <template v-if="typeof row[col.index || col.key] === 'boolean' || col.type === 'boolean'">
                                         <v-status-badge :value="row[col.index || col.key]" type="boolean" size="sm"></v-status-badge>
                                     </template>
                                     <template v-else-if="(col.index || col.key) === 'status' || (col.index || col.key) === 'is_active' || col.type === 'status'">
-                                        <v-status-badge :value="row[col.index || col.key]" type="status" size="sm"></v-status-badge>
+                                        <button
+                                            type="button"
+                                            @click.stop="confirmToggleRowStatus(row)"
+                                            class="cursor-pointer transition-transform hover:scale-105 inline-block"
+                                            :title="isRowActive(row) ? 'Active (Click to deactivate)' : 'Inactive (Click to activate)'"
+                                        >
+                                            <v-status-badge :value="row[col.index || col.key]" type="status" size="sm"></v-status-badge>
+                                        </button>
                                     </template>
                                     <template v-else-if="col.type === 'badge'">
                                         <v-status-badge :value="row[col.index || col.key]" type="badge" size="sm"></v-status-badge>
@@ -910,7 +918,8 @@
                 const currentlyActive = this.isRowActive(row);
                 const targetAction = currentlyActive ? 'deactivate' : 'activate';
                 const targetLabel = currentlyActive ? 'Deactivate' : 'Activate';
-                const label = row.name || row.code || `ID #${row[this.rowKeyProperty]}`;
+                const rowId = row ? (row.id ?? row[this.rowKeyProperty] ?? row[this.meta?.primary_column]) : null;
+                const label = row.name || row.code || `ID #${rowId}`;
 
                 this.confirmDialog = {
                     open: true,
@@ -923,29 +932,35 @@
                         const path = window.location.pathname.replace(/\/+$/, '');
                         const toggleUrl = row.toggle_status_url
                             || row._actions?.toggle_status?.url
-                            || `/api${path}/${row[this.rowKeyProperty]}/toggle-status`;
+                            || `/api${path}/${rowId}/toggle-status`;
 
                         try {
                             const res = await this.sendRequest('POST', toggleUrl, {
                                 status: currentlyActive ? 'inactive' : 'active'
                             });
-                            this.flashMessage = res.message || `Record "${label}" ${currentlyActive ? 'deactivated' : 'activated'} successfully.`;
+                            this.flashMessage = res?.message || `Record "${label}" ${currentlyActive ? 'deactivated' : 'activated'} successfully.`;
                             this.flashType = 'success';
                         } catch (e) {
-                            try {
-                                const bulkActionKey = currentlyActive ? 'deactivate_selected' : 'activate_selected';
-                                const bulkUrl = `${this.endpoint}/bulk/${bulkActionKey}`;
-                                await this.sendRequest('POST', bulkUrl, {
-                                    ids: [row[this.rowKeyProperty]],
-                                    all_matching: false
-                                });
-                                this.flashMessage = `Record "${label}" ${currentlyActive ? 'deactivated' : 'activated'} successfully.`;
-                                this.flashType = 'success';
-                            } catch (e2) {
-                                const singleUrl = `/api${path}/${row[this.rowKeyProperty]}/${targetAction}`;
-                                const res = await this.sendRequest('POST', singleUrl);
-                                this.flashMessage = res.message || `Record "${label}" ${currentlyActive ? 'deactivated' : 'activated'} successfully.`;
-                                this.flashType = 'success';
+                            if (e.status === 404) {
+                                try {
+                                    const bulkActionKey = currentlyActive ? 'deactivate_selected' : 'activate_selected';
+                                    const bulkUrl = `${this.endpoint}/bulk/${bulkActionKey}`;
+                                    const bulkRes = await this.sendRequest('POST', bulkUrl, {
+                                        ids: [rowId],
+                                        all_matching: false
+                                    });
+                                    this.flashMessage = bulkRes?.message || `Record "${label}" ${currentlyActive ? 'deactivated' : 'activated'} successfully.`;
+                                    this.flashType = 'success';
+                                } catch (e2) {
+                                    const singleUrl = `/api${path}/${rowId}/${targetAction}`;
+                                    const res = await this.sendRequest('POST', singleUrl);
+                                    this.flashMessage = res?.message || `Record "${label}" ${currentlyActive ? 'deactivated' : 'activated'} successfully.`;
+                                    this.flashType = 'success';
+                                }
+                            } else {
+                                this.flashMessage = e.message || `Failed to ${currentlyActive ? 'deactivate' : 'activate'} record.`;
+                                this.flashType = 'error';
+                                return;
                             }
                         }
                         this.fetchData(this.meta.current_page);
@@ -954,7 +969,8 @@
                 };
             },
             confirmDeleteRow(row) {
-                const label = row.name || row.code || `ID #${row[this.rowKeyProperty]}`;
+                const rowId = row ? (row.id ?? row[this.rowKeyProperty] ?? row[this.meta?.primary_column]) : null;
+                const label = row.name || row.code || `ID #${rowId}`;
                 this.confirmDialog = {
                     open: true,
                     title: 'Delete Record',
@@ -966,7 +982,7 @@
                         const path = window.location.pathname.replace(/\/+$/, '');
                         const deleteUrl = row.delete_url
                             || row._actions?.delete?.url
-                            || `/api${path}/${row[this.rowKeyProperty]}`;
+                            || `/api${path}/${rowId}`;
                         await this.sendRequest('DELETE', deleteUrl);
                         this.flashMessage = `Record "${label}" deleted successfully.`;
                         this.flashType = 'success';
@@ -1018,9 +1034,17 @@
             },
             async sendRequest(method, url, data = null) {
                 if (window.axios) {
-                    if (method === 'DELETE') return (await window.axios.delete(url)).data;
-                    if (method === 'POST') return (await window.axios.post(url, data)).data;
-                    if (method === 'PUT') return (await window.axios.put(url, data)).data;
+                    let res;
+                    if (method === 'DELETE') res = await window.axios.delete(url);
+                    else if (method === 'POST') res = await window.axios.post(url, data);
+                    else if (method === 'PUT') res = await window.axios.put(url, data);
+                    else if (method === 'GET') res = await window.axios.get(url);
+
+                    // Standard axios wraps payload in res.data and has config/headers
+                    if (res && typeof res === 'object' && 'config' in res && 'headers' in res && 'data' in res) {
+                        return res.data;
+                    }
+                    return res ?? {};
                 }
                 const res = await fetch(url, {
                     method,
@@ -1033,7 +1057,10 @@
                 });
                 if (!res.ok) {
                     const err = await res.json().catch(() => ({ message: 'Request failed.' }));
-                    throw new Error(err.message || 'Request failed.');
+                    const error = new Error(err.message || 'Request failed.');
+                    error.status = res.status;
+                    error.errors = err.errors || {};
+                    throw error;
                 }
                 if (res.status === 204) {
                     return {};

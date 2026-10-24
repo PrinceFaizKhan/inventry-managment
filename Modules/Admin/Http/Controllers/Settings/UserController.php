@@ -27,7 +27,16 @@ class UserController extends Controller
             abort(401);
         }
 
-        $targetStatus = $user->status === 'active' ? 'inactive' : 'active';
+        $requestedStatus = $request->input('status');
+        if (! $requestedStatus && str_ends_with($request->path(), '/activate')) {
+            $requestedStatus = 'active';
+        } elseif (! $requestedStatus && str_ends_with($request->path(), '/deactivate')) {
+            $requestedStatus = 'inactive';
+        }
+
+        $targetStatus = in_array($requestedStatus, ['active', 'inactive'], true)
+            ? $requestedStatus
+            : ($user->status === 'active' ? 'inactive' : 'active');
 
         // Cannot deactivate own account
         if ($user->is($actor) && $targetStatus === 'inactive') {

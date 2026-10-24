@@ -35,13 +35,15 @@
                 @{{ row.role || 'Unassigned' }}
             </span>
         </template>
-        <template #cell-status="{ row }">
-            <span
-                class="px-2 py-0.5 rounded text-[10px] font-semibold border capitalize"
-                :class="row.status === 'active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-300' : 'bg-zinc-50 text-zinc-600 border-zinc-200 dark:bg-zinc-900 dark:text-zinc-400'"
+        <template #cell-status="{ row, toggleStatus }">
+            <button
+                type="button"
+                @click.stop="toggleStatus ? toggleStatus() : null"
+                class="cursor-pointer transition-transform hover:scale-105 inline-block"
+                :title="row.status === 'active' ? 'Active (Click to deactivate)' : 'Inactive (Click to activate)'"
             >
-                @{{ row.status }}
-            </span>
+                <v-status-badge :value="row.status" type="status" size="sm"></v-status-badge>
+            </button>
         </template>
     </x-admin::datagrid>
 

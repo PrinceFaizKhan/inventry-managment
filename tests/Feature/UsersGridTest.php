@@ -206,4 +206,46 @@ class UsersGridTest extends TestCase
 
         $this->assertDatabaseHas('users', ['id' => $soloSuperAdmin->id, 'status' => 'active']);
     }
+
+    public function test_user_status_can_be_set_with_explicit_status_payload(): void
+    {
+        $actor = User::factory()->create();
+        $target = User::factory()->create(['status' => 'active']);
+
+        $res1 = $this->actingAs($actor)->postJson("/api/settings/users/{$target->id}/toggle-status", [
+            'status' => 'inactive',
+        ]);
+        $res1->assertOk()
+            ->assertJsonPath('status', 'inactive')
+            ->assertJsonPath('message', "User {$target->name} deactivated successfully.");
+
+        $this->assertDatabaseHas('users', ['id' => $target->id, 'status' => 'inactive']);
+
+        $res2 = $this->actingAs($actor)->postJson("/api/settings/users/{$target->id}/toggle-status", [
+            'status' => 'active',
+        ]);
+        $res2->assertOk()
+            ->assertJsonPath('status', 'active')
+            ->assertJsonPath('message', "User {$target->name} activated successfully.");
+
+        $this->assertDatabaseHas('users', ['id' => $target->id, 'status' => 'active']);
+    }
+
+    public function test_user_status_can_be_activated_and_deactivated_via_dedicated_routes(): void
+    {
+        $actor = User::factory()->create();
+        $target = User::factory()->create(['status' => 'active']);
+
+        $res1 = $this->actingAs($actor)->postJson("/api/settings/users/{$target->id}/deactivate");
+        $res1->assertOk()
+            ->assertJsonPath('status', 'inactive');
+
+        $this->assertDatabaseHas('users', ['id' => $target->id, 'status' => 'inactive']);
+
+        $res2 = $this->actingAs($actor)->postJson("/api/settings/users/{$target->id}/activate");
+        $res2->assertOk()
+            ->assertJsonPath('status', 'active');
+
+        $this->assertDatabaseHas('users', ['id' => $target->id, 'status' => 'active']);
+    }
 }

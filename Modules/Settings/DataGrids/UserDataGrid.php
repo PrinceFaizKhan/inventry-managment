@@ -26,7 +26,7 @@ class UserDataGrid extends DataGrid
                     'roles.name as role',
                 ])
         )
-            ->primaryKey('users.id')
+            ->primaryKey('id')
             ->searchable(['users.name', 'users.email'])
             ->defaultSort('users.name', 'asc')
             ->searchPlaceholder('Search by name or email...')
