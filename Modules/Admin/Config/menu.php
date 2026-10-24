@@ -58,8 +58,8 @@ return [
         'sort' => 20,
         'permission' => 'authenticated',
         'parent' => 'catalog',
-        'enabled' => false,
-        'coming_soon' => true,
+        'enabled' => true,
+        'coming_soon' => false,
         'children' => [],
     ],
     [

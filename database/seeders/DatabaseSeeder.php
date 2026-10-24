@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Modules\Attribute\Database\Seeders\AttributeGroupTableSeeder;
+use Modules\ProductTypes\Database\Seeders\DefaultProductTypeSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -15,6 +16,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             AdminUserSeeder::class,
             AttributeGroupTableSeeder::class,
+            DefaultProductTypeSeeder::class,
         ]);
     }
 }

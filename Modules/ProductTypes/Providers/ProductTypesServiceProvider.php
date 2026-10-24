@@ -3,7 +3,10 @@
 namespace Modules\ProductTypes\Providers;
 
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
+use Modules\ProductTypes\Models\ProductType;
+use Modules\ProductTypes\Policies\ProductTypePolicy;
 
 class ProductTypesServiceProvider extends ServiceProvider
 {
@@ -29,5 +32,7 @@ class ProductTypesServiceProvider extends ServiceProvider
         if (File::isDirectory($migrationDir)) {
             $this->loadMigrationsFrom($migrationDir);
         }
+
+        Gate::policy(ProductType::class, ProductTypePolicy::class);
     }
 }

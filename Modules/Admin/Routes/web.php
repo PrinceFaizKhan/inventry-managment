@@ -15,5 +15,8 @@ Route::middleware(['web', 'auth'])->group(function () {
 // Attribute Admin Routes
 require __DIR__.'/attribute-routes.php';
 
+// Product Type Admin Routes
+require __DIR__.'/product-type-routes.php';
+
 // Settings Admin Routes
 require __DIR__.'/settings-routes.php';
