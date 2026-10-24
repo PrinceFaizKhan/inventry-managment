@@ -26,12 +26,14 @@ class AttributeResource extends JsonResource
             'required' => (bool) $this->required,
             'is_filterable' => (bool) $this->is_filterable,
             'settings' => $this->settings?->getArrayCopy() ?? (array) $this->settings,
-            'options' => $this->whenLoaded('options', fn () => $this->options->map(fn ($option) => [
-                'id' => $option->id,
-                'code' => $option->code,
-                'label' => $option->label,
-                'sort_order' => $option->sort_order,
-            ])),
+            'options' => $this->relationLoaded('options')
+                ? $this->options->map(fn ($option) => [
+                    'id' => $option->id,
+                    'code' => $option->code,
+                    'label' => $option->label,
+                    'sort_order' => $option->sort_order,
+                ])->values()->all()
+                : [],
         ];
     }
 }

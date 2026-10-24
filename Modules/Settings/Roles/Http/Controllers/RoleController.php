@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Role;
 use Illuminate\Http\JsonResponse;
 use Modules\Settings\Roles\Http\Requests\StoreRoleRequest;
+use Modules\Settings\Roles\Http\Resources\RoleResource;
 
 class RoleController extends Controller
 {
@@ -20,6 +21,6 @@ class RoleController extends Controller
             'permissions' => $permissions,
         ]);
 
-        return response()->json(['data' => $role], 201);
+        return (new RoleResource($role))->response()->setStatusCode(201);
     }
 }

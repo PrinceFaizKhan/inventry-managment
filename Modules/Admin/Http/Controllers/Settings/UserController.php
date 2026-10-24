@@ -8,6 +8,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Modules\Settings\DataGrids\UserDataGrid;
+use Modules\Settings\Users\Http\Resources\UserResource;
 
 class UserController extends Controller
 {
@@ -38,28 +39,13 @@ class UserController extends Controller
             ? $requestedStatus
             : ($user->status === 'active' ? 'inactive' : 'active');
 
-        // Cannot deactivate own account
-        if ($user->is($actor) && $targetStatus === 'inactive') {
-            return response()->json([
-                'message' => 'You cannot deactivate your own account.',
-            ], 422);
-        }
-
-        // Last active Super Admin protection
         if ($targetStatus === 'inactive') {
-            $isSuperAdmin = $user->role && mb_strtolower((string) $user->role->name) === 'super admin';
-            if ($isSuperAdmin) {
-                $otherActiveSuperAdmins = User::query()
-                    ->where('id', '!=', $user->id)
-                    ->where('status', 'active')
-                    ->whereHas('role', fn ($query) => $query->whereRaw('LOWER(name) = ?', ['super admin']))
-                    ->count();
+            if ($errorResponse = $this->ensureNotSelf($user, $actor, 'deactivate')) {
+                return $errorResponse;
+            }
 
-                if ($otherActiveSuperAdmins === 0) {
-                    return response()->json([
-                        'message' => 'At least one active Super Admin must remain.',
-                    ], 422);
-                }
+            if ($errorResponse = $this->ensureNotLastSuperAdmin($user)) {
+                return $errorResponse;
             }
         }
 
@@ -70,11 +56,7 @@ class UserController extends Controller
         return response()->json([
             'message' => "User {$user->name} {$label} successfully.",
             'status' => $targetStatus,
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'status' => $targetStatus,
-            ],
+            'user' => (new UserResource($user))->resolve(),
         ]);
     }
 
@@ -92,25 +74,12 @@ class UserController extends Controller
         ]);
 
         if (isset($validated['status']) && $validated['status'] === 'inactive') {
-            if ($user->is($actor)) {
-                return response()->json([
-                    'message' => 'You cannot deactivate your own account.',
-                ], 422);
+            if ($errorResponse = $this->ensureNotSelf($user, $actor, 'deactivate')) {
+                return $errorResponse;
             }
 
-            $isSuperAdmin = $user->role && mb_strtolower((string) $user->role->name) === 'super admin';
-            if ($isSuperAdmin) {
-                $otherActiveSuperAdmins = User::query()
-                    ->where('id', '!=', $user->id)
-                    ->where('status', 'active')
-                    ->whereHas('role', fn ($query) => $query->whereRaw('LOWER(name) = ?', ['super admin']))
-                    ->count();
-
-                if ($otherActiveSuperAdmins === 0) {
-                    return response()->json([
-                        'message' => 'At least one active Super Admin must remain.',
-                    ], 422);
-                }
+            if ($errorResponse = $this->ensureNotLastSuperAdmin($user)) {
+                return $errorResponse;
             }
         }
 
@@ -118,7 +87,7 @@ class UserController extends Controller
 
         return response()->json([
             'message' => "User {$user->name} updated successfully.",
-            'user' => $user,
+            'user' => (new UserResource($user))->resolve(),
         ]);
     }
 
@@ -129,29 +98,55 @@ class UserController extends Controller
             abort(401);
         }
 
-        if ($user->is($actor)) {
-            return response()->json([
-                'message' => 'You cannot delete your own account.',
-            ], 422);
+        if ($errorResponse = $this->ensureNotSelf($user, $actor, 'delete')) {
+            return $errorResponse;
         }
 
-        $isSuperAdmin = $user->role && mb_strtolower((string) $user->role->name) === 'super admin';
-        if ($isSuperAdmin) {
-            $otherActiveSuperAdmins = User::query()
-                ->where('id', '!=', $user->id)
-                ->where('status', 'active')
-                ->whereHas('role', fn ($query) => $query->whereRaw('LOWER(name) = ?', ['super admin']))
-                ->count();
-
-            if ($otherActiveSuperAdmins === 0) {
-                return response()->json([
-                    'message' => 'At least one active Super Admin must remain.',
-                ], 422);
-            }
+        if ($errorResponse = $this->ensureNotLastSuperAdmin($user)) {
+            return $errorResponse;
         }
 
         $user->delete();
 
         return response()->json([], 204);
+    }
+
+    /**
+     * Prevent self-deactivation or self-deletion.
+     */
+    private function ensureNotSelf(User $user, User $actor, string $action): ?JsonResponse
+    {
+        if ($user->is($actor)) {
+            return response()->json([
+                'message' => "You cannot {$action} your own account.",
+            ], 422);
+        }
+
+        return null;
+    }
+
+    /**
+     * Ensure at least one active Super Admin remains.
+     */
+    private function ensureNotLastSuperAdmin(User $user): ?JsonResponse
+    {
+        $isSuperAdmin = $user->role && mb_strtolower((string) $user->role->name) === 'super admin';
+        if (! $isSuperAdmin) {
+            return null;
+        }
+
+        $otherActiveSuperAdmins = User::query()
+            ->where('id', '!=', $user->id)
+            ->where('status', 'active')
+            ->whereHas('role', fn ($query) => $query->whereRaw('LOWER(name) = ?', ['super admin']))
+            ->count();
+
+        if ($otherActiveSuperAdmins === 0) {
+            return response()->json([
+                'message' => 'At least one active Super Admin must remain.',
+            ], 422);
+        }
+
+        return null;
     }
 }

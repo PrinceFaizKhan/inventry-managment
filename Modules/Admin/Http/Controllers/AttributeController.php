@@ -13,6 +13,7 @@ use Modules\Attribute\AttributeTypeRegistry;
 use Modules\Attribute\DataGrids\AttributeDataGrid;
 use Modules\Attribute\Http\Requests\StoreAttributeRequest;
 use Modules\Attribute\Http\Requests\UpdateAttributeRequest;
+use Modules\Attribute\Http\Resources\AttributeResource;
 use Modules\Attribute\Models\Attribute;
 
 class AttributeController extends Controller
@@ -40,21 +41,7 @@ class AttributeController extends Controller
         Gate::authorize('update', $attribute);
 
         return view('admin::attributes.edit', [
-            'attribute' => [
-                'id' => $attribute->id,
-                'name' => $attribute->name,
-                'code' => $attribute->code,
-                'type' => $attribute->type,
-                'required' => $attribute->required,
-                'is_filterable' => $attribute->is_filterable,
-                'settings' => $attribute->settings?->getArrayCopy() ?? [],
-                'options' => $attribute->options->map(fn ($opt): array => [
-                    'id' => $opt->id,
-                    'code' => $opt->code,
-                    'label' => $opt->label,
-                    'sort_order' => $opt->sort_order,
-                ])->all(),
-            ],
+            'attribute' => (new AttributeResource($attribute->loadMissing('options')))->resolve(),
             'types' => $types->frontendDefinitions(),
             'currencies' => config('currencies', []),
         ]);
@@ -71,7 +58,11 @@ class AttributeController extends Controller
     {
         Gate::authorize('create', Attribute::class);
 
-        return response()->json(['data' => $create->execute($request->validated())], 201);
+        $attribute = $create->execute($request->validated());
+
+        return (new AttributeResource($attribute->loadMissing('options')))
+            ->response()
+            ->setStatusCode(201);
     }
 
     public function filterable(): JsonResponse
@@ -84,22 +75,7 @@ class AttributeController extends Controller
             ->orderBy('name')
             ->get();
 
-        return response()->json([
-            'data' => $attributes->map(fn (Attribute $attr): array => [
-                'id' => $attr->id,
-                'name' => $attr->name,
-                'code' => $attr->code,
-                'type' => $attr->type,
-                'required' => $attr->required,
-                'is_filterable' => true,
-                'options' => $attr->options->map(fn ($opt): array => [
-                    'id' => $opt->id,
-                    'code' => $opt->code,
-                    'label' => $opt->label,
-                    'sort_order' => $opt->sort_order,
-                ])->all(),
-            ]),
-        ]);
+        return AttributeResource::collection($attributes)->response();
     }
 
     public function show(Attribute $attribute, AttributeTypeRegistry $types): JsonResponse
@@ -107,21 +83,7 @@ class AttributeController extends Controller
         Gate::authorize('update', $attribute);
 
         return response()->json([
-            'data' => [
-                'id' => $attribute->id,
-                'name' => $attribute->name,
-                'code' => $attribute->code,
-                'type' => $attribute->type,
-                'required' => $attribute->required,
-                'is_filterable' => $attribute->is_filterable,
-                'settings' => $attribute->settings?->getArrayCopy() ?? [],
-                'options' => $attribute->options->map(fn ($option): array => [
-                    'id' => $option->id,
-                    'code' => $option->code,
-                    'label' => $option->label,
-                    'sort_order' => $option->sort_order,
-                ])->all(),
-            ],
+            'data' => (new AttributeResource($attribute->loadMissing('options')))->resolve(),
             'types' => $types->frontendDefinitions(),
             'currencies' => config('currencies', []),
         ]);
@@ -131,7 +93,9 @@ class AttributeController extends Controller
     {
         Gate::authorize('update', $attribute);
 
-        return response()->json(['data' => $update->execute($attribute, $request->validated())]);
+        $attribute = $update->execute($attribute, $request->validated());
+
+        return (new AttributeResource($attribute))->response();
     }
 
     public function destroy(Attribute $attribute): JsonResponse
