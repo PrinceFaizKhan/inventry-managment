@@ -1,12 +1,12 @@
 import { computed, ref } from 'vue'
 
-export type LocaleCode = 'en-IN' | 'ur-IN'
+export type LocaleCode = 'en-IN'
 
 export interface LocaleDefinition {
   code: LocaleCode
   name: string
   nativeName: string
-  direction: 'ltr' | 'rtl'
+  direction: 'ltr'
   currencySymbol: string
   currencyCode: string
 }
@@ -14,24 +14,19 @@ export interface LocaleDefinition {
 export const SUPPORTED_LOCALES: LocaleDefinition[] = [
   {
     code: 'en-IN',
-    name: 'English (India)',
-    nativeName: 'English (India)',
+    name: 'English',
+    nativeName: 'English',
     direction: 'ltr',
-    currencySymbol: '₹',
-    currencyCode: 'INR',
-  },
-  {
-    code: 'ur-IN',
-    name: 'Urdu (India)',
-    nativeName: 'اردو (ہندوستان)',
-    direction: 'rtl',
     currencySymbol: '₹',
     currencyCode: 'INR',
   },
 ]
 
-const initialLocale: LocaleCode =
-  (typeof window !== 'undefined' && (localStorage.getItem('ht-locale') as LocaleCode)) || 'en-IN'
+if (typeof window !== 'undefined') {
+  localStorage.removeItem('ht-locale')
+}
+
+const initialLocale: LocaleCode = 'en-IN'
 
 const currentLocale = ref<LocaleCode>(initialLocale)
 
@@ -104,74 +99,6 @@ const translations: Record<LocaleCode, Record<string, string>> = {
     'auth.password': 'Password',
     'auth.remember_me': 'Remember me',
     'auth.admin_credentials': 'Admin Credentials',
-  },
-  'ur-IN': {
-    // App & Layout
-    'brand.title': 'حسین ٹیلی کام',
-    'brand.portal': 'ایڈمن پورٹل',
-    'brand.tagline': 'آپ کا کاروبار۔ بااختیار اور مربوط۔',
-    'brand.tagline_desc': 'کیٹلاگ کا انتظام کریں، انوینٹری پر نظر رکھیں اور ہر فروخت کا ریکارڈ رکھیں۔',
-    'brand.workspace': 'ایڈمن ورک اسپیس',
-
-    // Navigation
-    'nav.dashboard': 'ڈیش بورڈ',
-    'nav.catalog': 'کیٹلاگ',
-    'nav.catalog.attributes': 'اوصاف و خصوصیات',
-    'nav.catalog.product_types': 'مصنوعات کی اقسام',
-    'nav.catalog.products': 'مصنوعات',
-    'nav.inventory': 'انوینٹری',
-    'nav.sales': 'فروخت و سیلز',
-    'nav.settings': 'ترتیبات',
-    'nav.settings.users': 'صارفین',
-    'nav.settings.roles': 'کردار اور اختیارات',
-
-    // Actions & Common
-    'action.sign_in': 'لاگ ان کریں',
-    'action.signing_in': 'لاگ ان ہو رہا ہے…',
-    'action.save': 'محفوظ کریں',
-    'action.saving': 'محفوظ ہو رہا ہے…',
-    'action.saved': 'کامیابی سے محفوظ ہو گیا۔',
-    'action.create': 'نیا بنائیں',
-    'action.edit': 'ترمیم',
-    'action.delete': 'حذف کریں',
-    'action.cancel': 'منسوخ کریں',
-    'action.back': 'واپس',
-    'action.logout': 'لاگ آؤٹ',
-    'action.filter': 'فلٹر',
-    'action.filters': 'فلٹرز',
-    'action.search': 'تلاش کریں',
-    'action.fill': 'خودکار بھریں',
-    'common.yes': 'ہاں',
-    'common.no': 'نہیں',
-    'common.on': 'آن',
-    'common.off': 'آف',
-    'common.loading': 'لوڈ ہو رہا ہے…',
-
-    // Attributes Domain
-    'attributes.title': 'اوصاف (Attributes)',
-    'attributes.desc': 'اپنے کیٹلاگ کے لیے قابلِ تجدید فیلڈز متعین کریں۔',
-    'attributes.name': 'نام',
-    'attributes.code': 'کوڈ',
-    'attributes.type': 'قسم',
-    'attributes.required': 'لازمی',
-    'attributes.required_desc': 'صارفین کو اس وصف کی قیمت درج کرنا لازمی ہوگا۔',
-    'attributes.filterable': 'قابلِ فلٹر',
-    'attributes.filterable_title': 'فلٹر میں شامل کریں (Is Filter)',
-    'attributes.filterable_desc': 'مصنوعات تلاش کرتے وقت اس وصف سے فلٹر کرنے کی اجازت دیں۔',
-    'attributes.general_settings': 'عمومی ترتیبات',
-    'attributes.live_preview': 'لائیو پیش نظارہ',
-    'attributes.live_preview_desc': 'پیش نظارہ عارضی ہے اور محفوظ نہیں کیا جائے گا۔',
-    'attributes.options': 'اختیارات / آپشنز',
-    'attributes.options_desc': 'اختیاری کوڈز تبدیل نہیں ہوں گے۔ لیبلز اور ترتیب بدلی جا سکتی ہے۔',
-    'attributes.validation_settings': 'توثیق اور ترتیبات',
-
-    // Auth
-    'auth.welcome_back': 'خوش آمدید',
-    'auth.welcome_sub': 'حسین ٹیلی کام ایڈمن میں سائن ان کریں۔',
-    'auth.email': 'ای میل پتہ',
-    'auth.password': 'پاس ورڈ',
-    'auth.remember_me': 'مجھے یاد رکھیں',
-    'auth.admin_credentials': 'ایڈمن اسناد',
   },
 }
 
@@ -271,7 +198,7 @@ export function formatIndianCurrency(amount: number): string {
  */
 export function useI18n() {
   const locale = computed(() => currentLocale.value)
-  const isRtl = computed(() => currentLocale.value === 'ur-IN')
+  const isRtl = computed(() => false)
   const currentDefinition = computed(
     () => SUPPORTED_LOCALES.find((l) => l.code === currentLocale.value) || SUPPORTED_LOCALES[0]
   )

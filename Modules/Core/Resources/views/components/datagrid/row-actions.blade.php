@@ -10,7 +10,7 @@
 
 @pushOnce('scripts')
 <!-- Ensure action-button scripts are registered -->
-<div style="display:none">
+<div class="hidden" aria-hidden="true">
     <x-core::button.action />
 </div>
 

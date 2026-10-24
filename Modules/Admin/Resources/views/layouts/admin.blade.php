@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ in_array(app()->getLocale(), ['ur', 'ur-IN']) ? 'rtl' : 'ltr' }}">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -156,15 +156,12 @@
                     </div>
 
 
-                    <!-- Right Controls: Theme Switcher, Language & Profile -->
+                    <!-- Right Controls: Theme Switcher & Profile -->
                     <div class="header-right flex items-center gap-2.5">
                         {!! view_event_render('header.right') !!}
 
                         <!-- Theme Toggle Component -->
                         <x-admin::theme-toggle />
-
-                        <!-- Language Switcher Component -->
-                        <x-admin::language-toggle />
 
                         @php
                             $adminUser = auth()->user();

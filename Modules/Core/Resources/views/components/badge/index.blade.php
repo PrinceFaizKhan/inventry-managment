@@ -14,11 +14,15 @@
 @pushOnce('scripts')
 <script type="text/x-template" id="v-status-badge-template">
     <span
-        class="inline-flex items-center font-semibold border capitalize select-none"
+        class="inline-flex items-center font-semibold border capitalize select-none transition-colors"
         :class="[
             badgeClasses,
-            size === 'sm' ? 'gap-1 px-1.5 py-0.5 text-[10px] rounded-full' : 'gap-1.5 px-2 py-0.5 text-xs rounded-full'
+            isBoolean
+                ? (size === 'sm' ? 'w-5 h-5 rounded-full justify-center p-0' : 'w-6 h-6 rounded-full justify-center p-0')
+                : (size === 'sm' ? 'gap-1 px-2 py-0.5 text-[10px] rounded-full' : 'gap-1.5 px-2.5 py-0.5 text-xs rounded-full')
         ]"
+        :title="computedTitle"
+        :aria-label="computedTitle"
     >
         <!-- Active / Enabled Status Icon -->
         <svg
@@ -55,8 +59,8 @@
         <!-- Boolean True Icon -->
         <svg
             v-else-if="resolvedStatus === 'true'"
-            :width="size === 'sm' ? 9 : 11"
-            :height="size === 'sm' ? 9 : 11"
+            :width="size === 'sm' ? 10 : 12"
+            :height="size === 'sm' ? 10 : 12"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -99,8 +103,8 @@
             <polyline points="12 6 12 12 16 14"/>
         </svg>
 
-        <!-- Label text -->
-        <span>@{{ displayLabel }}</span>
+        <!-- Label text (only shown when not boolean) -->
+        <span v-if="!isBoolean">@{{ displayLabel }}</span>
     </span>
 </script>
 
@@ -115,7 +119,7 @@
             },
             type: {
                 type: String,
-                default: 'auto' // 'auto', 'status', 'boolean'
+                default: 'auto' // 'auto', 'status', 'boolean', 'badge'
             },
             size: {
                 type: String,
@@ -129,7 +133,7 @@
         computed: {
             isBoolean() {
                 if (this.type === 'boolean') return true;
-                if (this.type === 'status') return false;
+                if (this.type === 'status' || this.type === 'badge' || this.type === 'generic') return false;
                 return typeof this.value === 'boolean';
             },
             resolvedStatus() {
@@ -158,18 +162,25 @@
                 }
                 return String(this.value).replace(/_/g, ' ');
             },
+            computedTitle() {
+                if (this.label) return this.label;
+                if (this.isBoolean) {
+                    return this.value ? 'Yes' : 'No';
+                }
+                return this.displayLabel;
+            },
             badgeClasses() {
                 switch (this.resolvedStatus) {
                     case 'active':
                     case 'true':
-                        return 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-900';
+                        return 'bg-emerald-50 text-emerald-700 border-emerald-200/80 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800/60';
                     case 'inactive':
                     case 'false':
-                        return 'bg-zinc-100 text-zinc-600 border-zinc-200 dark:bg-zinc-900 dark:text-zinc-400 dark:border-zinc-800';
+                        return 'bg-rose-50 text-rose-700 border-rose-200/80 dark:bg-rose-950/40 dark:text-rose-400 dark:border-rose-800/60';
                     case 'pending':
-                        return 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-900';
+                        return 'bg-amber-50 text-amber-700 border-amber-200/80 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-800/60';
                     default:
-                        return 'bg-[var(--soft)] text-[var(--teal)] border-[var(--teal)]/20';
+                        return 'bg-[var(--soft)] text-[var(--teal)] border-[var(--teal)]/20 dark:border-[var(--teal)]/30 font-medium';
                 }
             }
         }

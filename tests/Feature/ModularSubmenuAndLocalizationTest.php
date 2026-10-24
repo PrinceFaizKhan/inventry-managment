@@ -51,23 +51,14 @@ class ModularSubmenuAndLocalizationTest extends TestCase
         $this->assertTrue($this->app->providerIsLoaded(UsersServiceProvider::class));
     }
 
-    public function test_translations_api_returns_indian_english_and_urdu(): void
+    public function test_translations_api_returns_english(): void
     {
-        // Indian English
-        $responseEn = $this->getJson('/api/translations?locale=en-IN')->assertOk();
+        $responseEn = $this->getJson('/api/translations')->assertOk();
         $responseEn->assertJsonPath('locale', 'en-IN');
         $responseEn->assertJsonPath('direction', 'ltr');
         $messagesEn = $responseEn->json('messages');
         $this->assertSame('Attributes', $messagesEn['catalog.attributes.title'] ?? null);
         $this->assertSame('The provided credentials are incorrect.', $messagesEn['admin.invalid_credentials'] ?? null);
-
-        // Indian Urdu
-        $responseUr = $this->getJson('/api/translations?locale=ur-IN')->assertOk();
-        $responseUr->assertJsonPath('locale', 'ur-IN');
-        $responseUr->assertJsonPath('direction', 'rtl');
-        $messagesUr = $responseUr->json('messages');
-        $this->assertStringContainsString('اوصاف', $messagesUr['catalog.attributes.title'] ?? '');
-        $this->assertStringContainsString('اسناد', $messagesUr['admin.invalid_credentials'] ?? '');
     }
 
     public function test_grid_registry_resolves_independent_submenu_grids(): void

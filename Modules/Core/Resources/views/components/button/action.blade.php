@@ -25,7 +25,7 @@
         :type="href ? undefined : 'button'"
         :disabled="disabled"
         @click="handleClick"
-        class="rounded border grid place-items-center transition-colors select-none"
+        class="rounded-lg border grid place-items-center transition-all select-none"
         :class="[
             size === 'sm' ? 'w-7 h-7' : 'w-8 h-8',
             colorClasses,
@@ -181,19 +181,19 @@
             colorClasses() {
                 switch (this.resolvedType) {
                     case 'edit':
-                        return 'border-[var(--border)] bg-[var(--card)] hover:border-[var(--teal)] hover:bg-[var(--soft)] text-[var(--muted)] hover:text-[var(--teal)]';
+                        return 'border-emerald-200/80 bg-emerald-50/70 text-emerald-600 hover:bg-emerald-100 hover:border-emerald-300 hover:text-emerald-700 dark:border-emerald-800/60 dark:bg-emerald-950/40 dark:text-emerald-400 dark:hover:bg-emerald-900/50 dark:hover:border-emerald-700/80 dark:hover:text-emerald-300 shadow-2xs';
                     case 'delete':
-                        return 'border-red-200 bg-red-50 text-red-600 hover:bg-red-100 hover:border-red-300 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300';
+                        return 'border-rose-200/80 bg-rose-50/70 text-rose-600 hover:bg-rose-100 hover:border-rose-300 hover:text-rose-700 dark:border-rose-800/60 dark:bg-rose-950/40 dark:text-rose-400 dark:hover:bg-rose-900/50 dark:hover:border-rose-700/80 dark:hover:text-rose-300 shadow-2xs';
                     case 'activate':
                     case 'active':
-                        return 'border-emerald-200 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 hover:border-emerald-300 dark:border-emerald-900/60 dark:bg-emerald-950/40 dark:text-emerald-300';
+                        return 'border-emerald-200/80 bg-emerald-50/70 text-emerald-600 hover:bg-emerald-100 hover:border-emerald-300 hover:text-emerald-700 dark:border-emerald-800/60 dark:bg-emerald-950/40 dark:text-emerald-400 dark:hover:bg-emerald-900/50 dark:hover:border-emerald-700/80 dark:hover:text-emerald-300 shadow-2xs';
                     case 'deactivate':
                     case 'deactive':
-                        return 'border-zinc-200 bg-zinc-100 text-zinc-500 hover:bg-zinc-200 hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400';
+                        return 'border-rose-200/80 bg-rose-50/70 text-rose-600 hover:bg-rose-100 hover:border-rose-300 hover:text-rose-700 dark:border-rose-800/60 dark:bg-rose-950/40 dark:text-rose-400 dark:hover:bg-rose-900/50 dark:hover:border-rose-700/80 dark:hover:text-rose-300 shadow-2xs';
                     case 'view':
-                        return 'border-[var(--border)] bg-[var(--card)] hover:border-sky-400 hover:bg-sky-50 text-[var(--muted)] hover:text-sky-600 dark:hover:bg-sky-950/40';
+                        return 'border-sky-200/80 bg-sky-50/70 text-sky-600 hover:bg-sky-100 hover:border-sky-300 hover:text-sky-700 dark:border-sky-800/60 dark:bg-sky-950/40 dark:text-sky-400 dark:hover:bg-sky-900/50 dark:hover:border-sky-700/80 dark:hover:text-sky-300 shadow-2xs';
                     default:
-                        return 'border-[var(--border)] bg-[var(--card)] hover:border-[var(--teal)] text-[var(--text)]';
+                        return 'border-[var(--border)] bg-[var(--card)] text-[var(--muted)] hover:border-[var(--teal)] hover:text-[var(--text)] shadow-2xs';
                 }
             }
         },

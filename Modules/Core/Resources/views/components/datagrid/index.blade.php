@@ -26,7 +26,7 @@
 @endphp
 
 <!-- Ensure custom single-select, multi-select, badge, and action components are registered -->
-<div style="display:none">
+<div class="hidden" aria-hidden="true">
     <x-core::dropdown.select />
     <x-core::dropdown.multiselect />
     <x-core::badge />
@@ -328,11 +328,14 @@
                                     :value="row[col.index || col.key]"
                                 >
                                     <!-- Smart Default Fallback Formatters via modular v-status-badge -->
-                                    <template v-if="typeof row[col.index || col.key] === 'boolean'">
+                                    <template v-if="typeof row[col.index || col.key] === 'boolean' || col.type === 'boolean'">
                                         <v-status-badge :value="row[col.index || col.key]" type="boolean" size="sm"></v-status-badge>
                                     </template>
-                                    <template v-else-if="(col.index || col.key) === 'status' || (col.index || col.key) === 'is_active'">
+                                    <template v-else-if="(col.index || col.key) === 'status' || (col.index || col.key) === 'is_active' || col.type === 'status'">
                                         <v-status-badge :value="row[col.index || col.key]" type="status" size="sm"></v-status-badge>
+                                    </template>
+                                    <template v-else-if="col.type === 'badge'">
+                                        <v-status-badge :value="row[col.index || col.key]" type="badge" size="sm"></v-status-badge>
                                     </template>
                                     <template v-else>
                                         @{{ row[col.index || col.key] ?? '—' }}

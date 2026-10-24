@@ -40,9 +40,7 @@
             <span class="font-medium text-[var(--text)]">@{{ row.name }}</span>
         </template>
         <template #cell-type="{ row }">
-            <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-[var(--soft)] text-[var(--teal)]">
-                @{{ row.type }}
-            </span>
+            <v-status-badge :value="row.type" type="badge" size="sm"></v-status-badge>
         </template>
     </x-admin::datagrid>
 
