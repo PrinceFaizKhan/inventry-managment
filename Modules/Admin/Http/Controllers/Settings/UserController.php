@@ -3,10 +3,14 @@
 namespace Modules\Admin\Http\Controllers\Settings;
 
 use App\Http\Controllers\Controller;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Modules\Admin\Http\Requests\Settings\StoreUserRequest;
+use Modules\Admin\Http\Requests\Settings\UpdateUserRequest;
 use Modules\Settings\DataGrids\UserDataGrid;
 use Modules\Settings\Users\Http\Resources\UserResource;
 
@@ -19,6 +23,58 @@ class UserController extends Controller
         }
 
         return UserDataGrid::make()->render('admin::settings.users.index');
+    }
+
+    public function create(): View
+    {
+        $roles = Role::query()->select(['id', 'name'])->orderBy('name')->get();
+
+        return view('admin::settings.users.create', [
+            'roles' => $roles,
+        ]);
+    }
+
+    public function store(StoreUserRequest $request): JsonResponse|RedirectResponse
+    {
+        $validated = $request->validated();
+
+        $user = User::query()->create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => $validated['password'],
+            'role_id' => $validated['role_id'] ?? null,
+            'status' => $validated['status'] ?? 'active',
+        ]);
+
+        $user->loadMissing('role:id,name');
+
+        if ($request->wantsJson()) {
+            return (new UserResource($user))
+                ->response()
+                ->setStatusCode(201);
+        }
+
+        return redirect()
+            ->route('settings.users')
+            ->with('success', "User {$user->name} created successfully.");
+    }
+
+    public function edit(User $user): View
+    {
+        $user->loadMissing('role:id,name');
+        $roles = Role::query()->select(['id', 'name'])->orderBy('name')->get();
+
+        return view('admin::settings.users.edit', [
+            'user' => (new UserResource($user))->resolve(),
+            'roles' => $roles,
+        ]);
+    }
+
+    public function show(User $user): JsonResponse
+    {
+        $user->loadMissing('role:id,name');
+
+        return (new UserResource($user))->response();
     }
 
     public function toggleStatus(Request $request, User $user): JsonResponse
@@ -60,18 +116,14 @@ class UserController extends Controller
         ]);
     }
 
-    public function update(Request $request, User $user): JsonResponse
+    public function update(UpdateUserRequest $request, User $user): JsonResponse|RedirectResponse
     {
         $actor = $request->user();
         if (! $actor) {
             abort(401);
         }
 
-        $validated = $request->validate([
-            'status' => ['sometimes', 'string', 'in:active,inactive'],
-            'name' => ['sometimes', 'string', 'max:255'],
-            'role_id' => ['sometimes', 'nullable', 'exists:roles,id'],
-        ]);
+        $validated = $request->validated();
 
         if (isset($validated['status']) && $validated['status'] === 'inactive') {
             if ($errorResponse = $this->ensureNotSelf($user, $actor, 'deactivate')) {
@@ -83,12 +135,23 @@ class UserController extends Controller
             }
         }
 
-        $user->update($validated);
+        if (empty($validated['password'])) {
+            unset($validated['password']);
+        }
 
-        return response()->json([
-            'message' => "User {$user->name} updated successfully.",
-            'user' => (new UserResource($user))->resolve(),
-        ]);
+        $user->update($validated);
+        $user->loadMissing('role:id,name');
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => "User {$user->name} updated successfully.",
+                'user' => (new UserResource($user))->resolve(),
+            ]);
+        }
+
+        return redirect()
+            ->route('settings.users')
+            ->with('success', "User {$user->name} updated successfully.");
     }
 
     public function destroy(Request $request, User $user): JsonResponse

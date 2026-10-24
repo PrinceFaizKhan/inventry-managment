@@ -11,6 +11,16 @@
             <h1 class="text-2xl font-bold tracking-tight text-[var(--text)]">Users</h1>
             <p class="page-copy text-sm text-[var(--muted)] mt-1">Manage administrators and staff members with access to your workspace.</p>
         </div>
+        <div class="flex items-center gap-2">
+            <a
+                href="{{ route('settings.users.create') }}"
+                class="button button--primary inline-flex items-center gap-2 cursor-pointer shadow-sm hover:scale-[1.02] active:scale-[0.98] transition-transform text-xs"
+                title="Create New User"
+            >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                <span>Create User</span>
+            </a>
+        </div>
     </div>
 
     {!! view_event_render('settings.users.before') !!}
@@ -20,12 +30,12 @@
         search-placeholder="Search by name or email..."
     >
         <template #cell-name="{ row }">
-            <div class="flex items-center gap-2.5">
-                <span class="w-7 h-7 rounded-full bg-[var(--soft)] text-[var(--teal)] font-bold text-[11px] grid place-items-center flex-shrink-0">
+            <a :href="'/settings/users/' + row.id + '/edit'" class="flex items-center gap-2.5 group">
+                <span class="w-7 h-7 rounded-full bg-[var(--soft)] text-[var(--teal)] font-bold text-[11px] grid place-items-center flex-shrink-0 group-hover:scale-105 transition-transform">
                     @{{ (row.name || 'U').charAt(0).toUpperCase() }}
                 </span>
-                <span class="font-semibold text-[var(--text)]">@{{ row.name }}</span>
-            </div>
+                <span class="font-semibold text-[var(--text)] group-hover:text-[var(--teal)] transition-colors">@{{ row.name }}</span>
+            </a>
         </template>
         <template #cell-email="{ row }">
             <span class="font-mono text-xs text-[var(--muted)]">@{{ row.email }}</span>

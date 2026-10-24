@@ -248,4 +248,117 @@ class UsersGridTest extends TestCase
 
         $this->assertDatabaseHas('users', ['id' => $target->id, 'status' => 'active']);
     }
+
+    public function test_user_create_page_renders_cleanly_with_roles(): void
+    {
+        $actor = User::factory()->create();
+        Role::query()->create(['name' => 'Support Staff', 'access' => 'custom', 'permissions' => []]);
+
+        $res = $this->actingAs($actor)->get('/settings/users/create');
+        $res->assertOk()
+            ->assertViewIs('admin::settings.users.create')
+            ->assertViewHas('roles');
+    }
+
+    public function test_user_edit_page_renders_cleanly_with_user_and_roles(): void
+    {
+        $actor = User::factory()->create();
+        $target = User::factory()->create(['name' => 'Target User']);
+
+        $res = $this->actingAs($actor)->get("/settings/users/{$target->id}/edit");
+        $res->assertOk()
+            ->assertViewIs('admin::settings.users.edit')
+            ->assertViewHas('user')
+            ->assertViewHas('roles');
+    }
+
+    public function test_user_can_be_created_via_api_with_valid_data(): void
+    {
+        $actor = User::factory()->create();
+        $role = Role::query()->create(['name' => 'Custom Role', 'access' => 'custom', 'permissions' => []]);
+
+        $res = $this->actingAs($actor)->postJson('/api/settings/users', [
+            'name' => 'New Staff User',
+            'email' => 'newstaff@example.test',
+            'password' => 'secret123',
+            'password_confirmation' => 'secret123',
+            'role_id' => $role->id,
+            'status' => 'active',
+        ]);
+
+        $res->assertCreated()
+            ->assertJsonPath('data.name', 'New Staff User')
+            ->assertJsonPath('data.email', 'newstaff@example.test')
+            ->assertJsonPath('data.role', 'Custom Role')
+            ->assertJsonPath('data.status', 'active');
+
+        $this->assertDatabaseHas('users', [
+            'name' => 'New Staff User',
+            'email' => 'newstaff@example.test',
+            'role_id' => $role->id,
+            'status' => 'active',
+        ]);
+    }
+
+    public function test_user_creation_validates_required_fields_and_unique_email(): void
+    {
+        $actor = User::factory()->create(['email' => 'existing@example.test']);
+
+        $res = $this->actingAs($actor)->postJson('/api/settings/users', [
+            'name' => '',
+            'email' => 'existing@example.test',
+            'password' => '123',
+            'password_confirmation' => '456',
+            'status' => 'invalid-status',
+        ]);
+
+        $res->assertUnprocessable()
+            ->assertJsonValidationErrors(['name', 'email', 'password', 'status']);
+    }
+
+    public function test_user_can_be_updated_without_changing_password(): void
+    {
+        $actor = User::factory()->create();
+        $target = User::factory()->create([
+            'name' => 'Old Name',
+            'password' => 'original_secret',
+        ]);
+        $originalHash = $target->password;
+
+        $res = $this->actingAs($actor)->putJson("/api/settings/users/{$target->id}", [
+            'name' => 'Updated Name',
+            'email' => $target->email,
+            'status' => 'active',
+        ]);
+
+        $res->assertOk()
+            ->assertJsonPath('user.name', 'Updated Name');
+
+        $target->refresh();
+        $this->assertSame('Updated Name', $target->name);
+        $this->assertSame($originalHash, $target->password);
+    }
+
+    public function test_user_can_be_updated_with_new_password(): void
+    {
+        $actor = User::factory()->create();
+        $target = User::factory()->create([
+            'name' => 'Target User',
+            'password' => 'initial_password',
+        ]);
+        $initialHash = $target->password;
+
+        $res = $this->actingAs($actor)->putJson("/api/settings/users/{$target->id}", [
+            'name' => 'Target User',
+            'email' => $target->email,
+            'status' => 'active',
+            'password' => 'new_super_secret',
+            'password_confirmation' => 'new_super_secret',
+        ]);
+
+        $res->assertOk();
+
+        $target->refresh();
+        $this->assertNotSame($initialHash, $target->password);
+    }
 }
