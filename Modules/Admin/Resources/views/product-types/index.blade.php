@@ -12,10 +12,10 @@
             <h1 class="text-2xl font-bold tracking-tight text-[var(--text)]">Product Types</h1>
             <p class="page-copy text-sm text-[var(--muted)] mt-1">Configure product types with structured attribute groups and drag-and-drop attribute mappings.</p>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 w-full sm:w-auto">
             <a
                 href="{{ route('admin.catalog.product-types.create') }}"
-                class="button button--primary inline-flex items-center gap-2 cursor-pointer shadow-sm hover:scale-[1.02] active:scale-[0.98] transition-transform text-xs"
+                class="button button--primary inline-flex items-center justify-center gap-2 cursor-pointer shadow-sm hover:scale-[1.02] active:scale-[0.98] transition-transform text-xs w-full sm:w-auto"
                 title="Create New Product Type"
             >
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">

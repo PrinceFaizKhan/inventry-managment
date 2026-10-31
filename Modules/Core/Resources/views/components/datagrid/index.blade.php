@@ -77,7 +77,7 @@
             <div class="px-3 py-2 border-b border-[var(--border)] bg-[var(--page)] flex flex-wrap items-center justify-between gap-2.5">
                 
                 <!-- Left: Compact Search Bar -->
-                <div class="flex items-center gap-2 flex-1 min-w-[220px] max-w-sm">
+                <div class="flex items-center gap-2 flex-1 min-w-[170px] max-w-sm">
                     <div class="relative w-full">
                         <input
                             type="text"
@@ -118,8 +118,8 @@
 
                     <!-- Per Page Custom Dropdown Single-Select -->
                     <div class="flex items-center gap-1.5 text-xs text-[var(--muted)]">
-                        <span class="text-[11px] font-medium">Show</span>
-                        <div class="w-18">
+                        <span class="text-[11px] font-medium hidden sm:inline">Show</span>
+                        <div class="w-16 sm:w-18">
                             <v-dropdown-select
                                 :options="pageSizesDropdownOptions"
                                 :model-value="meta.per_page"
@@ -128,7 +128,7 @@
                                 :searchable="false"
                             ></v-dropdown-select>
                         </div>
-                        <span class="text-[11px] font-medium">rows</span>
+                        <span class="text-[11px] font-medium hidden sm:inline">rows</span>
                     </div>
 
                     <!-- Refresh Button -->
@@ -369,7 +369,7 @@
             </div>
 
             <!-- Pagination Footer: Compact -->
-            <div class="px-3 py-2 border-t border-[var(--border)] bg-[var(--page)] flex flex-wrap items-center justify-between gap-3 text-xs text-[var(--muted)]">
+            <div class="px-3 py-2 border-t border-[var(--border)] bg-[var(--page)] flex flex-col sm:flex-row items-center justify-between gap-2.5 text-xs text-[var(--muted)] text-center sm:text-left">
                 <!-- Showing X to Y of Total -->
                 <div>
                     <template v-if="meta.total > 0">
@@ -381,7 +381,7 @@
                 </div>
 
                 <!-- Navigation Controls -->
-                <div class="flex items-center gap-1" v-if="meta.last_page > 1">
+                <div class="flex items-center gap-1 justify-center" v-if="meta.last_page > 1">
                     <!-- First Page -->
                     <button
                         type="button"

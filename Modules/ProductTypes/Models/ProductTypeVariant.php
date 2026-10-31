@@ -6,7 +6,9 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Modules\Attribute\Models\Attribute;
 
 #[Fillable(['product_type_id', 'name', 'code', 'level_count'])]
 class ProductTypeVariant extends Model
@@ -43,5 +45,15 @@ class ProductTypeVariant extends Model
     public function levelTwoAxes(): HasMany
     {
         return $this->hasMany(ProductTypeVariantAxis::class)->where('level', 2)->orderBy('position')->orderBy('id');
+    }
+
+    /**
+     * Attributes designated as variant-level (fillable on child variants).
+     */
+    public function variantAttributes(): BelongsToMany
+    {
+        return $this->belongsToMany(Attribute::class, 'product_type_variant_attributes')
+            ->withTimestamps()
+            ->orderBy('attributes.name');
     }
 }

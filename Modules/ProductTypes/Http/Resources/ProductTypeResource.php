@@ -83,6 +83,18 @@ class ProductTypeResource extends JsonResource
                     }
                 }
 
+                $variantAttributes = [];
+                if ($variant->relationLoaded('variantAttributes')) {
+                    foreach ($variant->variantAttributes as $attr) {
+                        $variantAttributes[] = [
+                            'id' => $attr->id,
+                            'name' => $attr->name,
+                            'code' => $attr->code,
+                            'type' => $attr->type,
+                        ];
+                    }
+                }
+
                 $variants[] = [
                     'id' => $variant->id,
                     'name' => $variant->name,
@@ -90,6 +102,7 @@ class ProductTypeResource extends JsonResource
                     'level_count' => (int) $variant->level_count,
                     'level_1_attributes' => $level1,
                     'level_2_attributes' => $level2,
+                    'variant_attributes' => $variantAttributes,
                 ];
             }
         }

@@ -61,6 +61,7 @@ class ProductTypeController extends Controller
             'groups.attributeGroup:id,name,code',
             'groups.groupAttributes.attribute:id,name,code,type,required,is_filterable',
             'variants.axes.attribute:id,name,code,type,required,is_filterable',
+            'variants.variantAttributes:id,name,code,type,required,is_filterable',
         ]);
 
         $allGroups = AttributeGroup::query()
@@ -107,6 +108,7 @@ class ProductTypeController extends Controller
             'groups.attributeGroup:id,name,code',
             'groups.groupAttributes.attribute:id,name,code,type,required,is_filterable',
             'variants.axes.attribute:id,name,code,type,required,is_filterable',
+            'variants.variantAttributes:id,name,code,type,required,is_filterable',
         ]);
 
         return (new ProductTypeResource($productType))
@@ -122,6 +124,7 @@ class ProductTypeController extends Controller
             'groups.attributeGroup:id,name,code',
             'groups.groupAttributes.attribute:id,name,code,type,required,is_filterable',
             'variants.axes.attribute:id,name,code,type,required,is_filterable',
+            'variants.variantAttributes:id,name,code,type,required,is_filterable',
         ]);
 
         return (new ProductTypeResource($product_type))->response();
@@ -145,6 +148,7 @@ class ProductTypeController extends Controller
             'groups.attributeGroup:id,name,code',
             'groups.groupAttributes.attribute:id,name,code,type,required,is_filterable',
             'variants.axes.attribute:id,name,code,type,required,is_filterable',
+            'variants.variantAttributes:id,name,code,type,required,is_filterable',
         ]);
 
         return (new ProductTypeResource($product_type))->response();
@@ -272,6 +276,18 @@ class ProductTypeController extends Controller
                     ]);
                 }
             }
+
+            // Variant-level attributes (fillable on child variants)
+            $variantAttrIds = [];
+            if (! empty($vData['variant_attributes']) && is_array($vData['variant_attributes'])) {
+                foreach ($vData['variant_attributes'] as $attrData) {
+                    $attrId = (int) ($attrData['id'] ?? 0);
+                    if ($attrId > 0 && ! in_array($attrId, $variantAttrIds, true)) {
+                        $variantAttrIds[] = $attrId;
+                    }
+                }
+            }
+            $variant->variantAttributes()->sync($variantAttrIds);
         }
     }
 }

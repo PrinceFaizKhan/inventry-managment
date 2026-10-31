@@ -5,22 +5,22 @@
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[var(--border)]">
             <div>
                 <p class="eyebrow">Catalog / Product Types</p>
-                <h1 class="text-2xl font-bold tracking-tight text-[var(--text)]">
+                <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text)]">
                     @{{ mode === 'create' ? 'Create Product Type' : ('Edit Product Type: ' + (form.name || '')) }}
                 </h1>
                 <p class="page-copy text-xs text-[var(--muted)] mt-1">
                     Configure general attribute groups and 1-level or 2-level multi-variant types for configurable products.
                 </p>
             </div>
-            <div class="flex items-center gap-2.5">
-                <a :href="backUrl" class="button button--outline text-xs">
+            <div class="flex items-center gap-2.5 w-full sm:w-auto">
+                <a :href="backUrl" class="button button--outline text-xs flex-1 sm:flex-initial text-center justify-center">
                     Cancel
                 </a>
                 <button
                     type="button"
                     @click="submitForm"
                     :disabled="saving"
-                    class="button button--primary text-xs inline-flex items-center gap-1.5 cursor-pointer shadow-sm disabled:opacity-50"
+                    class="button button--primary text-xs inline-flex items-center justify-center gap-1.5 cursor-pointer shadow-sm disabled:opacity-50 flex-1 sm:flex-initial"
                 >
                     <svg v-if="!saving" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                         <polyline points="20 6 9 17 4 12"/>
@@ -59,12 +59,12 @@
         </div>
 
         <!-- 2 Main Tabs: General & Variant Types -->
-        <div class="flex items-center border-b border-[var(--border)] gap-6">
+        <div class="flex items-center border-b border-[var(--border)] gap-4 sm:gap-6 overflow-x-auto whitespace-nowrap scrollbar-none">
             <!-- Tab 1: General -->
             <button
                 type="button"
                 @click="activeMainTab = 'general'"
-                class="pb-3 px-1 text-xs font-bold inline-flex items-center gap-2 border-b-2 transition-all cursor-pointer"
+                class="pb-3 px-1 text-xs font-bold inline-flex items-center gap-2 border-b-2 transition-all cursor-pointer shrink-0"
                 :class="activeMainTab === 'general' ? 'border-[var(--teal)] text-[var(--teal)]' : 'border-transparent text-[var(--muted)] hover:text-[var(--text)]'"
             >
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -81,7 +81,7 @@
             <button
                 type="button"
                 @click="activeMainTab = 'variants'"
-                class="pb-3 px-1 text-xs font-bold inline-flex items-center gap-2 border-b-2 transition-all cursor-pointer"
+                class="pb-3 px-1 text-xs font-bold inline-flex items-center gap-2 border-b-2 transition-all cursor-pointer shrink-0"
                 :class="activeMainTab === 'variants' ? 'border-[var(--teal)] text-[var(--teal)]' : 'border-transparent text-[var(--muted)] hover:text-[var(--text)]'"
             >
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -647,6 +647,56 @@
                             </span>
                         </div>
                     </div>
+
+                    <!-- Variant-Level Attributes Display -->
+                    <div class="space-y-1.5 pt-2 border-t border-[var(--border)]/60">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[11px] font-semibold text-[var(--muted)] uppercase tracking-wider block">
+                                Variant-Level Attributes (Fillable on child variants)
+                            </span>
+                            <span class="text-[10px] font-mono text-[var(--muted)]">
+                                @{{ (variant.variant_attributes || []).length }} configured
+                            </span>
+                        </div>
+                        <div class="flex flex-wrap gap-1.5">
+                            <span
+                                v-for="attr in variant.variant_attributes"
+                                :key="attr.id"
+                                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-indigo-500/10 border border-indigo-500/20 text-indigo-400"
+                            >
+                                <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
+                                <span>@{{ attr.name }}</span>
+                                <span class="font-mono text-[10px] opacity-75">(@{{ attr.code }})</span>
+                            </span>
+                            <span v-if="!variant.variant_attributes || variant.variant_attributes.length === 0" class="text-xs text-[var(--muted)] italic">
+                                None configured (axes only)
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Parent-Level Attributes (Remaining family attributes) -->
+                    <div class="space-y-1.5 pt-2 border-t border-[var(--border)]/60">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[11px] font-semibold text-[var(--muted)] uppercase tracking-wider block">
+                                Parent-Level Attributes (Shared across all variants)
+                            </span>
+                            <span class="text-[10px] font-mono text-[var(--muted)]">
+                                @{{ getParentAttributesForVariant(variant).length }} attributes
+                            </span>
+                        </div>
+                        <div class="flex flex-wrap gap-1.5">
+                            <span
+                                v-for="attr in getParentAttributesForVariant(variant)"
+                                :key="attr.id"
+                                class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-medium bg-[var(--soft)] border border-[var(--border)] text-[var(--muted)]"
+                            >
+                                <span>@{{ attr.name }}</span>
+                            </span>
+                            <span v-if="getParentAttributesForVariant(variant).length === 0" class="text-xs text-[var(--muted)] italic">
+                                All family attributes are assigned to variant level.
+                            </span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -656,10 +706,10 @@
         <!-- ========================================== -->
         <div
             v-if="showVariantModal"
-            class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs overflow-y-auto"
+            class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-xs overflow-y-auto"
             @click.self="showVariantModal = false"
         >
-            <div class="w-full max-w-4xl rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-150 my-8">
+            <div class="w-full max-w-4xl max-h-[calc(100vh-2rem)] flex flex-col rounded-2xl border border-[var(--border)] bg-[var(--card)] p-4 sm:p-6 shadow-2xl space-y-4 sm:space-y-5 animate-in fade-in zoom-in-95 duration-150 my-auto overflow-y-auto">
                 <!-- Modal Header -->
                 <div class="flex items-center justify-between border-b border-[var(--border)] pb-3">
                     <div class="flex items-center gap-2.5">
@@ -856,13 +906,94 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Variant-Level Attributes Zone (Fillable on child variants) -->
+                        <div class="space-y-2 pt-2 border-t border-[var(--border)]/60">
+                            <div class="flex items-center justify-between">
+                                <label class="text-xs font-bold text-[var(--text)] flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+                                    <span>Variant-Level Attributes (Fillable on Child Variants)</span>
+                                </label>
+                                <span class="text-[10px] text-[var(--muted)]">
+                                    @{{ variantModalForm.variant_attributes.length }} assigned
+                                </span>
+                            </div>
+                            <p class="text-[11px] text-[var(--muted)]">
+                                Attributes customized per child variant (e.g. Price, Weight). All other family attributes remain at Parent Level.
+                            </p>
+
+                            <div
+                                class="p-3 rounded-xl border border-[var(--border)] bg-[var(--page)] min-h-[90px] space-y-2 transition-all"
+                                :class="{ 'ring-2 ring-indigo-500 bg-indigo-500/5': dropTargetLevel === 'variant' }"
+                                @dragover.prevent="dropTargetLevel = 'variant'"
+                                @dragleave="dropTargetLevel = null"
+                                @drop="onModalAttrDrop($event, 'variant')"
+                            >
+                                <div
+                                    v-for="(attr, aIdx) in variantModalForm.variant_attributes"
+                                    :key="attr.id"
+                                    class="p-2 rounded-lg border border-[var(--border)] bg-[var(--card)] flex items-center justify-between gap-2 text-xs shadow-2xs select-none"
+                                >
+                                    <div class="flex items-center gap-2 min-w-0">
+                                        <span class="font-bold text-[var(--text)] truncate">@{{ attr.name }}</span>
+                                        <span class="font-mono text-[10px] text-[var(--muted)]">@{{ attr.code }}</span>
+                                    </div>
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="text-[10px] px-1.5 py-0.5 rounded font-mono font-medium bg-[var(--soft)] text-[var(--muted)] uppercase border border-[var(--border)]">
+                                            @{{ attr.type }}
+                                        </span>
+                                        <button
+                                            type="button"
+                                            @click="removeModalAttr('variant', aIdx)"
+                                            class="p-1 rounded text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 cursor-pointer"
+                                            title="Remove attribute"
+                                        >
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div
+                                    v-if="variantModalForm.variant_attributes.length === 0"
+                                    class="py-5 text-center text-[var(--muted)] text-xs flex flex-col items-center justify-center gap-1 border border-dashed border-[var(--border)] rounded-lg"
+                                >
+                                    <span>Drag attributes here or click "+ Variant Attr" below</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- Right: Available Select-Type Attributes Pool (5 cols) -->
+                    <!-- Right: Available Attributes Pool (5 cols) -->
                     <div class="lg:col-span-5 space-y-3">
-                        <div class="flex items-center justify-between">
-                            <label class="text-xs font-bold text-[var(--text)]">Select Attributes Pool</label>
-                            <span class="text-[11px] text-[var(--muted)]">@{{ availableSelectAttributesList.length }} total</span>
+                        <div class="flex items-center justify-between gap-2 flex-wrap">
+                            <label class="text-xs font-bold text-[var(--text)]">Attributes Pool</label>
+                            <!-- Tab selector: Axes vs Family -->
+                            <div class="flex items-center gap-1 p-0.5 rounded-lg bg-[var(--page)] border border-[var(--border)] text-[10px]">
+                                <button
+                                    type="button"
+                                    @click="modalAttrPoolTab = 'axes'"
+                                    class="px-2 py-0.5 rounded font-medium transition-colors cursor-pointer"
+                                    :class="modalAttrPoolTab === 'axes' ? 'bg-[var(--card)] text-[var(--teal)] font-bold shadow-2xs' : 'text-[var(--muted)] hover:text-[var(--text)]'"
+                                >
+                                    Axes (Select)
+                                </button>
+                                <button
+                                    type="button"
+                                    @click="modalAttrPoolTab = 'family'"
+                                    class="px-2 py-0.5 rounded font-medium transition-colors cursor-pointer"
+                                    :class="modalAttrPoolTab === 'family' ? 'bg-[var(--card)] text-[var(--teal)] font-bold shadow-2xs' : 'text-[var(--muted)] hover:text-[var(--text)]'"
+                                >
+                                    Family Attrs
+                                </button>
+                                <button
+                                    type="button"
+                                    @click="modalAttrPoolTab = 'all'"
+                                    class="px-2 py-0.5 rounded font-medium transition-colors cursor-pointer"
+                                    :class="modalAttrPoolTab === 'all' ? 'bg-[var(--card)] text-[var(--teal)] font-bold shadow-2xs' : 'text-[var(--muted)] hover:text-[var(--text)]'"
+                                >
+                                    All
+                                </button>
+                            </div>
                         </div>
 
                         <!-- Search -->
@@ -879,9 +1010,9 @@
                         </div>
 
                         <!-- List of Attributes -->
-                        <div class="space-y-1.5 max-h-[300px] overflow-y-auto pr-1">
+                        <div class="space-y-1.5 max-h-[380px] overflow-y-auto pr-1">
                             <div
-                                v-for="attr in filteredModalSelectAttributes"
+                                v-for="attr in filteredModalAttributes"
                                 :key="attr.id"
                                 draggable="true"
                                 @dragstart="onModalDragStart($event, attr)"
@@ -892,63 +1023,77 @@
                                     <span class="font-mono text-[10px] text-[var(--muted)]">@{{ attr.code }}</span>
                                 </div>
 
-                                <div class="flex items-center gap-1 shrink-0">
+                                <div class="flex items-center gap-1 shrink-0 flex-wrap justify-end">
                                     <span class="text-[9px] px-1.5 py-0.2 rounded font-mono font-medium bg-[var(--soft)] text-[var(--muted)] uppercase border border-[var(--border)]">
                                         @{{ attr.type }}
                                     </span>
 
-                                    <!-- If 1 level -->
-                                    <button
-                                        v-if="variantModalForm.level_count === 1"
-                                        type="button"
-                                        @click="addAttrToModalLevel(attr, 1)"
-                                        class="px-2 py-0.5 rounded text-[10px] font-semibold bg-[var(--teal)] text-white hover:opacity-90 cursor-pointer"
-                                    >
-                                        + Add
-                                    </button>
-
-                                    <!-- If 2 levels -->
-                                    <div v-else class="flex items-center gap-1">
+                                    <!-- If select/radio/checkbox: Can add as Axis -->
+                                    <template v-if="['select', 'multiselect', 'radio', 'checkbox'].includes(attr.type)">
+                                        <!-- If 1 level -->
                                         <button
+                                            v-if="variantModalForm.level_count === 1"
                                             type="button"
                                             @click="addAttrToModalLevel(attr, 1)"
                                             class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-[var(--teal)] text-white hover:opacity-90 cursor-pointer"
-                                            title="Add to Level 1 (Variant Group)"
+                                            title="Add as Variation Axis"
                                         >
-                                            + L1
+                                            + Axis
                                         </button>
-                                        <button
-                                            type="button"
-                                            @click="addAttrToModalLevel(attr, 2)"
-                                            class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-indigo-600 text-white hover:opacity-90 cursor-pointer"
-                                            title="Add to Level 2 (Final Variant)"
-                                        >
-                                            + L2
-                                        </button>
-                                    </div>
+
+                                        <!-- If 2 levels -->
+                                        <div v-else class="flex items-center gap-1">
+                                            <button
+                                                type="button"
+                                                @click="addAttrToModalLevel(attr, 1)"
+                                                class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-[var(--teal)] text-white hover:opacity-90 cursor-pointer"
+                                                title="Add to Level 1 (Variant Group)"
+                                            >
+                                                + L1
+                                            </button>
+                                            <button
+                                                type="button"
+                                                @click="addAttrToModalLevel(attr, 2)"
+                                                class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-indigo-600 text-white hover:opacity-90 cursor-pointer"
+                                                title="Add to Level 2 (Final Variant)"
+                                            >
+                                                + L2
+                                            </button>
+                                        </div>
+                                    </template>
+
+                                    <!-- Add as Variant-Level Attribute button -->
+                                    <button
+                                        type="button"
+                                        @click="addAttrToModalVariant(attr)"
+                                        class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-indigo-500/10 text-indigo-500 border border-indigo-500/20 hover:bg-indigo-500 hover:text-white cursor-pointer transition-colors"
+                                        title="Add as Variant-Level Attribute (fillable per child variant)"
+                                    >
+                                        + Variant
+                                    </button>
                                 </div>
                             </div>
 
-                            <div v-if="filteredModalSelectAttributes.length === 0" class="p-4 text-center text-xs text-[var(--muted)]">
-                                No matching select attributes found.
+                            <div v-if="filteredModalAttributes.length === 0" class="p-4 text-center text-xs text-[var(--muted)]">
+                                No matching attributes found.
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Modal Footer -->
-                <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-[var(--border)]">
+                <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-[var(--border)] shrink-0">
                     <button
                         type="button"
                         @click="showVariantModal = false"
-                        class="button button--outline text-xs"
+                        class="button button--outline text-xs flex-1 sm:flex-initial text-center justify-center"
                     >
                         Cancel
                     </button>
                     <button
                         type="button"
                         @click="saveVariantModal"
-                        class="button button--primary text-xs"
+                        class="button button--primary text-xs flex-1 sm:flex-initial text-center justify-center"
                     >
                         Save Variant Type Profile
                     </button>
@@ -959,10 +1104,10 @@
         <!-- Add Group Modal -->
         <div
             v-if="showAddGroupModal"
-            class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs"
+            class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/50 backdrop-blur-xs overflow-y-auto"
             @click.self="showAddGroupModal = false"
         >
-            <div class="w-full max-w-md rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 shadow-xl space-y-5 animate-in fade-in zoom-in-95 duration-150">
+            <div class="w-full max-w-md max-h-[calc(100vh-2rem)] flex flex-col rounded-2xl border border-[var(--border)] bg-[var(--card)] p-4 sm:p-6 shadow-xl space-y-4 sm:space-y-5 animate-in fade-in zoom-in-95 duration-150 my-auto overflow-y-auto">
                 <div class="flex items-center justify-between border-b border-[var(--border)] pb-3">
                     <h3 class="text-sm font-bold text-[var(--text)] flex items-center gap-2">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-[var(--teal)]">
@@ -1025,7 +1170,7 @@
                         <button
                             type="button"
                             @click="showAddGroupModal = false"
-                            class="button button--outline text-xs"
+                            class="button button--outline text-xs flex-1 sm:flex-initial text-center justify-center"
                         >
                             Cancel
                         </button>
@@ -1033,7 +1178,7 @@
                             type="button"
                             @click="addSelectedExistingGroup"
                             :disabled="!selectedExistingGroupId"
-                            class="button button--primary text-xs disabled:opacity-50"
+                            class="button button--primary text-xs disabled:opacity-50 flex-1 sm:flex-initial text-center justify-center"
                         >
                             Add to Product Type
                         </button>
@@ -1077,7 +1222,7 @@
                         <button
                             type="button"
                             @click="showAddGroupModal = false"
-                            class="button button--outline text-xs"
+                            class="button button--outline text-xs flex-1 sm:flex-initial text-center justify-center"
                         >
                             Cancel
                         </button>
@@ -1085,7 +1230,7 @@
                             type="button"
                             @click="createNewGroupAndAdd"
                             :disabled="creatingNewGroup"
-                            class="button button--primary text-xs disabled:opacity-50 inline-flex items-center gap-1.5"
+                            class="button button--primary text-xs disabled:opacity-50 inline-flex items-center justify-center gap-1.5 flex-1 sm:flex-initial"
                         >
                             <svg v-if="creatingNewGroup" class="animate-spin -ml-0.5 mr-1 h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -1154,9 +1299,10 @@
                         id: v.id,
                         name: v.name,
                         code: v.code,
-                        level_count: (int = parseInt(v.level_count, 10)) === 2 ? 2 : 1,
+                        level_count: parseInt(v.level_count, 10) === 2 ? 2 : 1,
                         level_1_attributes: Array.isArray(v.level_1_attributes) ? [...v.level_1_attributes] : [],
-                        level_2_attributes: Array.isArray(v.level_2_attributes) ? [...v.level_2_attributes] : []
+                        level_2_attributes: Array.isArray(v.level_2_attributes) ? [...v.level_2_attributes] : [],
+                        variant_attributes: Array.isArray(v.variant_attributes) ? [...v.variant_attributes] : []
                     });
                 });
             }
@@ -1191,12 +1337,14 @@
                 // Modal for Variant Type (Add / Edit)
                 showVariantModal: false,
                 editingVariantIndex: null,
+                modalAttrPoolTab: 'family', // 'axes' | 'family' | 'all'
                 variantModalForm: {
                     name: '',
                     code: '',
                     level_count: 1, // 1 or 2
                     level_1_attributes: [],
-                    level_2_attributes: []
+                    level_2_attributes: [],
+                    variant_attributes: []
                 },
                 variantModalCodeTouched: false,
                 variantModalError: null,
@@ -1269,8 +1417,35 @@
                 return this.availableGroupsList.filter(g => !addedIds.has(g.id));
             },
 
-            filteredModalSelectAttributes() {
-                let list = this.availableSelectAttributesList;
+            familyAssignedAttributes() {
+                const attrs = [];
+                const seen = new Set();
+                this.form.groups.forEach(g => {
+                    if (Array.isArray(g.attributes)) {
+                        g.attributes.forEach(a => {
+                            if (!seen.has(a.id)) {
+                                seen.add(a.id);
+                                attrs.push(a);
+                            }
+                        });
+                    }
+                });
+                return attrs;
+            },
+
+            filteredModalAttributes() {
+                let list = [];
+                if (this.modalAttrPoolTab === 'axes') {
+                    list = this.availableSelectAttributesList;
+                } else if (this.modalAttrPoolTab === 'family') {
+                    list = this.familyAssignedAttributes;
+                    if (list.length === 0) {
+                        list = this.availableAttributesList;
+                    }
+                } else {
+                    list = this.availableAttributesList;
+                }
+
                 if (this.modalAttrSearch.trim()) {
                     const q = this.modalAttrSearch.trim().toLowerCase();
                     list = list.filter(a =>
@@ -1478,6 +1653,7 @@
                 this.variantModalError = null;
                 this.modalAttrSearch = '';
                 this.dropTargetLevel = null;
+                this.modalAttrPoolTab = 'family';
 
                 if (index !== null && this.form.variants[index]) {
                     const v = this.form.variants[index];
@@ -1486,7 +1662,8 @@
                         code: v.code,
                         level_count: v.level_count || 1,
                         level_1_attributes: [...(v.level_1_attributes || [])],
-                        level_2_attributes: [...(v.level_2_attributes || [])]
+                        level_2_attributes: [...(v.level_2_attributes || [])],
+                        variant_attributes: [...(v.variant_attributes || [])]
                     };
                     this.variantModalCodeTouched = true;
                 } else {
@@ -1495,7 +1672,8 @@
                         code: '',
                         level_count: 1,
                         level_1_attributes: [],
-                        level_2_attributes: []
+                        level_2_attributes: [],
+                        variant_attributes: []
                     };
                     this.variantModalCodeTouched = false;
                 }
@@ -1509,6 +1687,7 @@
                 }
             },
             addAttrToModalLevel(attr, level) {
+                this.variantModalError = null;
                 const list = level === 1 ? this.variantModalForm.level_1_attributes : this.variantModalForm.level_2_attributes;
                 const otherList = level === 1 ? this.variantModalForm.level_2_attributes : this.variantModalForm.level_1_attributes;
 
@@ -1518,16 +1697,37 @@
                     otherList.splice(otherIdx, 1);
                 }
 
+                // Also remove from variant_attributes if present there
+                const vIdx = this.variantModalForm.variant_attributes.findIndex(a => a.id === attr.id);
+                if (vIdx !== -1) {
+                    this.variantModalForm.variant_attributes.splice(vIdx, 1);
+                }
+
                 // Add to current level if not present
                 if (!list.some(a => a.id === attr.id)) {
                     list.push({ ...attr });
                 }
             },
+            addAttrToModalVariant(attr) {
+                this.variantModalError = null;
+                // If already in L1 or L2 axes, cannot be added as variant-level attribute
+                if (this.variantModalForm.level_1_attributes.some(a => a.id === attr.id) ||
+                    this.variantModalForm.level_2_attributes.some(a => a.id === attr.id)) {
+                    this.variantModalError = `Attribute "${attr.name}" is already used as a variation axis.`;
+                    return;
+                }
+
+                if (!this.variantModalForm.variant_attributes.some(a => a.id === attr.id)) {
+                    this.variantModalForm.variant_attributes.push({ ...attr });
+                }
+            },
             removeModalAttr(level, idx) {
                 if (level === 1) {
                     this.variantModalForm.level_1_attributes.splice(idx, 1);
-                } else {
+                } else if (level === 2) {
                     this.variantModalForm.level_2_attributes.splice(idx, 1);
+                } else if (level === 'variant') {
+                    this.variantModalForm.variant_attributes.splice(idx, 1);
                 }
             },
             onModalDragStart(event, attr) {
@@ -1538,7 +1738,11 @@
             onModalAttrDrop(event, level) {
                 event.preventDefault();
                 if (!this.draggedModalAttr) return;
-                this.addAttrToModalLevel(this.draggedModalAttr, level);
+                if (level === 'variant') {
+                    this.addAttrToModalVariant(this.draggedModalAttr);
+                } else {
+                    this.addAttrToModalLevel(this.draggedModalAttr, level);
+                }
                 this.draggedModalAttr = null;
                 this.dropTargetLevel = null;
             },
@@ -1579,7 +1783,8 @@
                     code,
                     level_count: this.variantModalForm.level_count,
                     level_1_attributes: [...this.variantModalForm.level_1_attributes],
-                    level_2_attributes: this.variantModalForm.level_count === 2 ? [...this.variantModalForm.level_2_attributes] : []
+                    level_2_attributes: this.variantModalForm.level_count === 2 ? [...this.variantModalForm.level_2_attributes] : [],
+                    variant_attributes: [...this.variantModalForm.variant_attributes]
                 };
 
                 if (this.editingVariantIndex !== null) {
@@ -1589,6 +1794,14 @@
                 }
 
                 this.showVariantModal = false;
+            },
+            getParentAttributesForVariant(variant) {
+                const excludedIds = new Set([
+                    ...(variant.level_1_attributes || []).map(a => a.id),
+                    ...(variant.level_2_attributes || []).map(a => a.id),
+                    ...(variant.variant_attributes || []).map(a => a.id)
+                ]);
+                return this.familyAssignedAttributes.filter(a => !excludedIds.has(a.id));
             },
             removeVariantType(index) {
                 this.form.variants.splice(index, 1);

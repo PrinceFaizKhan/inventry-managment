@@ -18,5 +18,8 @@ require __DIR__.'/attribute-routes.php';
 // Product Type Admin Routes
 require __DIR__.'/product-type-routes.php';
 
+// Product Admin Routes
+require __DIR__.'/product-routes.php';
+
 // Settings Admin Routes
 require __DIR__.'/settings-routes.php';

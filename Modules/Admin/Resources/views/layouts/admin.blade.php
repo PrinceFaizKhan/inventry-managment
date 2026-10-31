@@ -2,7 +2,7 @@
 <html lang="en" dir="ltr">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Haseen Telecom · Studio')</title>
     {!! view_event_render('layout.head') !!}
@@ -52,7 +52,7 @@
     <div id="app" class="admin min-h-screen flex bg-[var(--page)] text-[var(--text)] transition-colors duration-200">
         
         <!-- 1. OBSIDIAN NAVIGATION RAIL / SIDEBAR (Collapsible & Expandable) -->
-        <aside class="sidebar fixed top-0 bottom-0 left-0 z-40 flex flex-col justify-between py-3 bg-[var(--card)] border-r border-[var(--border)] transition-all select-none" id="admin-sidebar">
+        <aside class="sidebar fixed top-0 bottom-0 left-0 z-50 flex flex-col justify-between py-3 bg-[var(--card)] border-r border-[var(--border)] transition-all select-none" id="admin-sidebar">
             
             <div class="flex flex-col w-full">
                 <!-- Top Brand Pod & Collapse Toggle -->
@@ -117,22 +117,22 @@
         </aside>
 
         <!-- Mobile Backdrop Overlay -->
-        <div class="backdrop fixed inset-0 bg-black/60 backdrop-blur-sm z-35 hidden transition-opacity duration-200" id="sidebar-backdrop" onclick="window.closeSidebar()"></div>
+        <div class="backdrop fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity duration-200" id="sidebar-backdrop" onclick="window.closeSidebar()"></div>
 
         <!-- 2. MAIN APP BODY -->
         <div class="app-body flex-1 flex flex-col min-w-0 min-h-screen">
             
             <!-- FLOATING DYNAMIC CAPSULE HEADER BAR -->
-            <header class="sticky top-3 z-30 px-4 sm:px-6 lg:px-8 max-w-[1720px] w-full mx-auto">
-                <div class="rounded-2xl border border-[var(--border)] bg-[var(--card)]/85 backdrop-blur-xl px-4 sm:px-5 py-2.5 shadow-sm flex items-center justify-between gap-4 transition-colors">
+            <header class="sticky top-2 sm:top-3 z-30 px-2 sm:px-6 lg:px-8 max-w-[1720px] w-full mx-auto">
+                <div class="rounded-2xl border border-[var(--border)] bg-[var(--card)]/85 backdrop-blur-xl px-2.5 sm:px-5 py-2 sm:py-2.5 shadow-sm flex items-center justify-between gap-2 sm:gap-4 transition-colors">
                     
                     <!-- Left: Interactive Menu Toggle Button + Breadcrumb Capsule -->
-                    <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-2 sm:gap-3 min-w-0">
                         
                         <!-- UNIVERSAL MENU TOGGLE BUTTON (Works on Desktop & Mobile) -->
                         <button
                             type="button"
-                            class="sidebar-toggle-btn p-2 rounded-xl border border-[var(--border)] bg-[var(--card)] text-[var(--muted)] hover:text-[var(--teal)] hover:border-[var(--teal)]/40 hover:bg-[var(--soft)] transition-all cursor-pointer shadow-xs flex items-center justify-center select-none"
+                            class="sidebar-toggle-btn p-1.5 sm:p-2 rounded-xl border border-[var(--border)] bg-[var(--card)] text-[var(--muted)] hover:text-[var(--teal)] hover:border-[var(--teal)]/40 hover:bg-[var(--soft)] transition-all cursor-pointer shadow-xs flex items-center justify-center select-none shrink-0"
                             id="sidebar-toggle"
                             onclick="window.toggleSidebar()"
                             title="Toggle Navigation Menu (⌘\)"
@@ -145,11 +145,11 @@
                             </svg>
                         </button>
 
-                        <div class="crumb flex items-center gap-2 text-xs font-semibold">
+                        <div class="crumb flex items-center gap-1.5 sm:gap-2 text-xs font-semibold min-w-0">
                             {!! view_event_render('header.left') !!}
-                            <span class="text-[var(--muted)] hover:text-[var(--text)] transition-colors">Workspace</span>
-                            <span class="text-[var(--border)]">/</span>
-                            <span class="px-2 py-0.5 rounded-md bg-[var(--soft)] text-[var(--teal)] border border-[var(--teal)]/20 font-bold">
+                            <span class="text-[var(--muted)] hover:text-[var(--text)] transition-colors hidden sm:inline">Workspace</span>
+                            <span class="text-[var(--border)] hidden sm:inline">/</span>
+                            <span class="px-2 py-0.5 rounded-md bg-[var(--soft)] text-[var(--teal)] border border-[var(--teal)]/20 font-bold truncate max-w-[120px] sm:max-w-none">
                                 @yield('crumb', __('brand.portal') ?? 'Studio')
                             </span>
                         </div>
@@ -157,7 +157,7 @@
 
 
                     <!-- Right Controls: Theme Switcher & Profile -->
-                    <div class="header-right flex items-center gap-2.5">
+                    <div class="header-right flex items-center gap-1.5 sm:gap-2.5 shrink-0">
                         {!! view_event_render('header.right') !!}
 
                         <!-- Theme Toggle Component -->
@@ -185,7 +185,7 @@
             </header>
 
             <!-- 3. WORKSPACE CANVAS -->
-            <main class="workspace flex-1 px-4 sm:px-6 lg:px-8 max-w-[1720px] w-full mx-auto py-6">
+            <main class="workspace flex-1 px-2.5 sm:px-6 lg:px-8 max-w-[1720px] w-full mx-auto py-4 sm:py-6">
                 {!! view_event_render('content.before') !!}
                 @yield('content')
                 {!! view_event_render('content.after') !!}

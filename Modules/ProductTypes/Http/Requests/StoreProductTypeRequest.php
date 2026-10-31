@@ -58,6 +58,8 @@ class StoreProductTypeRequest extends FormRequest
             'variants.*.level_2_attributes' => ['nullable', 'array'],
             'variants.*.level_2_attributes.*.id' => ['required', 'exists:attributes,id'],
             'variants.*.level_2_attributes.*.position' => ['nullable', 'integer'],
+            'variants.*.variant_attributes' => ['nullable', 'array'],
+            'variants.*.variant_attributes.*.id' => ['required', 'exists:attributes,id'],
         ];
     }
 }

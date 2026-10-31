@@ -124,6 +124,19 @@ document.addEventListener('keydown', function (e) {
   }
 })
 
+// Auto-close mobile drawer when navigation links are tapped
+document.addEventListener('DOMContentLoaded', function () {
+  const sidebar = document.getElementById('admin-sidebar')
+  if (sidebar) {
+    sidebar.addEventListener('click', function (e) {
+      const link = e.target.closest('a')
+      if (link && window.innerWidth <= 768) {
+        window.closeSidebar()
+      }
+    })
+  }
+})
+
 /**
  * Mount the application ensuring all inline Vue components defined in Blade
  * views have finished registering.

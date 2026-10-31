@@ -414,6 +414,50 @@ class ProductTypeTest extends TestCase
         $this->assertDatabaseHas('attributes', ['id' => $color->id]);
     }
 
+    public function test_user_can_create_variant_profile_with_variant_level_attributes(): void
+    {
+        $user = $this->userWithRole('administration');
+
+        $color = Attribute::create(['name' => 'Color', 'code' => 'color', 'type' => 'select']);
+        $size = Attribute::create(['name' => 'Size', 'code' => 'size', 'type' => 'select']);
+        $price = Attribute::create(['name' => 'Price', 'code' => 'price', 'type' => 'price']);
+        $weight = Attribute::create(['name' => 'Weight', 'code' => 'weight', 'type' => 'text']);
+
+        $payload = [
+            'name' => 'Smartphones',
+            'code' => 'smartphones',
+            'groups' => [],
+            'variants' => [
+                [
+                    'name' => 'Color & Size with Pricing',
+                    'code' => 'color_size_pricing',
+                    'level_count' => 2,
+                    'level_1_attributes' => [['id' => $color->id, 'position' => 1]],
+                    'level_2_attributes' => [['id' => $size->id, 'position' => 1]],
+                    'variant_attributes' => [
+                        ['id' => $price->id],
+                        ['id' => $weight->id],
+                    ],
+                ],
+            ],
+        ];
+
+        $response = $this->actingAs($user)->postJson('/api/catalog/product-types', $payload);
+
+        $response->assertCreated()
+            ->assertJsonPath('data.variants.0.code', 'color_size_pricing')
+            ->assertJsonPath('data.variants.0.level_count', 2)
+            ->assertJsonPath('data.variants.0.variant_attributes.0.code', 'price')
+            ->assertJsonPath('data.variants.0.variant_attributes.1.code', 'weight');
+
+        $this->assertDatabaseHas('product_type_variant_attributes', [
+            'attribute_id' => $price->id,
+        ]);
+        $this->assertDatabaseHas('product_type_variant_attributes', [
+            'attribute_id' => $weight->id,
+        ]);
+    }
+
     /** @param list<string> $permissions */
     private function userWithRole(string $access, array $permissions = []): User
     {
