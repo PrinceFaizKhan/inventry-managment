@@ -74,73 +74,109 @@
         <div class="rounded-xl border border-[var(--border)] bg-[var(--card)] shadow-xs overflow-hidden transition-colors">
             
             <!-- Toolbar Area: Compact Density -->
-            <div class="px-3 py-2 border-b border-[var(--border)] bg-[var(--page)] flex flex-wrap items-center justify-between gap-2.5">
-                
-                <!-- Left: Compact Search Bar -->
-                <div class="flex items-center gap-2 flex-1 min-w-[170px] max-w-sm">
-                    <div class="relative w-full">
-                        <input
-                            type="text"
-                            :value="search"
-                            @input="onSearchInput"
-                            :placeholder="searchPlaceholder"
-                            class="w-full h-8 pl-8 pr-7 rounded-lg border border-[var(--border)] bg-[var(--card)] text-xs text-[var(--text)] placeholder-[var(--muted)] focus:outline-none focus:border-[var(--teal)] focus:ring-1 focus:ring-[var(--teal)] transition-all"
-                        />
-                        <svg class="absolute left-2.5 top-2.5 text-[var(--muted)] pointer-events-none" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <div class="px-3 py-2 border-b border-[var(--border)] bg-[var(--page)] space-y-2">
+                <div class="flex flex-wrap items-center justify-between gap-2.5">
+                    <!-- Left: Compact Search Bar -->
+                    <div class="flex items-center gap-2 flex-1 min-w-[170px] max-w-sm">
+                        <div class="relative w-full">
+                            <input
+                                type="text"
+                                :value="search"
+                                @input="onSearchInput"
+                                :placeholder="searchPlaceholder"
+                                class="w-full h-8 pl-8 pr-7 rounded-lg border border-[var(--border)] bg-[var(--card)] text-xs text-[var(--text)] placeholder-[var(--muted)] focus:outline-none focus:border-[var(--teal)] focus:ring-1 focus:ring-[var(--teal)] transition-all"
+                            />
+                            <svg class="absolute left-2.5 top-2.5 text-[var(--muted)] pointer-events-none" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                            <button
+                                v-if="search"
+                                type="button"
+                                @click="clearSearch"
+                                class="absolute right-2 top-2 text-[var(--muted)] hover:text-[var(--text)] text-xs font-bold"
+                                title="Clear search"
+                            >&times;</button>
+                        </div>
+                    </div>
+
+                    <!-- Right Toolbar Actions -->
+                    <div class="flex items-center gap-2 flex-wrap">
+                        
+                        <!-- Fields Visibility Toggle Button -->
                         <button
-                            v-if="search"
                             type="button"
-                            @click="clearSearch"
-                            class="absolute right-2 top-2 text-[var(--muted)] hover:text-[var(--text)] text-xs font-bold"
-                            title="Clear search"
-                        >&times;</button>
+                            @click="isVisibilityDrawerOpen = true"
+                            class="h-8 px-2.5 rounded-lg border border-[var(--border)] bg-[var(--card)] hover:border-[var(--teal)] text-[var(--text)] text-xs font-medium inline-flex items-center gap-1.5 transition-colors cursor-pointer select-none"
+                            title="Show or hide columns / attributes"
+                        >
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            <span class="hidden sm:inline">Fields</span>
+                            <span class="px-1.5 py-0.2 rounded-full bg-[var(--soft)] text-[var(--teal)] text-[10px] font-bold border border-[var(--border)]">
+                                @{{ visibleColumns.length }}
+                            </span>
+                        </button>
+
+                        <!-- Filters Button (Opens Right-Side Slide-Over Drawer) -->
+                        <div v-if="hasAvailableFilters">
+                            <button
+                                type="button"
+                                @click="openFilterDrawer"
+                                class="h-8 px-2.5 rounded-lg border text-xs font-medium inline-flex items-center gap-1.5 transition-colors cursor-pointer select-none"
+                                :class="activeFiltersCount > 0 ? 'border-[var(--teal)] bg-[var(--soft)] text-[var(--teal)] font-semibold' : 'border-[var(--border)] bg-[var(--card)] text-[var(--text)] hover:border-[var(--teal)]'"
+                            >
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                                <span>Filter</span>
+                                <span v-if="activeFiltersCount > 0" class="px-1.5 py-0.2 rounded-full bg-[var(--teal)] text-white text-[10px] grid place-items-center font-bold">
+                                    @{{ activeFiltersCount }}
+                                </span>
+                            </button>
+                        </div>
+
+                        <!-- Per Page Custom Dropdown Single-Select -->
+                        <div class="hidden sm:flex items-center gap-1.5 text-xs text-[var(--muted)]">
+                            <span class="text-[11px] font-medium">Show</span>
+                            <div class="w-16 sm:w-18">
+                                <v-dropdown-select
+                                    :options="pageSizesDropdownOptions"
+                                    :model-value="meta.per_page"
+                                    @change="changePerPage"
+                                    size="sm"
+                                    :searchable="false"
+                                ></v-dropdown-select>
+                            </div>
+                            <span class="text-[11px] font-medium">rows</span>
+                        </div>
+
+                        <!-- Refresh Button -->
+                        <button
+                            type="button"
+                            @click="refresh"
+                            :disabled="isLoading"
+                            class="h-8 w-8 rounded-lg border border-[var(--border)] bg-[var(--card)] text-[var(--muted)] hover:text-[var(--text)] hover:border-[var(--teal)] grid place-items-center transition-colors disabled:opacity-50 cursor-pointer"
+                            title="Refresh data"
+                        >
+                            <svg :class="{ 'animate-spin': isLoading }" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                        </button>
                     </div>
                 </div>
 
-                <!-- Right Toolbar Actions -->
-                <div class="flex items-center gap-2 flex-wrap">
-                    
-                    <!-- Filters Button (Opens Right-Side Slide-Over Drawer) -->
-                    <div v-if="hasAvailableFilters">
-                        <button
-                            type="button"
-                            @click="openFilterDrawer"
-                            class="h-8 px-2.5 rounded-lg border text-xs font-medium inline-flex items-center gap-1.5 transition-colors cursor-pointer select-none"
-                            :class="activeFiltersCount > 0 ? 'border-[var(--teal)] bg-[var(--soft)] text-[var(--teal)] font-semibold' : 'border-[var(--border)] bg-[var(--card)] text-[var(--text)] hover:border-[var(--teal)]'"
+                <!-- Mobile Only: Quick Sort Bar -->
+                <div v-if="mobileSortOptions.length > 0" class="block md:hidden pt-1 border-t border-[var(--border)]/40">
+                    <div class="flex items-center gap-2">
+                        <span class="text-[10px] font-semibold text-[var(--muted)] uppercase tracking-wider shrink-0">Sort:</span>
+                        <select
+                            :value="currentSortColumn ? (currentSortColumn + ':' + currentSortDirection) : ''"
+                            @change="onMobileSortChange($event.target.value)"
+                            class="w-full h-7 px-2 rounded-lg bg-[var(--card)] border border-[var(--border)] text-[11px] text-[var(--text)] focus:outline-none focus:border-[var(--teal)] cursor-pointer"
                         >
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-                            <span>Filter</span>
-                            <span v-if="activeFiltersCount > 0" class="px-1.5 py-0.2 rounded-full bg-[var(--teal)] text-white text-[10px] grid place-items-center font-bold">
-                                @{{ activeFiltersCount }}
-                            </span>
-                        </button>
+                            <option value="">Default order</option>
+                            <option
+                                v-for="opt in mobileSortOptions"
+                                :key="opt.value"
+                                :value="opt.value"
+                            >
+                                @{{ opt.label }}
+                            </option>
+                        </select>
                     </div>
-
-                    <!-- Per Page Custom Dropdown Single-Select -->
-                    <div class="flex items-center gap-1.5 text-xs text-[var(--muted)]">
-                        <span class="text-[11px] font-medium hidden sm:inline">Show</span>
-                        <div class="w-16 sm:w-18">
-                            <v-dropdown-select
-                                :options="pageSizesDropdownOptions"
-                                :model-value="meta.per_page"
-                                @change="changePerPage"
-                                size="sm"
-                                :searchable="false"
-                            ></v-dropdown-select>
-                        </div>
-                        <span class="text-[11px] font-medium hidden sm:inline">rows</span>
-                    </div>
-
-                    <!-- Refresh Button -->
-                    <button
-                        type="button"
-                        @click="refresh"
-                        :disabled="isLoading"
-                        class="h-8 w-8 rounded-lg border border-[var(--border)] bg-[var(--card)] text-[var(--muted)] hover:text-[var(--text)] hover:border-[var(--teal)] grid place-items-center transition-colors disabled:opacity-50 cursor-pointer"
-                        title="Refresh data"
-                    >
-                        <svg :class="{ 'animate-spin': isLoading }" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
-                    </button>
                 </div>
             </div>
 
@@ -212,8 +248,8 @@
                 </div>
             </transition>
 
-            <!-- Table Area (Compact Enterprise Density) -->
-            <div class="overflow-x-auto relative">
+            <!-- Table Area (Desktop View: hidden md:block) -->
+            <div class="hidden md:block overflow-x-auto relative">
                 <table class="w-full text-left border-collapse text-xs">
                     <thead>
                         <tr class="border-b border-[var(--border)] bg-[var(--page)] text-[var(--muted)] font-semibold text-[11px] uppercase tracking-wider select-none">
@@ -230,9 +266,9 @@
                                 />
                             </th>
 
-                            <!-- Data Columns -->
+                            <!-- Data Columns (Filtered by visibleColumns) -->
                             <th
-                                v-for="col in resolvedColumns"
+                                v-for="col in visibleColumns"
                                 :key="col.index || col.key"
                                 class="py-2 px-3 text-[11px]"
                                 :class="[
@@ -266,7 +302,7 @@
                                 <td v-if="isSelectable" class="w-9 py-2 px-2.5 text-center">
                                     <div class="w-3.5 h-3.5 rounded bg-[var(--soft)] mx-auto"></div>
                                 </td>
-                                <td v-for="col in resolvedColumns" :key="'shimmer-col-' + (col.index || col.key)" class="py-2 px-3">
+                                <td v-for="col in visibleColumns" :key="'shimmer-col-' + (col.index || col.key)" class="py-2 px-3">
                                     <div class="h-3 rounded bg-[var(--soft)] w-3/4"></div>
                                 </td>
                                 <td class="py-2 px-3 text-right">
@@ -277,7 +313,7 @@
 
                         <!-- Empty State -->
                         <tr v-else-if="records.length === 0">
-                            <td :colspan="resolvedColumns.length + (isSelectable ? 2 : 1)" class="py-10 text-center text-[var(--muted)]">
+                            <td :colspan="visibleColumns.length + (isSelectable ? 2 : 1)" class="py-10 text-center text-[var(--muted)]">
                                 <slot name="empty">
                                     <div class="flex flex-col items-center justify-center gap-1.5 max-w-sm mx-auto">
                                         <svg class="text-[var(--muted)] opacity-40" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
@@ -317,7 +353,7 @@
 
                             <!-- Column Cells -->
                             <td
-                                v-for="col in resolvedColumns"
+                                v-for="col in visibleColumns"
                                 :key="col.index || col.key"
                                 class="py-2 px-3 text-xs text-[var(--text)]"
                                 :class="col.align === 'center' ? 'text-center' : (col.align === 'right' ? 'text-right' : 'text-left')"
@@ -366,6 +402,185 @@
                         </tr>
                     </tbody>
                 </table>
+            </div>
+
+            <!-- Mobile Bento Boxes / Cards Grid View (Phone View: block md:hidden) -->
+            <div class="block md:hidden">
+                <!-- Mobile Loading Shimmer -->
+                <div v-if="isLoading" class="p-3 space-y-3">
+                    <div v-for="n in 3" :key="'mob-shim-' + n" class="p-4 rounded-2xl border border-[var(--border)] bg-[var(--page)] animate-pulse space-y-3">
+                        <div class="flex items-center justify-between">
+                            <div class="h-4 w-24 bg-[var(--soft)] rounded-md"></div>
+                            <div class="h-4 w-16 bg-[var(--soft)] rounded-full"></div>
+                        </div>
+                        <div class="h-4 w-3/4 bg-[var(--soft)] rounded-md"></div>
+                        <div class="h-8 w-full bg-[var(--soft)] rounded-xl"></div>
+                    </div>
+                </div>
+
+                <!-- Mobile Empty State -->
+                <div v-else-if="records.length === 0" class="py-10 px-4 text-center text-[var(--muted)]">
+                    <slot name="empty">
+                        <div class="flex flex-col items-center justify-center gap-1.5 max-w-sm mx-auto">
+                            <svg class="text-[var(--muted)] opacity-40" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                            <p class="text-xs font-semibold text-[var(--text)] mt-1">No matching records found</p>
+                            <p class="text-[11px] text-[var(--muted)]">Try adjusting search criteria or clearing filters.</p>
+                            <button
+                                v-if="search || activeFiltersCount > 0"
+                                type="button"
+                                @click="resetAll"
+                                class="mt-2 px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--card)] text-xs text-[var(--text)] hover:border-[var(--teal)] transition-colors cursor-pointer"
+                            >
+                                Reset search & filters
+                            </button>
+                        </div>
+                    </slot>
+                </div>
+
+                <!-- Mobile Records Cards List -->
+                <div v-else class="p-3 space-y-3">
+                    <div
+                        v-for="(row, rIdx) in records"
+                        :key="String(row[rowKeyProperty])"
+                        class="p-4 rounded-2xl border border-[var(--border)] bg-[var(--card)] shadow-xs space-y-3 transition-all hover:border-[var(--teal)]/40"
+                        :class="{ 'ring-1 ring-sky-500/50 bg-sky-50/20 dark:bg-sky-950/10': isSelectable && isRowSelected(row) }"
+                    >
+                        <!-- Mobile Card Custom Slot (Parent can fully customize or use default) -->
+                        <slot
+                            name="mobile-card"
+                            :row="row"
+                            :index="rIdx"
+                            :columns="visibleColumns"
+                            :toggle-status="() => confirmToggleRowStatus(row)"
+                            :delete-row="() => confirmDeleteRow(row)"
+                            :move-up="() => moveRecord(rIdx, -1)"
+                            :move-down="() => moveRecord(rIdx, 1)"
+                        >
+                            <!-- Default Bento Box Layout -->
+                            <!-- Card Header: Checkbox + Position/SKU + Status -->
+                            <div class="flex items-center justify-between gap-2">
+                                <div class="flex items-center gap-2 flex-wrap min-w-0">
+                                    <input
+                                        v-if="isSelectable"
+                                        type="checkbox"
+                                        :checked="isRowSelected(row)"
+                                        :disabled="row.selectable === false"
+                                        @change="toggleRowSelection(row)"
+                                        class="w-4 h-4 rounded border-[var(--border)] text-[var(--teal)] focus:ring-[var(--teal)] cursor-pointer"
+                                    />
+                                    <span class="font-mono text-[10px] text-[var(--muted)] font-bold">#@{{ meta.from ? (meta.from + rIdx) : (rIdx + 1) }}</span>
+
+                                    <!-- Primary Identifier Badge (SKU or Code or ID) -->
+                                    <template v-if="primaryColumn && isColumnVisible(primaryColumn.index || primaryColumn.key)">
+                                        <slot
+                                            :name="'cell-' + (primaryColumn.index || primaryColumn.key)"
+                                            :row="row"
+                                            :value="row[primaryColumn.index || primaryColumn.key]"
+                                            :toggle-status="() => confirmToggleRowStatus(row)"
+                                        >
+                                            <span class="font-mono text-[11px] font-bold px-2 py-0.5 rounded bg-[var(--soft)] text-[var(--teal)] border border-[var(--teal)]/20 truncate">
+                                                @{{ row[primaryColumn.index || primaryColumn.key] }}
+                                            </span>
+                                        </slot>
+                                    </template>
+                                </div>
+
+                                <!-- Status Badge or Toggle -->
+                                <div class="flex items-center gap-1.5 shrink-0">
+                                    <button
+                                        v-if="isStatusToggleVisible(row)"
+                                        type="button"
+                                        @click.stop="confirmToggleRowStatus(row)"
+                                        class="cursor-pointer transition-transform hover:scale-105 inline-flex items-center"
+                                        :title="isRowActive(row) ? 'Active' : 'Inactive'"
+                                    >
+                                        <v-status-badge :value="isRowActive(row)" type="status" size="sm"></v-status-badge>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Card Title (Name column if present) -->
+                            <div v-if="nameColumn && isColumnVisible(nameColumn.index || nameColumn.key)" class="font-bold text-xs text-[var(--text)] leading-snug">
+                                <slot
+                                    :name="'cell-' + (nameColumn.index || nameColumn.key)"
+                                    :row="row"
+                                    :value="row[nameColumn.index || nameColumn.key]"
+                                    :toggle-status="() => confirmToggleRowStatus(row)"
+                                >
+                                    @{{ row[nameColumn.index || nameColumn.key] }}
+                                </slot>
+                            </div>
+
+                            <!-- Other Visible Attributes Fields inside Bento Box -->
+                            <div v-if="remainingVisibleColumns.length > 0" class="pt-2 border-t border-[var(--border)]/60 grid grid-cols-2 gap-2 text-xs">
+                                <div
+                                    v-for="col in remainingVisibleColumns"
+                                    :key="col.index || col.key"
+                                    class="p-2 rounded-xl bg-[var(--page)] border border-[var(--border)]/60 space-y-0.5"
+                                >
+                                    <span class="text-[10px] text-[var(--muted)] font-semibold block uppercase tracking-wider truncate">
+                                        @{{ col.label }}
+                                    </span>
+                                    <div class="font-medium text-[var(--text)] text-xs truncate">
+                                        <slot
+                                            :name="'cell-' + (col.index || col.key)"
+                                            :row="row"
+                                            :value="row[col.index || col.key]"
+                                            :toggle-status="() => confirmToggleRowStatus(row)"
+                                        >
+                                            <template v-if="typeof row[col.index || col.key] === 'boolean' || col.type === 'boolean'">
+                                                <v-status-badge :value="row[col.index || col.key]" type="boolean" size="sm"></v-status-badge>
+                                            </template>
+                                            <template v-else-if="col.type === 'badge'">
+                                                <v-status-badge :value="row[col.index || col.key]" type="badge" size="sm"></v-status-badge>
+                                            </template>
+                                            <template v-else>
+                                                @{{ row[col.index || col.key] ?? '—' }}
+                                            </template>
+                                        </slot>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Card Footer: Reorder Position Buttons & Unified Actions -->
+                            <div class="pt-2.5 border-t border-[var(--border)] flex items-center justify-between gap-2">
+                                <!-- Position Reorder Buttons -->
+                                <div class="flex items-center gap-1">
+                                    <button
+                                        type="button"
+                                        @click="moveRecord(rIdx, -1)"
+                                        :disabled="rIdx === 0"
+                                        class="p-1 rounded-md bg-[var(--page)] border border-[var(--border)] text-[var(--muted)] hover:text-[var(--text)] disabled:opacity-30 cursor-pointer"
+                                        title="Move Position Up"
+                                    >
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        @click="moveRecord(rIdx, 1)"
+                                        :disabled="rIdx === records.length - 1"
+                                        class="p-1 rounded-md bg-[var(--page)] border border-[var(--border)] text-[var(--muted)] hover:text-[var(--text)] disabled:opacity-30 cursor-pointer"
+                                        title="Move Position Down"
+                                    >
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                                    </button>
+                                    <span class="text-[10px] text-[var(--muted)] font-mono ml-0.5">Pos @{{ rIdx + 1 }}</span>
+                                </div>
+
+                                <!-- Card Actions (Edit, Delete, Status) -->
+                                <slot name="row-actions" :row="row">
+                                    <v-row-actions
+                                        :row="row"
+                                        :actions="rowActionsConfig"
+                                        :edit-url="row.edit_url || getEditUrl(row)"
+                                        @delete="confirmDeleteRow"
+                                        @toggle-status="confirmToggleRowStatus"
+                                    ></v-row-actions>
+                                </slot>
+                            </div>
+                        </slot>
+                    </div>
+                </div>
             </div>
 
             <!-- Pagination Footer: Compact -->
@@ -504,6 +719,66 @@
             </div>
         </teleport>
 
+        <!-- Fields Visibility Slide-Over Drawer (Show/Hide Attributes) -->
+        <teleport to="body">
+            <div v-if="isVisibilityDrawerOpen" class="fixed inset-0 z-[1000] overflow-hidden">
+                <div class="fixed inset-0 bg-black/40 backdrop-blur-xs transition-opacity" @click="isVisibilityDrawerOpen = false"></div>
+                <div class="fixed inset-y-0 right-0 max-w-full flex">
+                    <div class="w-80 max-w-[calc(100vw-1rem)] bg-[var(--card)] border-l border-[var(--border)] shadow-2xl flex flex-col z-10 text-[var(--text)] transform transition-transform duration-300 ease-in-out">
+                        <div class="p-3 px-4 border-b border-[var(--border)] flex items-center justify-between bg-[var(--page)]">
+                            <div class="flex items-center gap-2">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-[var(--teal)]"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                <h2 class="text-xs font-bold uppercase tracking-wider text-[var(--text)]">Card Fields Visibility</h2>
+                                <span class="px-1.5 py-0.2 rounded-full bg-[var(--soft)] text-[var(--teal)] text-[10px] font-bold border border-[var(--border)]">
+                                    @{{ visibleColumns.length }} of @{{ resolvedColumns.length }}
+                                </span>
+                            </div>
+                            <button type="button" @click="isVisibilityDrawerOpen = false" class="w-7 h-7 rounded-lg hover:bg-[var(--soft)] grid place-items-center text-base font-bold text-[var(--muted)] hover:text-[var(--text)] cursor-pointer">&times;</button>
+                        </div>
+                        <div class="p-4 flex-1 overflow-y-auto space-y-3">
+                            <p class="text-[11px] text-[var(--muted)] leading-relaxed">
+                                Toggle which attributes and columns appear in your cards and table:
+                            </p>
+                            <div class="space-y-1.5">
+                                <label
+                                    v-for="col in resolvedColumns"
+                                    :key="col.index || col.key"
+                                    class="flex items-center justify-between p-2.5 rounded-xl border border-[var(--border)] bg-[var(--page)] hover:border-[var(--teal)]/40 transition-colors cursor-pointer select-none"
+                                >
+                                    <div class="flex items-center gap-2 min-w-0">
+                                        <span class="text-xs font-semibold text-[var(--text)] truncate">@{{ col.label }}</span>
+                                        <span class="font-mono text-[10px] text-[var(--muted)]">(@{{ col.index || col.key }})</span>
+                                    </div>
+                                    <input
+                                        type="checkbox"
+                                        :checked="isColumnVisible(col.index || col.key)"
+                                        @change="toggleColumnVisibility(col.index || col.key)"
+                                        class="w-4 h-4 rounded border-[var(--border)] text-[var(--teal)] focus:ring-[var(--teal)] cursor-pointer"
+                                    />
+                                </label>
+                            </div>
+                        </div>
+                        <div class="p-3 px-4 border-t border-[var(--border)] bg-[var(--page)] flex items-center justify-between gap-2">
+                            <button
+                                type="button"
+                                @click="resetColumnVisibility"
+                                class="text-xs text-[var(--muted)] hover:text-[var(--teal)] underline font-medium cursor-pointer"
+                            >
+                                Reset defaults
+                            </button>
+                            <button
+                                type="button"
+                                @click="isVisibilityDrawerOpen = false"
+                                class="button button--primary text-xs px-4"
+                            >
+                                Done
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </teleport>
+
         <!-- Confirmation Dialog Modal -->
         <teleport to="body">
             <div
@@ -579,6 +854,8 @@
                 appliedFilters: {},
                 filterDraft: {},
                 isFilterDrawerOpen: false,
+                hiddenColumnKeys: [],
+                isVisibilityDrawerOpen: false,
                 selectedIds: [],
                 isEntireQuerySelected: false,
                 isLoading: false,
@@ -596,6 +873,37 @@
             };
         },
         computed: {
+            visibleColumns() {
+                return this.resolvedColumns.filter(col => {
+                    const key = col.index || col.key;
+                    return !this.hiddenColumnKeys.includes(key);
+                });
+            },
+            primaryColumn() {
+                return this.resolvedColumns.find(c => ['sku', 'code', 'id'].includes(c.index || c.key)) || this.resolvedColumns[0];
+            },
+            nameColumn() {
+                return this.resolvedColumns.find(c => ['name', 'title', 'label'].includes(c.index || c.key));
+            },
+            remainingVisibleColumns() {
+                const primaryKey = this.primaryColumn ? (this.primaryColumn.index || this.primaryColumn.key) : null;
+                const nameKey = this.nameColumn ? (this.nameColumn.index || this.nameColumn.key) : null;
+                return this.visibleColumns.filter(c => {
+                    const key = c.index || c.key;
+                    return key !== primaryKey && key !== nameKey && key !== 'status' && key !== 'is_active';
+                });
+            },
+            mobileSortOptions() {
+                const opts = [];
+                for (const col of this.resolvedColumns) {
+                    if (col.sortable !== false) {
+                        const key = col.index || col.key;
+                        opts.push({ value: `${key}:asc`, label: `${col.label} (A-Z / Asc)` });
+                        opts.push({ value: `${key}:desc`, label: `${col.label} (Z-A / Desc)` });
+                    }
+                }
+                return opts;
+            },
             resolvedColumns() {
                 if (this.initialConfig.columns && this.initialConfig.columns.length > 0) {
                     return this.initialConfig.columns;
@@ -712,9 +1020,57 @@
             }
         },
         mounted() {
+            try {
+                const storageKey = `datagrid_hidden_cols_${this.endpoint.replace(/[^a-zA-Z0-9]/g, '_')}`;
+                const saved = localStorage.getItem(storageKey);
+                if (saved) {
+                    this.hiddenColumnKeys = JSON.parse(saved);
+                }
+            } catch (e) {}
             this.fetchData(1);
         },
         methods: {
+            isColumnVisible(key) {
+                return !this.hiddenColumnKeys.includes(key);
+            },
+            toggleColumnVisibility(key) {
+                if (this.hiddenColumnKeys.includes(key)) {
+                    this.hiddenColumnKeys = this.hiddenColumnKeys.filter(k => k !== key);
+                } else {
+                    if (this.visibleColumns.length > 1) {
+                        this.hiddenColumnKeys.push(key);
+                    }
+                }
+                try {
+                    const storageKey = `datagrid_hidden_cols_${this.endpoint.replace(/[^a-zA-Z0-9]/g, '_')}`;
+                    localStorage.setItem(storageKey, JSON.stringify(this.hiddenColumnKeys));
+                } catch (e) {}
+            },
+            resetColumnVisibility() {
+                this.hiddenColumnKeys = [];
+                try {
+                    const storageKey = `datagrid_hidden_cols_${this.endpoint.replace(/[^a-zA-Z0-9]/g, '_')}`;
+                    localStorage.removeItem(storageKey);
+                } catch (e) {}
+            },
+            onMobileSortChange(val) {
+                if (!val) {
+                    this.currentSortColumn = '';
+                    this.currentSortDirection = 'asc';
+                } else {
+                    const parts = val.split(':');
+                    this.currentSortColumn = parts[0];
+                    this.currentSortDirection = parts[1] || 'asc';
+                }
+                this.fetchData(1);
+            },
+            moveRecord(fromIndex, direction) {
+                const toIndex = fromIndex + direction;
+                if (toIndex < 0 || toIndex >= this.records.length) return;
+                const moved = this.records.splice(fromIndex, 1)[0];
+                this.records.splice(toIndex, 0, moved);
+                this.$emit('reorder', { item: moved, fromIndex, toIndex, records: this.records });
+            },
             openFilterDrawer() {
                 this.filterDraft = { ...this.appliedFilters };
                 this.isFilterDrawerOpen = true;

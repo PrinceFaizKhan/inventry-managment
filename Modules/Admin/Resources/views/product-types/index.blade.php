@@ -85,5 +85,20 @@
     </x-admin::datagrid>
 
     <div class="hidden" aria-hidden="true"><product-types-list></product-types-list></div>
+
+    <!-- Mobile Floating Action Button (FAB) for instant thumb reachability -->
+    <div class="sm:hidden fixed bottom-6 right-5 z-40">
+        <a
+            href="{{ route('admin.catalog.product-types.create') }}"
+            class="h-12 px-4 rounded-2xl bg-gradient-to-r from-teal-500 to-teal-400 text-slate-950 font-bold text-xs shadow-lg shadow-teal-500/30 flex items-center gap-2 active:scale-95 transition-transform cursor-pointer"
+            title="Create Product Type"
+        >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span>Create</span>
+        </a>
+    </div>
 </div>
 @endsection

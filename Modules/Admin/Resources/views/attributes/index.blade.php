@@ -11,12 +11,12 @@
             <h1 class="text-2xl font-bold tracking-tight text-[var(--text)]">Attributes</h1>
             <p class="page-copy text-sm text-[var(--muted)] mt-1">Define and manage reusable product attributes for your catalog.</p>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 w-full sm:w-auto">
             {!! view_event_render('catalog.attributes.header.actions') !!}
             <button
                 type="button"
                 onclick="window.dispatchEvent(new CustomEvent('ht-open-create-attribute'))"
-                class="button button--primary inline-flex items-center gap-2 cursor-pointer shadow-sm hover:scale-[1.02] active:scale-[0.98] transition-transform"
+                class="button button--primary inline-flex items-center justify-center gap-2 cursor-pointer shadow-sm hover:scale-[1.02] active:scale-[0.98] transition-transform text-xs w-full sm:w-auto"
                 title="Create New Attribute"
             >
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
@@ -45,6 +45,22 @@
     </x-admin::datagrid>
 
     <div class="hidden" aria-hidden="true"><attributes-list></attributes-list></div>
+
+    <!-- Mobile Floating Action Button (FAB) for instant thumb reachability -->
+    <div class="sm:hidden fixed bottom-6 right-5 z-40">
+        <button
+            type="button"
+            onclick="window.dispatchEvent(new CustomEvent('ht-open-create-attribute'))"
+            class="h-12 px-4 rounded-2xl bg-gradient-to-r from-teal-500 to-teal-400 text-slate-950 font-bold text-xs shadow-lg shadow-teal-500/30 flex items-center gap-2 active:scale-95 transition-transform cursor-pointer"
+            title="Create Attribute"
+        >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span>Create</span>
+        </button>
+    </div>
 
     @include('admin::attributes.create-modal', ['types' => $types ?? []])
 
