@@ -37,6 +37,7 @@ class ProductResource extends JsonResource
                 'level_count' => $this->productTypeVariant->level_count,
             ] : null,
             'parent_id' => $this->parent_id,
+            'connectors' => $this->relationLoaded('connectors') ? $this->connectors->pluck('connector_code')->values()->all() : $this->connectorCodes(),
             'created_at' => $this->created_at?->toIso8601String(),
             'updated_at' => $this->updated_at?->toIso8601String(),
         ];

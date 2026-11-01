@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Modules\Attribute\Models\Attribute;
+use Modules\Core\Support\Connector\ConnectorRegistry;
 use Modules\Product\DataGrids\ProductDataGrid;
 use Modules\Product\Http\Requests\StoreProductRequest;
 use Modules\Product\Http\Requests\UpdateProductRequest;
@@ -77,6 +78,7 @@ class ProductController extends Controller
         Gate::authorize('update', $product);
 
         $product->load([
+            'connectors',
             'productType.groups.attributeGroup:id,name,code',
             'productType.groups.groupAttributes.attribute.options',
             'productTypeVariant.axes.attribute.options',
@@ -202,6 +204,10 @@ class ProductController extends Controller
             ])->values()->all(),
         ])->values()->all();
 
+        $connectorRegistry = app(ConnectorRegistry::class);
+        $availableConnectors = $connectorRegistry->all();
+        $initialConnectors = $product->connectors->pluck('connector_code')->values()->all();
+
         return view('admin::products.edit', [
             'product' => $product,
             'groupsData' => $groupsData,
@@ -209,6 +215,8 @@ class ProductController extends Controller
             'childVariantsData' => $childVariantsData,
             'variantAxesData' => $variantAxesData,
             'variantAttributesData' => $variantAttributesData,
+            'availableConnectors' => $availableConnectors,
+            'initialConnectors' => $initialConnectors,
         ]);
     }
 
@@ -244,6 +252,11 @@ class ProductController extends Controller
 
             $product->save();
 
+            // Sync assigned connectors / sales channels
+            if ($request->has('connectors') && is_array($request->input('connectors'))) {
+                $product->syncConnectors($request->input('connectors'));
+            }
+
             // Save parent attribute values
             if ($request->has('values') && is_array($request->input('values'))) {
                 $submittedValues = $request->input('values');
@@ -277,6 +290,11 @@ class ProductController extends Controller
                     $attrVal->setValue($value, $attribute->type);
                     $attrVal->save();
                 }
+            }
+
+            // Synchronize connectors (independent modules)
+            if ($request->has('connectors') && is_array($request->input('connectors'))) {
+                $product->syncConnectors($request->input('connectors'));
             }
 
             // Synchronize child variants for configurable products
@@ -365,6 +383,7 @@ class ProductController extends Controller
         });
 
         $product->load([
+            'connectors',
             'productType',
             'productTypeVariant.variantAttributes',
             'variants.attributeValues',

@@ -5,6 +5,7 @@ namespace Modules\Core\Providers;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Modules\Core\Http\Middleware\SetLocale;
+use Modules\Core\Support\Connector\ConnectorRegistry;
 use Modules\Core\Support\Grid\GridBulkActionHandler;
 use Modules\Core\Support\Grid\GridConfigurationException;
 use Modules\Core\Support\Grid\GridDataProvider;
@@ -50,6 +51,7 @@ class CoreServiceProvider extends ServiceProvider
         $this->app->singleton(MenuRegistry::class);
         $this->app->singleton(GridRegistry::class);
         $this->app->singleton(PermissionRegistry::class);
+        $this->app->singleton(ConnectorRegistry::class);
 
         // Container aliases for backwards compatibility
         $this->app->alias(ViewRenderEventManager::class, 'App\Support\ViewEvent\ViewRenderEventManager');

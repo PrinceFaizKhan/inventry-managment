@@ -40,6 +40,14 @@ class UpdateProductRequest extends FormRequest
                 'sometimes',
                 'array',
             ],
+            'connectors' => [
+                'sometimes',
+                'array',
+            ],
+            'connectors.*' => [
+                'string',
+                'max:64',
+            ],
             'variants' => [
                 'sometimes',
                 'array',

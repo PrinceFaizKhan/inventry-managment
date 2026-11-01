@@ -200,6 +200,7 @@
         <x-admin::toggle />
         <x-admin::textarea />
         <x-admin::rich-text />
+        <x-admin::dropdown.multiselect />
     </div>
 
     {!! view_event_render('layout.body.after') !!}

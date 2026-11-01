@@ -78,6 +78,53 @@ class Product extends Model
         return $this->hasMany(ProductAttributeValue::class);
     }
 
+    /**
+     * Assigned independent connectors / channels for this product.
+     */
+    public function connectors(): HasMany
+    {
+        return $this->hasMany(ProductConnector::class, 'product_id');
+    }
+
+    /**
+     * Get list of assigned connector codes.
+     *
+     * @return array<int, string>
+     */
+    public function connectorCodes(): array
+    {
+        return $this->connectors->pluck('connector_code')->values()->all();
+    }
+
+    /**
+     * Check if product is assigned to a specific connector.
+     */
+    public function hasConnector(string $code): bool
+    {
+        return $this->connectors->contains('connector_code', $code);
+    }
+
+    /**
+     * Sync assigned connectors.
+     *
+     * @param  array<int, string>  $codes
+     */
+    public function syncConnectors(array $codes): void
+    {
+        $uniqueCodes = array_values(array_unique(array_filter($codes)));
+
+        // Remove connectors not in submitted list
+        $this->connectors()->whereNotIn('connector_code', $uniqueCodes)->delete();
+
+        // Add or keep connectors
+        foreach ($uniqueCodes as $code) {
+            $this->connectors()->firstOrCreate(
+                ['connector_code' => $code],
+                ['status' => true, 'sync_status' => 'synced']
+            );
+        }
+    }
+
     public function isSimple(): bool
     {
         return $this->type === 'simple';

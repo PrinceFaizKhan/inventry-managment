@@ -5,6 +5,8 @@
 
 @section('content')
 <div class="product-edit-page space-y-6">
+    {!! view_event_render('catalog.product.edit.before', ['product' => $product]) !!}
+
     <v-product-editor
         :initial-product='@json($product)'
         :initial-groups='@json($groupsData)'
@@ -12,8 +14,22 @@
         :initial-child-variants='@json($childVariantsData)'
         :variant-axes='@json($variantAxesData)'
         :variant-attributes='@json($variantAttributesData)'
+        :available-connectors='@json($availableConnectors)'
+        :initial-connectors='@json($initialConnectors)'
         back-url="{{ route('admin.catalog.products.index') }}"
-    ></v-product-editor>
+    >
+        <template #sidebar-before>
+            {!! view_event_render('catalog.product.edit.right_sidebar.before', ['product' => $product]) !!}
+        </template>
+        <template #connectors-extra>
+            {!! view_event_render('catalog.product.edit.right_sidebar.connectors', ['product' => $product]) !!}
+        </template>
+        <template #sidebar-after>
+            {!! view_event_render('catalog.product.edit.right_sidebar.after', ['product' => $product]) !!}
+        </template>
+    </v-product-editor>
+
+    {!! view_event_render('catalog.product.edit.after', ['product' => $product]) !!}
 </div>
 
 @pushOnce('scripts')
@@ -324,8 +340,11 @@
                 </div>
             </div>
 
-            <!-- Right Sidebar: Product Meta & Variant Profile (1 col) -->
+            <!-- Right Sidebar: Product Meta & Variant Profile & Connectors (1 col) -->
             <div class="space-y-6">
+                <!-- Slot for modules before right sidebar cards -->
+                <slot name="sidebar-before"></slot>
+
                 <!-- Product Metadata Card -->
                 <div class="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5 shadow-xs space-y-4">
                     <h3 class="text-xs font-bold uppercase tracking-wider text-[var(--muted)]">Product Specifications</h3>
@@ -427,6 +446,57 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Published Modules Container Card -->
+                <div class="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5 shadow-xs space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <div class="w-7 h-7 rounded-lg bg-[var(--soft)] text-[var(--teal)] flex items-center justify-center shrink-0">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                                    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-xs font-bold uppercase tracking-wider text-[var(--text)]">Published Modules</h3>
+                                <p class="text-[10px] text-[var(--muted)]">Publish product to installed independent modules</p>
+                            </div>
+                        </div>
+
+                        <span
+                            class="px-2 py-0.5 rounded text-[10px] font-mono font-bold"
+                            :class="selectedConnectors.length > 0 ? 'bg-teal-500/10 text-[var(--teal)] border border-[var(--teal)]/30' : 'bg-[var(--page)] text-[var(--muted)] border border-[var(--border)]'"
+                        >
+                            @{{ selectedConnectors.length }} / @{{ availableConnectorsList.length }}
+                        </span>
+                    </div>
+
+                    <!-- Custom Dropdown MultiSelect Input Component -->
+                    <div class="space-y-2">
+                        <v-dropdown-multiselect
+                            :options="connectorOptions"
+                            v-model="selectedConnectors"
+                            @change="markDirty"
+                            placeholder="Select published modules..."
+                            size="sm"
+                            :disabled="availableConnectorsList.length === 0"
+                        />
+
+                        <!-- Helper note when no modules are installed vs when installed -->
+                        <p v-if="availableConnectorsList.length === 0" class="text-[11px] text-[var(--muted)] leading-relaxed italic">
+                            No connector modules installed yet. Modules you create and install will automatically appear here.
+                        </p>
+                        <p v-else class="text-[10.5px] text-[var(--muted)] leading-relaxed">
+                            Selected modules will receive and publish this product across their channels.
+                        </p>
+                    </div>
+
+                    <!-- Injected view_event_render slot for independent connector modules -->
+                    <slot name="connectors-extra"></slot>
+                </div>
+
+                <!-- Slot for modules after right sidebar cards -->
+                <slot name="sidebar-after"></slot>
             </div>
         </div>
 
@@ -822,6 +892,14 @@
                 type: Array,
                 default: () => []
             },
+            availableConnectors: {
+                type: Array,
+                default: () => []
+            },
+            initialConnectors: {
+                type: Array,
+                default: () => []
+            },
             backUrl: {
                 type: String,
                 default: '/catalog/products'
@@ -862,6 +940,8 @@
                 childVariants: childVariants,
                 axesList: Array.isArray(this.variantAxes) ? this.variantAxes : [],
                 variantAttributesList: Array.isArray(this.variantAttributes) ? this.variantAttributes : [],
+                availableConnectorsList: Array.isArray(this.availableConnectors) ? this.availableConnectors : [],
+                selectedConnectors: Array.isArray(this.initialConnectors) ? [...this.initialConnectors] : [],
                 collapsedGroups: {}, // false by default (open)
                 saving: false,
                 isDirty: false,
@@ -910,6 +990,12 @@
                     }
                 }
                 return parents;
+            },
+            connectorOptions() {
+                return (this.availableConnectorsList || []).map(c => ({
+                    value: c.code,
+                    label: c.name || c.code
+                }));
             }
         },
         methods: {
@@ -923,6 +1009,17 @@
                 this.isDirty = true;
                 this.saveSuccess = false;
                 this.saveError = null;
+            },
+            isConnectorSelected(code) {
+                return this.selectedConnectors.includes(code);
+            },
+            selectAllConnectors() {
+                this.selectedConnectors = this.availableConnectorsList.map(c => c.code);
+                this.markDirty();
+            },
+            clearAllConnectors() {
+                this.selectedConnectors = [];
+                this.markDirty();
             },
             formatOptionTag(opt) {
                 if (!opt) return '';
@@ -1042,7 +1139,8 @@
                 try {
                     const payload = {
                         status: this.status,
-                        values: this.values
+                        values: this.values,
+                        connectors: this.selectedConnectors
                     };
 
                     if (this.product.type === 'configurable') {
@@ -1060,6 +1158,9 @@
 
                     if (res?.data?.data) {
                         this.product = { ...this.product, ...res.data.data };
+                        if (Array.isArray(res.data.data.connectors)) {
+                            this.selectedConnectors = [...res.data.data.connectors];
+                        }
                     }
 
                     this.isDirty = false;
