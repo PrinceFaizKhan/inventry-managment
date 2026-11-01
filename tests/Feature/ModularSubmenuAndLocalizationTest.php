@@ -94,7 +94,7 @@ class ModularSubmenuAndLocalizationTest extends TestCase
         // 1. Index page
         $indexRes = $this->actingAs($user)->get('/catalog/attributes')->assertOk();
         $indexRes->assertSee('<attributes-list></attributes-list>', false);
-        $indexRes->assertSee('Haseen');
+        $indexRes->assertSee('Khan Group');
 
         // 2. Create page
         $createRes = $this->actingAs($user)->get('/catalog/attributes/create')->assertOk();

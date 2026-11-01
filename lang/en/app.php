@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'brand_name' => 'Haseen Telecom',
+    'brand_name' => 'Khan Group & Company',
     'portal_name' => 'Admin Portal',
     'welcome' => 'Welcome back',
     'saved' => 'Saved successfully.',

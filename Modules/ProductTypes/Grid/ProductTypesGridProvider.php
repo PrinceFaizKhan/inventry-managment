@@ -53,7 +53,7 @@ class ProductTypesGridProvider implements GridDataProvider
             'groups_count' => (int) ($model->groups_count ?? 0),
             'attributes_count' => (int) ($model->attributes_count ?? 0),
             'variants_count' => (int) ($model->variants_count ?? 0),
-            'created_at' => $model->created_at?->format('M d, Y H:i'),
+            'created_at' => $model->created_at?->format('M d, Y'),
         ];
     }
 

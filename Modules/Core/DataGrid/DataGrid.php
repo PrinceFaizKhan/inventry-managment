@@ -303,6 +303,13 @@ abstract class DataGrid implements Responsable
             foreach ($this->columns as $col) {
                 if ($closure = $col->getClosure()) {
                     $row[$col->getIndex()] = $closure($record);
+                } elseif (in_array($col->getIndex(), ['created_at', 'updated_at'], true)) {
+                    $rawDate = $record->{$col->getIndex()} ?? ($row[$col->getIndex()] ?? null);
+                    if ($rawDate instanceof \DateTimeInterface) {
+                        $row[$col->getIndex()] = $rawDate->format('M d, Y');
+                    } elseif (is_string($rawDate) && ! empty($rawDate) && ($ts = strtotime($rawDate)) !== false) {
+                        $row[$col->getIndex()] = date('M d, Y', $ts);
+                    }
                 } elseif (isset($row[$col->getIndex()]) && is_bool($row[$col->getIndex()])) {
                     $row[$col->getIndex()] = (bool) $row[$col->getIndex()];
                 }

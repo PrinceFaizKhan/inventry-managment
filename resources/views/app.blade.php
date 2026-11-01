@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Haseen Telecom · Admin</title>
+    <title>Khan Group & Company · Admin</title>
     {!! view_event_render('layout.head') !!}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>

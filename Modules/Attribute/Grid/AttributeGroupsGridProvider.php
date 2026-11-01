@@ -39,7 +39,7 @@ class AttributeGroupsGridProvider implements GridDataProvider
             'id' => $model->id,
             'name' => $model->name,
             'code' => $model->code,
-            'created_at' => $model->created_at?->format('M d, Y H:i'),
+            'created_at' => $model->created_at?->format('M d, Y'),
         ];
     }
 

@@ -116,7 +116,7 @@ class ProductsGridProvider implements GridDataProvider
             'type' => $model->type,
             'family' => $model->productType?->name ?? '—',
             'status' => (bool) $model->status,
-            'created_at' => $model->created_at?->format('M d, Y H:i'),
+            'created_at' => $model->created_at?->format('M d, Y'),
         ];
 
         if ($model->relationLoaded('attributeValues')) {

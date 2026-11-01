@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Haseen Telecom · Studio')</title>
+    <title>@yield('title', 'Khan Group & Company · Studio')</title>
     {!! view_event_render('layout.head') !!}
     <script>
         // Synchronously restore theme and sidebar state to prevent layout shift
@@ -57,14 +57,14 @@
             <div class="flex flex-col w-full">
                 <!-- Top Brand Pod & Collapse Toggle -->
                 <div class="side-brand-wrap flex items-center justify-between w-full px-3 py-1.5 mb-2 border-b border-[var(--border)]/70">
-                    <a href="{{ url('dashboard') }}" class="flex items-center gap-3 overflow-hidden group py-1" title="Haseen Telecom Studio">
+                    <a href="{{ url('dashboard') }}" class="flex items-center gap-3 overflow-hidden group py-1" title="Khan Group & Company Studio">
                         <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-[var(--teal)] to-cyan-400 p-[1.5px] shadow-sm hover:scale-105 transition-transform flex-shrink-0 flex items-center justify-center">
                             <div class="w-full h-full bg-[var(--card)] rounded-[10px] flex items-center justify-center group-hover:bg-transparent transition-colors">
-                                <span class="font-black text-sm tracking-tighter text-[var(--teal)] group-hover:text-white">HT</span>
+                                <span class="font-black text-sm tracking-tighter text-[var(--teal)] group-hover:text-white">KG</span>
                             </div>
                         </div>
                         <div class="sidebar-brand-text min-w-0 text-left">
-                            <b class="text-sm font-bold block leading-tight text-[var(--text)] truncate">Haseen <em class="text-[var(--teal)] not-italic">Telecom</em></b>
+                            <b class="text-sm font-bold block leading-tight text-[var(--text)] truncate">Khan Group <em class="text-[var(--teal)] not-italic">&amp; Company</em></b>
                             <small class="text-[9px] uppercase tracking-wider font-semibold text-[var(--muted)] block">Studio Workspace</small>
                         </div>
                     </a>
@@ -167,7 +167,7 @@
                             $adminUser = auth()->user();
                             $profileData = [
                                 'name' => $adminUser?->name ?? 'Admin',
-                                'email' => $adminUser?->email ?? 'admin@haseentelecom.com',
+                                'email' => $adminUser?->email ?? 'admin@khangroup.com',
                                 'role' => $adminUser?->role?->name ?? 'Administrator',
                             ];
                         @endphp

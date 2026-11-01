@@ -381,6 +381,9 @@
                                     <template v-else-if="col.type === 'badge'">
                                         <v-status-badge :value="row[col.index || col.key]" type="badge" size="sm"></v-status-badge>
                                     </template>
+                                    <template v-else-if="(col.index || col.key) === 'created_at' || (col.index || col.key) === 'updated_at' || col.type === 'date'">
+                                        @{{ formatDisplayDate(row[col.index || col.key]) }}
+                                    </template>
                                     <template v-else>
                                         @{{ row[col.index || col.key] ?? '—' }}
                                     </template>
@@ -533,6 +536,9 @@
                                             </template>
                                             <template v-else-if="col.type === 'badge'">
                                                 <v-status-badge :value="row[col.index || col.key]" type="badge" size="sm"></v-status-badge>
+                                            </template>
+                                            <template v-else-if="(col.index || col.key) === 'created_at' || (col.index || col.key) === 'updated_at' || col.type === 'date'">
+                                                @{{ formatDisplayDate(row[col.index || col.key]) }}
                                             </template>
                                             <template v-else>
                                                 @{{ row[col.index || col.key] ?? '—' }}
@@ -1344,6 +1350,19 @@
                     localStorage.removeItem(storageKey);
                 } catch (e) {}
                 this.columnOrderKeys = [];
+            },
+            formatDisplayDate(val) {
+                if (!val) return '—';
+                if (typeof val === 'string') {
+                    if (val.includes('T')) {
+                        const d = new Date(val);
+                        if (!isNaN(d.getTime())) {
+                            return d.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
+                        }
+                    }
+                    return val.replace(/\s+\d{1,2}:\d{2}(:\d{2})?$/, '');
+                }
+                return val;
             },
             applyDefaultVisibility() {
                 const defaultCols = this.meta?.default_columns || this.initialConfig?.default_columns;

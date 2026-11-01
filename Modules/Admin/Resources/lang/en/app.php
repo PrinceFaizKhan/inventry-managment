@@ -3,7 +3,7 @@
 return [
     'title' => 'Admin Authentication',
     'welcome_back' => 'Welcome back',
-    'welcome_sub' => 'Sign in to Haseen Telecom admin.',
+    'welcome_sub' => 'Sign in to Khan Group & Company admin.',
     'email' => 'Email address',
     'password' => 'Password',
     'remember_me' => 'Remember me',

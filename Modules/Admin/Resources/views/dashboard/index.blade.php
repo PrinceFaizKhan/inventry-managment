@@ -8,7 +8,7 @@
     <!-- Welcome Header -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[var(--border)]">
         <div>
-            <p class="eyebrow">Haseen Telecom · Admin Workspace</p>
+            <p class="eyebrow">Khan Group &amp; Company · Admin Workspace</p>
             <h1 class="text-2xl font-bold tracking-tight text-[var(--text)]">
                 Welcome, {{ auth()->user()?->name ?? 'Admin' }}!
             </h1>

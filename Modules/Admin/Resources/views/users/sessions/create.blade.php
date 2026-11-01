@@ -1,6 +1,6 @@
 <x-admin::layouts.anonymous>
     <x-slot:title>
-        {{ __('admin::app.title') ?? 'Sign In · Haseen Telecom' }}
+        {{ __('admin::app.title') ?? 'Sign In · Khan Group & Company' }}
     </x-slot>
 
     <div class="login">
@@ -12,7 +12,7 @@
                     </svg>
                 </span>
                 <div>
-                    <b>Haseen <em>Telecom</em></b>
+                    <b>Khan Group <em>&amp; Company</em></b>
                     <small>Admin Workspace</small>
                 </div>
             </div>
@@ -24,7 +24,7 @@
 
         <main>
             <section class="intro">
-                <p class="eyebrow">Haseen Telecom · Admin Portal</p>
+                <p class="eyebrow">Khan Group &amp; Company · Admin Portal</p>
                 <h1>Your business.<br/><em>Connected &amp; in control.</em></h1>
                 <p>Manage your catalog, track inventory and keep every sale in one place.</p>
                 <div class="tags">
@@ -53,7 +53,7 @@
                     </span>
 
                     <h2>Welcome back</h2>
-                    <p>Sign in to Haseen Telecom admin.</p>
+                    <p>Sign in to Khan Group &amp; Company admin.</p>
                 </div>
 
                 @if ($errors->any())
@@ -134,7 +134,7 @@
             </section>
         </main>
 
-        <footer>Haseen Telecom <i>·</i> Admin workspace</footer>
+        <footer>Khan Group &amp; Company <i>·</i> Admin workspace</footer>
     </div>
 
     @pushOnce('scripts')

@@ -34,7 +34,7 @@ const currentLocale = ref<LocaleCode>(initialLocale)
 const translations: Record<LocaleCode, Record<string, string>> = {
   'en-IN': {
     // App & Layout
-    'brand.title': 'Haseen Telecom',
+    'brand.title': 'Khan Group & Company',
     'brand.portal': 'Admin Portal',
     'brand.tagline': 'Your business. Connected & in control.',
     'brand.tagline_desc': 'Manage your catalog, track inventory and keep every sale in one place.',
@@ -94,7 +94,7 @@ const translations: Record<LocaleCode, Record<string, string>> = {
 
     // Auth
     'auth.welcome_back': 'Welcome back',
-    'auth.welcome_sub': 'Sign in to Haseen Telecom admin.',
+    'auth.welcome_sub': 'Sign in to Khan Group & Company admin.',
     'auth.email': 'Email address',
     'auth.password': 'Password',
     'auth.remember_me': 'Remember me',
