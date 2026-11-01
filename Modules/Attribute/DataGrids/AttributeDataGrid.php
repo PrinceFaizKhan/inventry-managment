@@ -13,7 +13,7 @@ class AttributeDataGrid extends DataGrid
 {
     public function build(): void
     {
-        $this->source(Attribute::query()->select(['id', 'name', 'code', 'type', 'required', 'is_filterable', 'created_at']))
+        $this->source(Attribute::query()->select(['id', 'name', 'code', 'type', 'required', 'is_unique', 'is_filterable', 'created_at']))
             ->primaryKey('id')
             ->searchable(['name', 'code'])
             ->defaultSort('name', 'asc')
@@ -23,6 +23,7 @@ class AttributeDataGrid extends DataGrid
                 Column::make('name')->label('Name')->sortable()->searchable(),
                 Column::make('type')->label('Type')->sortable()->badge(),
                 Column::make('required')->label('Required')->sortable()->boolean(),
+                Column::make('is_unique')->label('Unique')->sortable()->boolean(),
                 Column::make('is_filterable')->label('Filterable')->sortable()->boolean(),
             ])
             ->filters([
@@ -39,6 +40,7 @@ class AttributeDataGrid extends DataGrid
                     'money' => 'Money',
                 ]),
                 Filter::boolean('required')->label('Required'),
+                Filter::boolean('is_unique')->label('Unique'),
                 Filter::boolean('is_filterable')->label('Filterable'),
             ])
             ->actions([

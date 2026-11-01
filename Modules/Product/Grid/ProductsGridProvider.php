@@ -19,7 +19,10 @@ class ProductsGridProvider implements GridDataProvider
     {
         $query = Product::query()
             ->select(['products.id', 'products.sku', 'products.type', 'products.product_type_id', 'products.status', 'products.created_at'])
-            ->with(['productType:id,name,code'])
+            ->with([
+                'productType:id,name,code',
+                'attributeValues.attribute.options',
+            ])
             ->parentsOnly();
 
         if ($parameters['search'] !== '') {
@@ -40,7 +43,17 @@ class ProductsGridProvider implements GridDataProvider
             $query->where('products.product_type_id', $filters['family']);
         }
 
-        // 2. Dynamic filterable attributes filters
+        // 2. Type filter (configurable / simple)
+        if (! empty($filters['type'])) {
+            $query->where('products.type', $filters['type']);
+        }
+
+        // 3. Status filter (active / inactive)
+        if (isset($filters['status']) && $filters['status'] !== '' && $filters['status'] !== null) {
+            $query->where('products.status', filter_var($filters['status'], FILTER_VALIDATE_BOOLEAN));
+        }
+
+        // 4. Dynamic filterable attributes filters
         if (Schema::hasTable('attributes')) {
             $filterableAttributes = Attribute::query()
                 ->where('is_filterable', true)
@@ -48,7 +61,7 @@ class ProductsGridProvider implements GridDataProvider
                 ->keyBy('code');
 
             foreach ($filters as $code => $value) {
-                if ($value === '' || $value === null || $code === 'family') {
+                if ($value === '' || $value === null || in_array($code, ['family', 'type', 'status'], true)) {
                     continue;
                 }
 
@@ -97,7 +110,7 @@ class ProductsGridProvider implements GridDataProvider
     public function row(Model $model): array
     {
         /** @var Product $model */
-        return [
+        $row = [
             'id' => $model->id,
             'sku' => $model->sku,
             'type' => $model->type,
@@ -105,6 +118,54 @@ class ProductsGridProvider implements GridDataProvider
             'status' => (bool) $model->status,
             'created_at' => $model->created_at?->format('M d, Y H:i'),
         ];
+
+        if ($model->relationLoaded('attributeValues')) {
+            foreach ($model->attributeValues as $attrVal) {
+                if ($attrVal->attribute) {
+                    $row[$attrVal->attribute->code] = $this->formatAttributeValue($attrVal);
+                }
+            }
+        }
+
+        return $row;
+    }
+
+    protected function formatAttributeValue(ProductAttributeValue $attrVal): mixed
+    {
+        $attr = $attrVal->attribute;
+        if (! $attr) {
+            return $attrVal->getValue();
+        }
+
+        if ($attr->type === 'boolean') {
+            return (bool) $attrVal->boolean_value;
+        }
+
+        if (in_array($attr->type, ['select', 'radio'])) {
+            $val = $attrVal->integer_value ?? $attrVal->text_value;
+            if ($val !== null && $attr->relationLoaded('options') && $attr->options->isNotEmpty()) {
+                $opt = $attr->options->first(fn ($o) => (string) $o->id === (string) $val || $o->code === (string) $val);
+                if ($opt) {
+                    return $opt->label ?? $opt->code;
+                }
+            }
+
+            return $val;
+        }
+
+        if (in_array($attr->type, ['multiselect', 'checkbox']) && is_array($attrVal->json_value)) {
+            if ($attr->relationLoaded('options') && $attr->options->isNotEmpty()) {
+                return collect($attrVal->json_value)->map(function ($val) use ($attr) {
+                    $opt = $attr->options->first(fn ($o) => (string) $o->id === (string) $val || $o->code === (string) $val);
+
+                    return $opt ? ($opt->label ?? $opt->code) : $val;
+                })->implode(', ');
+            }
+
+            return implode(', ', $attrVal->json_value);
+        }
+
+        return $attrVal->getValue();
     }
 
     public function filterOptions(): array
@@ -118,7 +179,19 @@ class ProductsGridProvider implements GridDataProvider
             'label' => $pt->name,
         ])->values()->all();
 
-        // 2. Filterable Attributes options
+        // 2. Product Type filter options
+        $options['type'] = [
+            ['value' => 'configurable', 'label' => 'Configurable'],
+            ['value' => 'simple', 'label' => 'Simple'],
+        ];
+
+        // 3. Product Status filter options
+        $options['status'] = [
+            ['value' => '1', 'label' => 'Active'],
+            ['value' => '0', 'label' => 'Inactive'],
+        ];
+
+        // 4. Dynamic Filterable Attributes options (attributes where is_filterable = true)
         if (Schema::hasTable('attributes')) {
             $filterableAttributes = Attribute::query()
                 ->where('is_filterable', true)
@@ -127,6 +200,10 @@ class ProductsGridProvider implements GridDataProvider
                 ->get();
 
             foreach ($filterableAttributes as $attribute) {
+                if (in_array($attribute->code, ['family', 'type', 'status'], true)) {
+                    continue;
+                }
+
                 if ($attribute->type === 'boolean') {
                     $options[$attribute->code] = [
                         ['value' => '1', 'label' => 'Yes'],
@@ -161,6 +238,14 @@ class ProductsGridProvider implements GridDataProvider
     {
         if ($filter === 'family') {
             return is_numeric($value) && ProductType::query()->where('id', $value)->exists();
+        }
+
+        if ($filter === 'type') {
+            return in_array($value, ['simple', 'configurable'], true);
+        }
+
+        if ($filter === 'status') {
+            return in_array((string) $value, ['1', '0', 'true', 'false'], true);
         }
 
         if (Schema::hasTable('attributes')) {

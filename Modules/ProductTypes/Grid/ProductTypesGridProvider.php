@@ -28,6 +28,16 @@ class ProductTypesGridProvider implements GridDataProvider
             });
         }
 
+        if (isset($parameters['filters']['has_variants'])) {
+            $val = filter_var($parameters['filters']['has_variants'], FILTER_VALIDATE_BOOLEAN);
+            $val ? $query->has('variants') : $query->doesntHave('variants');
+        }
+
+        if (isset($parameters['filters']['has_groups'])) {
+            $val = filter_var($parameters['filters']['has_groups'], FILTER_VALIDATE_BOOLEAN);
+            $val ? $query->has('groups') : $query->doesntHave('groups');
+        }
+
         return $query
             ->orderBy($definition['sorts'][$parameters['sort']], $parameters['direction'])
             ->orderBy('id');
@@ -49,12 +59,24 @@ class ProductTypesGridProvider implements GridDataProvider
 
     public function filterOptions(): array
     {
-        return [];
+        return [
+            'has_variants' => [
+                ['value' => '1', 'label' => 'Yes (Configurable with Variants)'],
+                ['value' => '0', 'label' => 'No (Simple Only)'],
+            ],
+            'has_groups' => [
+                ['value' => '1', 'label' => 'Yes (Has Groups)'],
+                ['value' => '0', 'label' => 'No (Empty)'],
+            ],
+        ];
     }
 
     public function acceptsFilterValue(string $filter, mixed $value): bool
     {
-        return false;
+        return match ($filter) {
+            'has_variants', 'has_groups' => in_array((string) $value, ['0', '1'], true),
+            default => false,
+        };
     }
 
     public function isSelectable(User $actor, Model $record): bool

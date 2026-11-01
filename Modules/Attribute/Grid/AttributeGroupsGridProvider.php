@@ -22,6 +22,11 @@ class AttributeGroupsGridProvider implements GridDataProvider
             });
         }
 
+        if (isset($parameters['filters']['has_families'])) {
+            $val = filter_var($parameters['filters']['has_families'], FILTER_VALIDATE_BOOLEAN);
+            $val ? $query->has('productTypeGroups') : $query->doesntHave('productTypeGroups');
+        }
+
         return $query
             ->orderBy($definition['sorts'][$parameters['sort']], $parameters['direction'])
             ->orderBy('id');
@@ -40,12 +45,20 @@ class AttributeGroupsGridProvider implements GridDataProvider
 
     public function filterOptions(): array
     {
-        return [];
+        return [
+            'has_families' => [
+                ['value' => '1', 'label' => 'Yes (Assigned to Families)'],
+                ['value' => '0', 'label' => 'No (Unassigned)'],
+            ],
+        ];
     }
 
     public function acceptsFilterValue(string $filter, mixed $value): bool
     {
-        return false;
+        return match ($filter) {
+            'has_families' => in_array((string) $value, ['0', '1'], true),
+            default => false,
+        };
     }
 
     public function isSelectable(User $actor, Model $record): bool

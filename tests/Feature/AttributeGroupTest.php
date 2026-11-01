@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\Attribute\Database\Seeders\AttributeGroupTableSeeder;
 use Modules\Attribute\Models\AttributeGroup;
+use Modules\ProductTypes\Models\ProductType;
 use Tests\TestCase;
 
 class AttributeGroupTest extends TestCase
@@ -57,6 +58,27 @@ class AttributeGroupTest extends TestCase
         $response->assertOk()
             ->assertJsonPath('meta.total', 2)
             ->assertJsonPath('data.0.code', 'general_info');
+    }
+
+    public function test_user_can_filter_attribute_groups_grid_by_families(): void
+    {
+        $user = $this->userWithRole('administration');
+
+        $group1 = AttributeGroup::create(['name' => 'General Information', 'code' => 'general_info']);
+        $group2 = AttributeGroup::create(['name' => 'Unassigned Details', 'code' => 'unassigned_details']);
+
+        $pt = ProductType::create(['name' => 'Default', 'code' => 'default']);
+        $pt->groups()->create(['attribute_group_id' => $group1->id, 'position' => 1]);
+
+        $responseAssigned = $this->actingAs($user)->getJson('/api/grids/attribute-groups?filter[has_families]=1');
+        $responseAssigned->assertOk()
+            ->assertJsonPath('meta.total', 1)
+            ->assertJsonPath('data.0.code', 'general_info');
+
+        $responseUnassigned = $this->actingAs($user)->getJson('/api/grids/attribute-groups?filter[has_families]=0');
+        $responseUnassigned->assertOk()
+            ->assertJsonPath('meta.total', 1)
+            ->assertJsonPath('data.0.code', 'unassigned_details');
     }
 
     public function test_user_can_create_attribute_group(): void

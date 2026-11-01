@@ -27,6 +27,7 @@ class CreateAttribute
                 'code' => $code,
                 'type' => $data['type'],
                 'required' => false,
+                'is_unique' => false,
                 'is_filterable' => false,
                 'settings' => $this->types->defaults($data['type']),
             ]));

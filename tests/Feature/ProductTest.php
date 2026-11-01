@@ -62,6 +62,53 @@ class ProductTest extends TestCase
             ->assertJsonPath('data.0.family', 'Electronics');
     }
 
+    public function test_user_can_filter_products_by_family_type_and_status(): void
+    {
+        $user = $this->userWithRole('administration');
+
+        $family1 = ProductType::create(['name' => 'Phones', 'code' => 'phones']);
+        $family2 = ProductType::create(['name' => 'Laptops', 'code' => 'laptops']);
+
+        Product::create([
+            'sku' => 'PHONE-ACT-01',
+            'type' => 'configurable',
+            'product_type_id' => $family1->id,
+            'status' => true,
+        ]);
+
+        Product::create([
+            'sku' => 'PHONE-INACT-02',
+            'type' => 'simple',
+            'product_type_id' => $family1->id,
+            'status' => false,
+        ]);
+
+        Product::create([
+            'sku' => 'LAPTOP-ACT-03',
+            'type' => 'simple',
+            'product_type_id' => $family2->id,
+            'status' => true,
+        ]);
+
+        // Filter by type=configurable
+        $resType = $this->actingAs($user)->getJson('/api/grids/products?filter[type]=configurable');
+        $resType->assertOk()
+            ->assertJsonPath('meta.total', 1)
+            ->assertJsonPath('data.0.sku', 'PHONE-ACT-01');
+
+        // Filter by status=0 (inactive)
+        $resStatus = $this->actingAs($user)->getJson('/api/grids/products?filter[status]=0');
+        $resStatus->assertOk()
+            ->assertJsonPath('meta.total', 1)
+            ->assertJsonPath('data.0.sku', 'PHONE-INACT-02');
+
+        // Filter by family=$family2->id
+        $resFamily = $this->actingAs($user)->getJson('/api/grids/products?filter[family]='.$family2->id);
+        $resFamily->assertOk()
+            ->assertJsonPath('meta.total', 1)
+            ->assertJsonPath('data.0.sku', 'LAPTOP-ACT-03');
+    }
+
     public function test_user_can_create_simple_product_via_popup(): void
     {
         $user = $this->userWithRole('administration');
@@ -495,5 +542,57 @@ class ProductTest extends TestCase
             'attribute_id' => $price->id,
             'float_value' => 199.99,
         ]);
+    }
+
+    public function test_product_update_enforces_is_unique_attribute_validation(): void
+    {
+        $user = $this->userWithRole('administration');
+        $family = ProductType::create(['name' => 'Phones', 'code' => 'phones']);
+        $uniqueAttr = Attribute::create([
+            'name' => 'IMEI',
+            'code' => 'imei',
+            'type' => 'text',
+            'required' => false,
+            'is_unique' => true,
+        ]);
+
+        $prod1 = Product::create([
+            'sku' => 'PHONE-01',
+            'type' => 'simple',
+            'product_type_id' => $family->id,
+            'status' => true,
+        ]);
+
+        $prod2 = Product::create([
+            'sku' => 'PHONE-02',
+            'type' => 'simple',
+            'product_type_id' => $family->id,
+            'status' => true,
+        ]);
+
+        // Prod 1 assigns IMEI 123456789
+        $res1 = $this->actingAs($user)->putJson("/api/catalog/products/{$prod1->id}", [
+            'values' => [
+                $uniqueAttr->id => '123456789',
+            ],
+        ]);
+        $res1->assertOk();
+
+        // Prod 2 attempts to assign same IMEI 123456789 -> fails with 422
+        $res2 = $this->actingAs($user)->putJson("/api/catalog/products/{$prod2->id}", [
+            'values' => [
+                $uniqueAttr->id => '123456789',
+            ],
+        ]);
+        $res2->assertStatus(422)
+            ->assertJsonValidationErrors(["values.{$uniqueAttr->id}"]);
+
+        // Prod 1 updating without changing its own IMEI succeeds (not conflicting with itself)
+        $res1Self = $this->actingAs($user)->putJson("/api/catalog/products/{$prod1->id}", [
+            'values' => [
+                $uniqueAttr->id => '123456789',
+            ],
+        ]);
+        $res1Self->assertOk();
     }
 }

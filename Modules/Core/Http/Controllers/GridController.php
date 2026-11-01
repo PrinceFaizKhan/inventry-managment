@@ -48,6 +48,7 @@ class GridController extends Controller
                 'default_sort' => $definition['default_sort'] ?? 'id',
                 'default_direction' => $definition['default_direction'] ?? 'asc',
                 'columns' => $definition['columns'] ?? null,
+                'default_columns' => $definition['default_columns'] ?? null,
                 'filters' => $definition['filters'] ?? [],
                 'actions' => collect($definition['actions'])->map(fn (string $permission): bool => $authorizer->allows($request->user(), $permission)),
                 'selectable' => $definition['selectable'],

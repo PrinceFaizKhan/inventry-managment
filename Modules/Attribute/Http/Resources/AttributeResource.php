@@ -24,6 +24,7 @@ class AttributeResource extends JsonResource
             'code' => $this->code,
             'type' => $this->type,
             'required' => (bool) $this->required,
+            'is_unique' => (bool) $this->is_unique,
             'is_filterable' => (bool) $this->is_filterable,
             'settings' => $this->settings?->getArrayCopy() ?? (array) $this->settings,
             'options' => $this->relationLoaded('options')

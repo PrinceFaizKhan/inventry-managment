@@ -66,6 +66,27 @@ class ProductTypeTest extends TestCase
             ->assertJsonPath('data.1.groups_count', 1);
     }
 
+    public function test_user_can_filter_product_types_grid_by_groups_and_variants(): void
+    {
+        $user = $this->userWithRole('administration');
+
+        $pt1 = ProductType::create(['name' => 'Default', 'code' => 'default']);
+        $pt2 = ProductType::create(['name' => 'Smartphones', 'code' => 'smartphones']);
+
+        $group = AttributeGroup::create(['name' => 'General', 'code' => 'general']);
+        $pt1->groups()->create(['attribute_group_id' => $group->id, 'position' => 1]);
+
+        $response = $this->actingAs($user)->getJson('/api/grids/product-types?filter[has_groups]=1');
+        $response->assertOk()
+            ->assertJsonPath('meta.total', 1)
+            ->assertJsonPath('data.0.name', 'Default');
+
+        $responseEmpty = $this->actingAs($user)->getJson('/api/grids/product-types?filter[has_groups]=0');
+        $responseEmpty->assertOk()
+            ->assertJsonPath('meta.total', 1)
+            ->assertJsonPath('data.0.name', 'Smartphones');
+    }
+
     public function test_user_can_create_product_type_with_groups_and_attributes(): void
     {
         $user = $this->userWithRole('administration');

@@ -22,7 +22,10 @@ return [
             ['index' => 'variants_count', 'label' => 'Variant Types', 'sortable' => false, 'align' => 'center'],
             ['index' => 'created_at', 'label' => 'Created At', 'sortable' => true],
         ],
-        'filters' => [],
+        'filters' => [
+            'has_variants' => ['type' => 'select', 'label' => 'Variant Hierarchy'],
+            'has_groups' => ['type' => 'select', 'label' => 'Attribute Groups'],
+        ],
         'page_sizes' => [10, 25, 50],
         'default_sort' => 'name',
         'default_direction' => 'asc',

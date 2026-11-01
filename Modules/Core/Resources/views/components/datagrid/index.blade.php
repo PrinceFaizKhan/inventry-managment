@@ -721,55 +721,275 @@
 
         <!-- Fields Visibility Slide-Over Drawer (Show/Hide Attributes) -->
         <teleport to="body">
-            <div v-if="isVisibilityDrawerOpen" class="fixed inset-0 z-[1000] overflow-hidden">
-                <div class="fixed inset-0 bg-black/40 backdrop-blur-xs transition-opacity" @click="isVisibilityDrawerOpen = false"></div>
-                <div class="fixed inset-y-0 right-0 max-w-full flex">
-                    <div class="w-80 max-w-[calc(100vw-1rem)] bg-[var(--card)] border-l border-[var(--border)] shadow-2xl flex flex-col z-10 text-[var(--text)] transform transition-transform duration-300 ease-in-out">
-                        <div class="p-3 px-4 border-b border-[var(--border)] flex items-center justify-between bg-[var(--page)]">
-                            <div class="flex items-center gap-2">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-[var(--teal)]"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                                <h2 class="text-xs font-bold uppercase tracking-wider text-[var(--text)]">Card Fields Visibility</h2>
-                                <span class="px-1.5 py-0.2 rounded-full bg-[var(--soft)] text-[var(--teal)] text-[10px] font-bold border border-[var(--border)]">
-                                    @{{ visibleColumns.length }} of @{{ resolvedColumns.length }}
-                                </span>
-                            </div>
-                            <button type="button" @click="isVisibilityDrawerOpen = false" class="w-7 h-7 rounded-lg hover:bg-[var(--soft)] grid place-items-center text-base font-bold text-[var(--muted)] hover:text-[var(--text)] cursor-pointer">&times;</button>
-                        </div>
-                        <div class="p-4 flex-1 overflow-y-auto space-y-3">
-                            <p class="text-[11px] text-[var(--muted)] leading-relaxed">
-                                Toggle which attributes and columns appear in your cards and table:
-                            </p>
-                            <div class="space-y-1.5">
-                                <label
-                                    v-for="col in resolvedColumns"
-                                    :key="col.index || col.key"
-                                    class="flex items-center justify-between p-2.5 rounded-xl border border-[var(--border)] bg-[var(--page)] hover:border-[var(--teal)]/40 transition-colors cursor-pointer select-none"
-                                >
-                                    <div class="flex items-center gap-2 min-w-0">
-                                        <span class="text-xs font-semibold text-[var(--text)] truncate">@{{ col.label }}</span>
-                                        <span class="font-mono text-[10px] text-[var(--muted)]">(@{{ col.index || col.key }})</span>
+            <div v-if="isVisibilityDrawerOpen" class="fixed inset-0 z-[1000] overflow-hidden" role="dialog" aria-modal="true">
+                <!-- Backdrop with high-end glass blur -->
+                <div class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity" @click="isVisibilityDrawerOpen = false"></div>
+                
+                <div class="fixed inset-y-0 right-0 max-w-full flex pl-6 sm:pl-10">
+                    <div class="w-full sm:w-[420px] max-w-[100vw] bg-[var(--card)] border-l border-[var(--border)] shadow-2xl flex flex-col z-10 text-[var(--text)]">
+                        
+                        <!-- Header -->
+                        <div class="p-4 border-b border-[var(--border)] bg-[var(--page)] flex items-center justify-between gap-3">
+                            <div class="flex items-center gap-2.5 min-w-0">
+                                <div class="w-9 h-9 rounded-xl bg-teal-500/10 border border-teal-500/20 text-[var(--teal)] grid place-items-center shrink-0">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                        <circle cx="12" cy="12" r="3"/>
+                                    </svg>
+                                </div>
+                                <div class="min-w-0">
+                                    <div class="flex items-center gap-2">
+                                        <h2 class="text-sm font-bold tracking-tight text-[var(--text)] truncate">Grid Fields & Attributes</h2>
                                     </div>
-                                    <input
-                                        type="checkbox"
-                                        :checked="isColumnVisible(col.index || col.key)"
-                                        @change="toggleColumnVisibility(col.index || col.key)"
-                                        class="w-4 h-4 rounded border-[var(--border)] text-[var(--teal)] focus:ring-[var(--teal)] cursor-pointer"
-                                    />
-                                </label>
+                                    <p class="text-[11px] text-[var(--muted)] truncate">Choose visible columns for table & mobile cards</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1.5 shrink-0">
+                                <span class="px-2 py-0.5 rounded-full bg-[var(--soft)] text-[var(--teal)] text-[11px] font-bold border border-[var(--teal)]/20">
+                                    @{{ visibleColumns.length }}/@{{ resolvedColumns.length }}
+                                </span>
+                                <button
+                                    type="button"
+                                    @click="isVisibilityDrawerOpen = false"
+                                    class="w-8 h-8 rounded-lg hover:bg-[var(--soft)] text-[var(--muted)] hover:text-[var(--text)] grid place-items-center text-lg font-bold cursor-pointer transition-colors"
+                                    title="Close"
+                                >&times;</button>
                             </div>
                         </div>
-                        <div class="p-3 px-4 border-t border-[var(--border)] bg-[var(--page)] flex items-center justify-between gap-2">
-                            <button
-                                type="button"
-                                @click="resetColumnVisibility"
-                                class="text-xs text-[var(--muted)] hover:text-[var(--teal)] underline font-medium cursor-pointer"
-                            >
-                                Reset defaults
-                            </button>
+
+                        <!-- Search & Quick Action Filter Bar -->
+                        <div class="p-3 border-b border-[var(--border)] bg-[var(--card)] space-y-2">
+                            <!-- Field Search -->
+                            <div class="relative">
+                                <input
+                                    type="text"
+                                    v-model="fieldSearchQuery"
+                                    placeholder="Search fields or attributes..."
+                                    class="w-full h-8 pl-8 pr-7 rounded-lg border border-[var(--border)] bg-[var(--page)] text-xs text-[var(--text)] placeholder-[var(--muted)] focus:outline-none focus:border-[var(--teal)] focus:ring-1 focus:ring-[var(--teal)] transition-all"
+                                />
+                                <svg class="absolute left-2.5 top-2.5 text-[var(--muted)] pointer-events-none" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                                <button
+                                    v-if="fieldSearchQuery"
+                                    type="button"
+                                    @click="fieldSearchQuery = ''"
+                                    class="absolute right-2 top-2 text-[var(--muted)] hover:text-[var(--text)] text-xs font-bold"
+                                    title="Clear"
+                                >&times;</button>
+                            </div>
+
+                            <!-- Quick Action Pills -->
+                            <div class="flex items-center justify-between text-xs pt-0.5">
+                                <button
+                                    type="button"
+                                    @click="selectAllColumns"
+                                    class="text-[11px] font-medium text-[var(--teal)] hover:underline cursor-pointer"
+                                >
+                                    Select All (@{{ resolvedColumns.length }})
+                                </button>
+                                <button
+                                    type="button"
+                                    @click="resetColumnVisibility"
+                                    class="text-[11px] font-medium text-[var(--muted)] hover:text-[var(--text)] underline cursor-pointer"
+                                >
+                                    Reset to Defaults
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Drawer Fields Scrollable Body -->
+                        <div class="p-4 flex-1 overflow-y-auto space-y-4">
+                            
+                            <!-- Empty search state -->
+                            <div v-if="filteredResolvedColumns.length === 0" class="py-8 text-center text-xs text-[var(--muted)]">
+                                No matching fields or attributes found for "<strong>@{{ fieldSearchQuery }}</strong>".
+                            </div>
+
+                            <!-- Group 1: Core Fields -->
+                            <div v-if="coreFields.length > 0" class="space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-[10px] font-bold text-[var(--muted)] uppercase tracking-wider">Core Fields</span>
+                                    <span class="text-[10px] text-[var(--muted)]">@{{ coreFields.filter(c => isColumnVisible(c.index || c.key)).length }}/@{{ coreFields.length }} active</span>
+                                </div>
+                                <div class="space-y-1.5">
+                                    <div
+                                        v-for="col in coreFields"
+                                        :key="col.index || col.key"
+                                        @click="toggleColumnVisibility(col.index || col.key)"
+                                        class="flex items-center justify-between p-3 rounded-xl border transition-all cursor-pointer select-none"
+                                        :class="isColumnVisible(col.index || col.key) ? 'border-[var(--teal)]/40 bg-[var(--soft)]/40 shadow-xs' : 'border-[var(--border)] bg-[var(--page)] hover:border-[var(--teal)]/20'"
+                                    >
+                                        <div class="flex items-center gap-3 min-w-0">
+                                            <div
+                                                class="w-7 h-7 rounded-lg grid place-items-center text-xs shrink-0"
+                                                :class="isColumnVisible(col.index || col.key) ? 'bg-[var(--teal)]/15 text-[var(--teal)]' : 'bg-[var(--border)]/60 text-[var(--muted)]'"
+                                            >
+                                                <span v-if="(col.index || col.key) === 'sku'">#</span>
+                                                <span v-else-if="(col.index || col.key) === 'status'">●</span>
+                                                <span v-else-if="(col.index || col.key) === 'type'">▤</span>
+                                                <svg v-else width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg>
+                                            </div>
+                                            <div class="min-w-0">
+                                                <div class="flex items-center gap-1.5 flex-wrap">
+                                                    <span class="text-xs font-bold text-[var(--text)]">@{{ col.label }}</span>
+                                                    <span
+                                                        v-if="['sku', 'status'].includes(col.index || col.key)"
+                                                        class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
+                                                    >
+                                                        Default
+                                                    </span>
+                                                </div>
+                                                <span class="font-mono text-[10px] text-[var(--muted)] block truncate">@{{ col.index || col.key }}</span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Right Controls: Position Up/Down, #Badge & Toggle Switch -->
+                                        <div class="flex items-center gap-2 shrink-0">
+                                            <!-- Up/Down Reorder Buttons & Position Badge -->
+                                            <div class="flex items-center gap-1" @click.stop>
+                                                <button
+                                                    type="button"
+                                                    @click.stop="moveColumnPosition(col.index || col.key, -1)"
+                                                    :disabled="isFirstColumn(col.index || col.key)"
+                                                    class="w-6 h-6 rounded-md bg-[var(--page)] border border-[var(--border)] text-[var(--muted)] hover:text-[var(--text)] hover:border-[var(--teal)] disabled:opacity-25 disabled:cursor-not-allowed grid place-items-center cursor-pointer transition-colors"
+                                                    title="Move Up"
+                                                >
+                                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    @click.stop="moveColumnPosition(col.index || col.key, 1)"
+                                                    :disabled="isLastColumn(col.index || col.key)"
+                                                    class="w-6 h-6 rounded-md bg-[var(--page)] border border-[var(--border)] text-[var(--muted)] hover:text-[var(--text)] hover:border-[var(--teal)] disabled:opacity-25 disabled:cursor-not-allowed grid place-items-center cursor-pointer transition-colors"
+                                                    title="Move Down"
+                                                >
+                                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                                                </button>
+                                                <span class="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-[var(--page)] border border-[var(--border)] text-[var(--muted)] min-w-[26px] text-center" title="Column Position">
+                                                    #@{{ getColumnPosition(col.index || col.key) }}
+                                                </span>
+                                            </div>
+
+                                            <!-- Modern Animated iOS Toggle Switch -->
+                                            <div
+                                                class="w-11 h-6 rounded-full transition-colors relative cursor-pointer shrink-0"
+                                                :class="isColumnVisible(col.index || col.key) ? 'bg-[var(--teal)] shadow-sm shadow-teal-500/30' : 'bg-slate-300 dark:bg-slate-700'"
+                                            >
+                                                <span
+                                                    class="w-5 h-5 rounded-full bg-white shadow-sm block absolute top-0.5 transition-transform duration-200"
+                                                    :class="isColumnVisible(col.index || col.key) ? 'translate-x-[22px]' : 'translate-x-[2px]'"
+                                                ></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Group 2: Family Attributes (Dynamically loaded from Product Types/Families) -->
+                            <div v-if="familyAttributeFields.length > 0" class="space-y-2 pt-2 border-t border-[var(--border)]">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-1.5">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-[var(--teal)]"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+                                        <span class="text-[10px] font-bold text-[var(--muted)] uppercase tracking-wider">Family Attributes</span>
+                                    </div>
+                                    <span class="text-[10px] text-[var(--muted)]">@{{ familyAttributeFields.filter(c => isColumnVisible(c.index || c.key)).length }}/@{{ familyAttributeFields.length }} active</span>
+                                </div>
+                                <div class="space-y-1.5">
+                                    <div
+                                        v-for="col in familyAttributeFields"
+                                        :key="col.index || col.key"
+                                        @click="toggleColumnVisibility(col.index || col.key)"
+                                        class="flex items-center justify-between p-3 rounded-xl border transition-all cursor-pointer select-none"
+                                        :class="isColumnVisible(col.index || col.key) ? 'border-[var(--teal)]/40 bg-[var(--soft)]/40 shadow-xs' : 'border-[var(--border)] bg-[var(--page)] hover:border-[var(--teal)]/20'"
+                                    >
+                                        <div class="flex items-center gap-3 min-w-0">
+                                            <div
+                                                class="w-7 h-7 rounded-lg grid place-items-center text-xs shrink-0"
+                                                :class="isColumnVisible(col.index || col.key) ? 'bg-[var(--teal)]/15 text-[var(--teal)]' : 'bg-[var(--border)]/60 text-[var(--muted)]'"
+                                            >
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+                                            </div>
+                                            <div class="min-w-0">
+                                                <div class="flex items-center gap-1.5 flex-wrap">
+                                                    <span class="text-xs font-bold text-[var(--text)]">@{{ col.label }}</span>
+                                                    <span
+                                                        v-if="col.type"
+                                                        class="px-1.5 py-0.2 rounded text-[9px] font-medium bg-[var(--soft)] text-[var(--muted)] border border-[var(--border)]"
+                                                    >
+                                                        @{{ col.type }}
+                                                    </span>
+                                                </div>
+                                                <span class="font-mono text-[10px] text-[var(--muted)] block truncate">@{{ col.index || col.key }}</span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Right Controls: Position Up/Down, #Badge & Toggle Switch -->
+                                        <div class="flex items-center gap-2 shrink-0">
+                                            <!-- Up/Down Reorder Buttons & Position Badge -->
+                                            <div class="flex items-center gap-1" @click.stop>
+                                                <button
+                                                    type="button"
+                                                    @click.stop="moveColumnPosition(col.index || col.key, -1)"
+                                                    :disabled="isFirstColumn(col.index || col.key)"
+                                                    class="w-6 h-6 rounded-md bg-[var(--page)] border border-[var(--border)] text-[var(--muted)] hover:text-[var(--text)] hover:border-[var(--teal)] disabled:opacity-25 disabled:cursor-not-allowed grid place-items-center cursor-pointer transition-colors"
+                                                    title="Move Up"
+                                                >
+                                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    @click.stop="moveColumnPosition(col.index || col.key, 1)"
+                                                    :disabled="isLastColumn(col.index || col.key)"
+                                                    class="w-6 h-6 rounded-md bg-[var(--page)] border border-[var(--border)] text-[var(--muted)] hover:text-[var(--text)] hover:border-[var(--teal)] disabled:opacity-25 disabled:cursor-not-allowed grid place-items-center cursor-pointer transition-colors"
+                                                    title="Move Down"
+                                                >
+                                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                                                </button>
+                                                <span class="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-[var(--page)] border border-[var(--border)] text-[var(--muted)] min-w-[26px] text-center" title="Column Position">
+                                                    #@{{ getColumnPosition(col.index || col.key) }}
+                                                </span>
+                                            </div>
+
+                                            <!-- Modern Animated iOS Toggle Switch -->
+                                            <div
+                                                class="w-11 h-6 rounded-full transition-colors relative cursor-pointer shrink-0"
+                                                :class="isColumnVisible(col.index || col.key) ? 'bg-[var(--teal)] shadow-sm shadow-teal-500/30' : 'bg-slate-300 dark:bg-slate-700'"
+                                            >
+                                                <span
+                                                    class="w-5 h-5 rounded-full bg-white shadow-sm block absolute top-0.5 transition-transform duration-200"
+                                                    :class="isColumnVisible(col.index || col.key) ? 'translate-x-[22px]' : 'translate-x-[2px]'"
+                                                ></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Sticky Footer -->
+                        <div class="p-3 px-4 border-t border-[var(--border)] bg-[var(--page)] flex items-center justify-between gap-2 flex-wrap">
+                            <div class="flex items-center gap-1.5">
+                                <button
+                                    type="button"
+                                    @click="resetColumnVisibility"
+                                    class="h-9 px-3 rounded-lg border border-[var(--border)] bg-[var(--card)] hover:bg-[var(--soft)] text-xs font-semibold text-[var(--muted)] hover:text-[var(--text)] cursor-pointer transition-colors"
+                                    title="Reset visibility to default"
+                                >
+                                    Reset Visibility
+                                </button>
+                                <button
+                                    type="button"
+                                    @click="resetColumnOrder"
+                                    class="h-9 px-3 rounded-lg border border-[var(--border)] bg-[var(--card)] hover:bg-[var(--soft)] text-xs font-semibold text-[var(--muted)] hover:text-[var(--text)] cursor-pointer transition-colors"
+                                    title="Reset column order to default"
+                                >
+                                    Reset Order
+                                </button>
+                            </div>
                             <button
                                 type="button"
                                 @click="isVisibilityDrawerOpen = false"
-                                class="button button--primary text-xs px-4"
+                                class="button button--primary h-9 px-5 text-xs font-bold"
                             >
                                 Done
                             </button>
@@ -855,6 +1075,8 @@
                 filterDraft: {},
                 isFilterDrawerOpen: false,
                 hiddenColumnKeys: [],
+                columnOrderKeys: [],
+                fieldSearchQuery: '',
                 isVisibilityDrawerOpen: false,
                 selectedIds: [],
                 isEntireQuerySelected: false,
@@ -873,8 +1095,23 @@
             };
         },
         computed: {
+            orderedColumns() {
+                const cols = [...this.resolvedColumns];
+                if (!this.columnOrderKeys || this.columnOrderKeys.length === 0) {
+                    return cols;
+                }
+                return cols.sort((a, b) => {
+                    const keyA = a.index || a.key;
+                    const keyB = b.index || b.key;
+                    let posA = this.columnOrderKeys.indexOf(keyA);
+                    let posB = this.columnOrderKeys.indexOf(keyB);
+                    if (posA === -1) posA = 9999;
+                    if (posB === -1) posB = 9999;
+                    return posA - posB;
+                });
+            },
             visibleColumns() {
-                return this.resolvedColumns.filter(col => {
+                return this.orderedColumns.filter(col => {
                     const key = col.index || col.key;
                     return !this.hiddenColumnKeys.includes(key);
                 });
@@ -921,6 +1158,24 @@
                         }));
                 }
                 return [];
+            },
+            filteredResolvedColumns() {
+                const baseCols = this.orderedColumns;
+                if (!this.fieldSearchQuery || !this.fieldSearchQuery.trim()) {
+                    return baseCols;
+                }
+                const q = this.fieldSearchQuery.toLowerCase().trim();
+                return baseCols.filter(c => {
+                    const label = (c.label || '').toLowerCase();
+                    const key = (c.index || c.key || '').toLowerCase();
+                    return label.includes(q) || key.includes(q);
+                });
+            },
+            coreFields() {
+                return this.filteredResolvedColumns.filter(c => !c.is_attribute && c.group !== 'Family Attributes');
+            },
+            familyAttributeFields() {
+                return this.filteredResolvedColumns.filter(c => c.is_attribute || c.group === 'Family Attributes');
             },
             availableBulkActions() {
                 if (Array.isArray(this.initialConfig.massActions) && this.initialConfig.massActions.length > 0) {
@@ -1025,11 +1280,81 @@
                 const saved = localStorage.getItem(storageKey);
                 if (saved) {
                     this.hiddenColumnKeys = JSON.parse(saved);
+                } else {
+                    this.applyDefaultVisibility();
+                }
+
+                const orderStorageKey = `datagrid_col_order_${this.endpoint.replace(/[^a-zA-Z0-9]/g, '_')}`;
+                const savedOrder = localStorage.getItem(orderStorageKey);
+                if (savedOrder) {
+                    this.columnOrderKeys = JSON.parse(savedOrder);
                 }
             } catch (e) {}
             this.fetchData(1);
         },
         methods: {
+            ensureColumnOrderInitialized() {
+                if (!this.columnOrderKeys || this.columnOrderKeys.length === 0) {
+                    this.columnOrderKeys = this.resolvedColumns.map(c => c.index || c.key);
+                } else {
+                    const existing = new Set(this.columnOrderKeys);
+                    for (const col of this.resolvedColumns) {
+                        const k = col.index || col.key;
+                        if (!existing.has(k)) {
+                            this.columnOrderKeys.push(k);
+                        }
+                    }
+                }
+            },
+            moveColumnPosition(key, direction) {
+                this.ensureColumnOrderInitialized();
+                const idx = this.columnOrderKeys.indexOf(key);
+                if (idx === -1) return;
+                const targetIdx = idx + direction;
+                if (targetIdx < 0 || targetIdx >= this.columnOrderKeys.length) return;
+                const item = this.columnOrderKeys.splice(idx, 1)[0];
+                this.columnOrderKeys.splice(targetIdx, 0, item);
+                this.saveColumnOrder();
+            },
+            getColumnPosition(key) {
+                if (!this.columnOrderKeys || this.columnOrderKeys.length === 0) {
+                    const idx = this.resolvedColumns.findIndex(c => (c.index || c.key) === key);
+                    return idx !== -1 ? idx + 1 : 1;
+                }
+                const idx = this.columnOrderKeys.indexOf(key);
+                return idx !== -1 ? idx + 1 : this.columnOrderKeys.length + 1;
+            },
+            isFirstColumn(key) {
+                this.ensureColumnOrderInitialized();
+                return this.columnOrderKeys.indexOf(key) === 0;
+            },
+            isLastColumn(key) {
+                this.ensureColumnOrderInitialized();
+                return this.columnOrderKeys.indexOf(key) === this.columnOrderKeys.length - 1;
+            },
+            saveColumnOrder() {
+                try {
+                    const storageKey = `datagrid_col_order_${this.endpoint.replace(/[^a-zA-Z0-9]/g, '_')}`;
+                    localStorage.setItem(storageKey, JSON.stringify(this.columnOrderKeys));
+                } catch (e) {}
+            },
+            resetColumnOrder() {
+                try {
+                    const storageKey = `datagrid_col_order_${this.endpoint.replace(/[^a-zA-Z0-9]/g, '_')}`;
+                    localStorage.removeItem(storageKey);
+                } catch (e) {}
+                this.columnOrderKeys = [];
+            },
+            applyDefaultVisibility() {
+                const defaultCols = this.meta?.default_columns || this.initialConfig?.default_columns;
+                if (Array.isArray(defaultCols) && defaultCols.length > 0) {
+                    this.hiddenColumnKeys = this.resolvedColumns
+                        .map(c => c.index || c.key)
+                        .filter(key => !defaultCols.includes(key));
+                } else {
+                    this.hiddenColumnKeys = [];
+                }
+            },
             isColumnVisible(key) {
                 return !this.hiddenColumnKeys.includes(key);
             },
@@ -1041,17 +1366,24 @@
                         this.hiddenColumnKeys.push(key);
                     }
                 }
+                this.saveColumnVisibility();
+            },
+            selectAllColumns() {
+                this.hiddenColumnKeys = [];
+                this.saveColumnVisibility();
+            },
+            saveColumnVisibility() {
                 try {
                     const storageKey = `datagrid_hidden_cols_${this.endpoint.replace(/[^a-zA-Z0-9]/g, '_')}`;
                     localStorage.setItem(storageKey, JSON.stringify(this.hiddenColumnKeys));
                 } catch (e) {}
             },
             resetColumnVisibility() {
-                this.hiddenColumnKeys = [];
                 try {
                     const storageKey = `datagrid_hidden_cols_${this.endpoint.replace(/[^a-zA-Z0-9]/g, '_')}`;
                     localStorage.removeItem(storageKey);
                 } catch (e) {}
+                this.applyDefaultVisibility();
             },
             onMobileSortChange(val) {
                 if (!val) {
@@ -1106,6 +1438,16 @@
                 });
             },
             formatFilterLabel(key) {
+                if (this.meta.filters && this.meta.filters[key] && this.meta.filters[key].label) {
+                    return this.meta.filters[key].label;
+                }
+                const col = this.resolvedColumns.find(c => (c.index || c.key) === key);
+                if (col && col.label) {
+                    return col.label;
+                }
+                if (key === 'family') return 'Product Family';
+                if (key === 'type') return 'Product Type';
+                if (key === 'status') return 'Status';
                 return key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
             },
             hasAction(actionKey) {
@@ -1238,6 +1580,11 @@
                         ...this.meta,
                         ...(payload.meta || {})
                     };
+
+                    const storageKey = `datagrid_hidden_cols_${this.endpoint.replace(/[^a-zA-Z0-9]/g, '_')}`;
+                    if (!localStorage.getItem(storageKey)) {
+                        this.applyDefaultVisibility();
+                    }
 
                     for (const key of Object.keys(this.meta.filter_options || {})) {
                         if (this.filterDraft[key] === undefined) {

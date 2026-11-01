@@ -17,7 +17,8 @@ class AdminSessionTest extends TestCase
 
         $response->assertOk()
             ->assertSee('Admin Workspace')
-            ->assertSee('admin@haseentelecom.test')
+            ->assertSee('Sign in')
+            ->assertSee('name="email"', false)
             ->assertSee('action="http://localhost:8000/login"', false);
     }
 

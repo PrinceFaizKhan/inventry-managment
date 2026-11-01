@@ -3,6 +3,7 @@
 namespace Modules\Product\DataGrids;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Modules\Attribute\Models\Attribute;
 use Modules\Core\DataGrid\Action;
@@ -27,18 +28,62 @@ class ProductDataGrid extends DataGrid
             ->searchable(['sku'])
             ->defaultSort('created_at', 'desc')
             ->searchPlaceholder('Search by SKU or Family...')
-            ->columns([
-                Column::make('sku')->label('SKU')->sortable()->searchable(),
-                Column::make('type')->label('Type')->sortable(),
-                Column::make('family')->label('Family')->sortable(false),
-                Column::make('status')->label('Status')->sortable(),
-                Column::make('created_at')->label('Created At')->sortable(),
-            ])
+            ->columns($this->buildColumns())
             ->filters($this->buildFilters())
             ->actions([
                 Action::edit('catalog.products.edit', fn ($row) => url('catalog/products/'.$row->id.'/edit')),
                 Action::delete('catalog.products.delete', fn ($row) => url('api/catalog/products/'.$row->id)),
             ]);
+    }
+
+    /**
+     * @return array<int, Column>
+     */
+    protected function buildColumns(): array
+    {
+        $cols = [
+            Column::make('sku')->label('SKU')->sortable()->searchable(),
+            Column::make('status')->label('Status')->sortable(),
+            Column::make('type')->label('Type')->sortable(),
+            Column::make('family')->label('Family')->sortable(false),
+            Column::make('created_at')->label('Created At')->sortable(),
+        ];
+
+        try {
+            if (Schema::hasTable('attributes') && Schema::hasTable('product_type_group_attributes')) {
+                $familyAttrIds = DB::table('product_type_group_attributes')
+                    ->distinct()
+                    ->pluck('attribute_id');
+
+                if (Schema::hasTable('product_type_variant_axes')) {
+                    $axesAttrIds = DB::table('product_type_variant_axes')
+                        ->distinct()
+                        ->pluck('attribute_id');
+                    $familyAttrIds = $familyAttrIds->merge($axesAttrIds);
+                }
+
+                $familyAttrIds = $familyAttrIds->unique()->filter()->values();
+
+                if ($familyAttrIds->isNotEmpty()) {
+                    $familyAttributes = Attribute::query()
+                        ->whereIn('id', $familyAttrIds)
+                        ->orderBy('name')
+                        ->get();
+
+                    foreach ($familyAttributes as $attr) {
+                        if (in_array($attr->code, ['sku', 'status', 'type', 'family', 'created_at'])) {
+                            continue;
+                        }
+
+                        $cols[] = Column::make($attr->code)->label($attr->name)->sortable(false);
+                    }
+                }
+            }
+        } catch (\Throwable) {
+            // Fallback
+        }
+
+        return $cols;
     }
 
     /**
@@ -51,6 +96,22 @@ class ProductDataGrid extends DataGrid
                 ->label('Family')
                 ->options(fn () => ProductType::query()->orderBy('name')->pluck('name', 'id')->all())
                 ->query(fn ($query, $value) => $query->where('products.product_type_id', $value)),
+
+            Filter::select('type')
+                ->label('Type')
+                ->options([
+                    'configurable' => 'Configurable',
+                    'simple' => 'Simple',
+                ])
+                ->query(fn ($query, $value) => $query->where('products.type', $value)),
+
+            Filter::select('status')
+                ->label('Status')
+                ->options([
+                    '1' => 'Active',
+                    '0' => 'Inactive',
+                ])
+                ->query(fn ($query, $value) => $query->where('products.status', filter_var($value, FILTER_VALIDATE_BOOLEAN))),
         ];
 
         if (Schema::hasTable('attributes')) {
@@ -61,6 +122,10 @@ class ProductDataGrid extends DataGrid
                 ->get();
 
             foreach ($filterableAttributes as $attribute) {
+                if (in_array($attribute->code, ['family', 'type', 'status'], true)) {
+                    continue;
+                }
+
                 $filter = Filter::select($attribute->code)->label($attribute->name);
 
                 if ($attribute->type === 'boolean') {

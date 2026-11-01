@@ -27,9 +27,17 @@ class AttributeFactory extends Factory
             'code' => AttributeCodeGenerator::fromName($name),
             'type' => 'text',
             'required' => false,
+            'is_unique' => false,
             'is_filterable' => false,
             'settings' => ['validation' => 'any'],
         ];
+    }
+
+    public function unique(bool $isUnique = true): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'is_unique' => $isUnique,
+        ]);
     }
 
     public function filterable(): static

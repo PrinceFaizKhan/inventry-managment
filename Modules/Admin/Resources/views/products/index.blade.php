@@ -109,53 +109,74 @@
                         >
                             @{{ row.sku }}
                         </a>
-                        <span
-                            v-if="row.type === 'configurable'"
-                            class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-teal-500/10 text-[var(--teal)] border border-[var(--teal)]/30"
-                        >
-                            Configurable
-                        </span>
-                        <span
-                            v-else
-                            class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-500/10 text-blue-500 border border-blue-500/30"
-                        >
-                            Simple
-                        </span>
+                        <!-- Show Type badge only if 'type' column is active -->
+                        <template v-if="columns.some(c => (c.index || c.key) === 'type')">
+                            <span
+                                v-if="row.type === 'configurable'"
+                                class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-teal-500/10 text-[var(--teal)] border border-[var(--teal)]/30"
+                            >
+                                Configurable
+                            </span>
+                            <span
+                                v-else
+                                class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-500/10 text-blue-500 border border-blue-500/30"
+                            >
+                                Simple
+                            </span>
+                        </template>
                     </div>
 
-                    <!-- Live status toggle -->
-                    <button
-                        type="button"
-                        @click.stop="toggleStatus"
-                        class="cursor-pointer transition-transform hover:scale-105 inline-flex items-center"
-                        :title="row.status ? 'Active (Click to deactivate)' : 'Inactive (Click to activate)'"
-                    >
-                        <span
-                            v-if="row.status"
-                            class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-500 border border-emerald-500/30"
+                    <!-- Live status toggle (shown if status column is active) -->
+                    <template v-if="columns.some(c => (c.index || c.key) === 'status')">
+                        <button
+                            type="button"
+                            @click.stop="toggleStatus"
+                            class="cursor-pointer transition-transform hover:scale-105 inline-flex items-center"
+                            :title="row.status ? 'Active (Click to deactivate)' : 'Inactive (Click to activate)'"
                         >
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                            <span>Active</span>
-                        </span>
-                        <span
-                            v-else
-                            class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-zinc-500/10 text-zinc-400 border border-zinc-500/30"
-                        >
-                            <span class="w-1.5 h-1.5 rounded-full bg-zinc-400"></span>
-                            <span>Inactive</span>
-                        </span>
-                    </button>
+                            <span
+                                v-if="row.status"
+                                class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-500 border border-emerald-500/30"
+                            >
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                <span>Active</span>
+                            </span>
+                            <span
+                                v-else
+                                class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-zinc-500/10 text-zinc-400 border border-zinc-500/30"
+                            >
+                                <span class="w-1.5 h-1.5 rounded-full bg-zinc-400"></span>
+                                <span>Inactive</span>
+                            </span>
+                        </button>
+                    </template>
                 </div>
 
-                <!-- Family & Variants Count -->
-                <div class="flex items-center justify-between text-xs text-[var(--muted)] pt-1">
-                    <span class="flex items-center gap-1.5">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
-                        <span>Family: <strong class="text-[var(--text)]">@{{ row.family || '—' }}</strong></span>
-                    </span>
-                    <span v-if="row.variants_count !== undefined" class="text-[var(--teal)] font-mono text-[11px] font-bold">
-                        @{{ row.variants_count }} variants
-                    </span>
+                <!-- Dynamic Visible Fields & Family Attributes inside 2-Column Bento Grid -->
+                <div
+                    v-if="columns.filter(c => !['sku', 'status', 'type'].includes(c.index || c.key)).length > 0"
+                    class="pt-2 border-t border-[var(--border)]/60 grid grid-cols-2 gap-2 text-xs"
+                >
+                    <div
+                        v-for="col in columns.filter(c => !['sku', 'status', 'type'].includes(c.index || c.key))"
+                        :key="col.index || col.key"
+                        class="p-2 rounded-xl bg-[var(--page)] border border-[var(--border)]/60 space-y-0.5"
+                    >
+                        <span class="text-[10px] text-[var(--muted)] font-semibold block uppercase tracking-wider truncate">
+                            @{{ col.label }}
+                        </span>
+                        <div class="font-medium text-[var(--text)] text-xs truncate">
+                            <span v-if="(col.index || col.key) === 'family'">
+                                @{{ row.family || '—' }}
+                            </span>
+                            <span v-else-if="typeof row[col.index || col.key] === 'boolean'">
+                                <v-status-badge :value="row[col.index || col.key]" type="boolean" size="sm"></v-status-badge>
+                            </span>
+                            <span v-else>
+                                @{{ row[col.index || col.key] ?? '—' }}
+                            </span>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Card Footer: Position reorder arrows + Edit Button -->

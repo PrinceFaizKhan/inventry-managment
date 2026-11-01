@@ -24,6 +24,7 @@ class UpdateAttributeRequest extends FormRequest
         $rules = [
             'name' => ['required', 'string', 'max:120'],
             'required' => ['required', 'boolean'],
+            'is_unique' => ['sometimes', 'boolean'],
             'is_filterable' => ['sometimes', 'boolean'],
             'is_filter' => ['sometimes', 'boolean'],
             'code' => ['prohibited'],

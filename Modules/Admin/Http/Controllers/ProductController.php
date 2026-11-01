@@ -114,6 +114,7 @@ class ProductController extends Controller
                             'type' => $attr->type,
                             'scope' => $scope,
                             'required' => (bool) $attr->required,
+                            'is_unique' => (bool) $attr->is_unique,
                             'options' => $attr->options->map(fn ($opt) => [
                                 'id' => $opt->id,
                                 'admin_name' => $opt->admin_name,
@@ -193,6 +194,7 @@ class ProductController extends Controller
             'code' => $attr->code,
             'type' => $attr->type,
             'required' => (bool) $attr->required,
+            'is_unique' => (bool) $attr->is_unique,
             'options' => $attr->options->map(fn ($opt) => [
                 'id' => $opt->id,
                 'admin_name' => $opt->admin_name,

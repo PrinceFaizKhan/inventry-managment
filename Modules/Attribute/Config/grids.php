@@ -15,6 +15,7 @@ return [
             'code' => 'code',
             'type' => 'type',
             'required' => 'required',
+            'is_unique' => 'is_unique',
             'is_filterable' => 'is_filterable',
         ],
         'columns' => [
@@ -22,11 +23,13 @@ return [
             ['index' => 'name', 'label' => 'Name', 'sortable' => true, 'searchable' => true],
             ['index' => 'type', 'label' => 'Type', 'sortable' => true],
             ['index' => 'required', 'label' => 'Required', 'sortable' => true, 'align' => 'center'],
+            ['index' => 'is_unique', 'label' => 'Unique', 'sortable' => true, 'align' => 'center'],
             ['index' => 'is_filterable', 'label' => 'Filterable', 'sortable' => true, 'align' => 'center'],
         ],
         'filters' => [
             'type' => ['type' => 'select'],
             'required' => ['type' => 'select'],
+            'is_unique' => ['type' => 'select'],
             'is_filterable' => ['type' => 'select'],
         ],
         'page_sizes' => [10, 25, 50],
@@ -58,7 +61,9 @@ return [
             ['index' => 'name', 'label' => 'Name', 'sortable' => true, 'searchable' => true],
             ['index' => 'created_at', 'label' => 'Created At', 'sortable' => true],
         ],
-        'filters' => [],
+        'filters' => [
+            'has_families' => ['type' => 'select', 'label' => 'Assigned to Families'],
+        ],
         'page_sizes' => [10, 25, 50],
         'default_sort' => 'name',
         'default_direction' => 'asc',

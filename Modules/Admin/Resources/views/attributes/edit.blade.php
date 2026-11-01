@@ -325,6 +325,14 @@
                         description="Require value before saving catalog items"
                         @change="saved = false"
                     />
+
+                    <!-- Is Unique Toggle -->
+                    <v-toggle
+                        v-model="isUnique"
+                        label="Is Unique"
+                        description="Require value to be unique across all products"
+                        @change="saved = false"
+                    />
                 </div>
 
                 <!-- Configurations Accordion Card -->
@@ -377,6 +385,7 @@
                 attr: this.initialAttribute,
                 name: this.initialAttribute ? this.initialAttribute.name : '',
                 required: this.initialAttribute ? Boolean(this.initialAttribute.required) : false,
+                isUnique: this.initialAttribute ? Boolean(this.initialAttribute.is_unique) : false,
                 isFilterable: this.initialAttribute ? Boolean(this.initialAttribute.is_filterable) : false,
                 settings: this.initialAttribute && this.initialAttribute.settings ? { ...this.initialAttribute.settings } : {},
                 options: this.initialAttribute && this.initialAttribute.options ? this.initialAttribute.options.map(o => ({ ...o })) : [],
@@ -468,6 +477,7 @@
                         this.attr = res.data;
                         this.name = res.data.name;
                         this.required = Boolean(res.data.required);
+                        this.isUnique = Boolean(res.data.is_unique);
                         this.isFilterable = Boolean(res.data.is_filterable);
                         this.settings = res.data.settings || {};
                         this.options = res.data.options ? res.data.options.map(o => ({ ...o })) : [];
@@ -507,6 +517,7 @@
                     const payload = {
                         name: this.name.trim(),
                         required: Boolean(this.required),
+                        is_unique: Boolean(this.isUnique),
                         is_filterable: Boolean(this.isFilterable),
                         settings: this.prepareSettings(),
                     };

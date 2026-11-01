@@ -399,6 +399,41 @@ class AttributeModuleTest extends TestCase
         }
     }
 
+    public function test_attribute_can_be_configured_with_is_unique_validation(): void
+    {
+        $user = $this->userWithRole('administration');
+        $attribute = Attribute::factory()->create([
+            'name' => 'IMEI Number',
+            'type' => 'text',
+            'is_unique' => false,
+        ]);
+
+        $this->actingAs($user)->putJson("/api/catalog/attributes/{$attribute->id}", [
+            'name' => 'IMEI Number',
+            'required' => true,
+            'is_unique' => true,
+        ])->assertOk()->assertJsonPath('data.is_unique', true);
+
+        $this->assertTrue((bool) $attribute->fresh()->is_unique);
+    }
+
+    public function test_attributes_grid_can_filter_by_is_unique(): void
+    {
+        $user = $this->userWithRole('administration');
+        Attribute::factory()->create(['name' => 'Serial Number', 'is_unique' => true]);
+        Attribute::factory()->create(['name' => 'Color Description', 'is_unique' => false]);
+
+        $response = $this->actingAs($user)->getJson('/api/grids/attributes?filter[is_unique]=1');
+        $response->assertOk()
+            ->assertJsonPath('meta.total', 1)
+            ->assertJsonPath('data.0.name', 'Serial Number');
+
+        $responseNonUnique = $this->actingAs($user)->getJson('/api/grids/attributes?filter[is_unique]=0');
+        $responseNonUnique->assertOk()
+            ->assertJsonPath('meta.total', 1)
+            ->assertJsonPath('data.0.name', 'Color Description');
+    }
+
     /** @param list<string> $permissions */
     private function userWithRole(string $access, array $permissions = []): User
     {

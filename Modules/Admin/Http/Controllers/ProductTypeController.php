@@ -36,12 +36,12 @@ class ProductTypeController extends Controller
             ->get();
 
         $allAttributes = Attribute::query()
-            ->select(['id', 'name', 'code', 'type', 'required', 'is_filterable'])
+            ->select(['id', 'name', 'code', 'type', 'required', 'is_unique', 'is_filterable'])
             ->orderBy('name')
             ->get();
 
         $selectAttributes = Attribute::query()
-            ->select(['id', 'name', 'code', 'type', 'required', 'is_filterable'])
+            ->select(['id', 'name', 'code', 'type', 'required', 'is_unique', 'is_filterable'])
             ->whereIn('type', ['select', 'multiselect', 'checkbox', 'radio'])
             ->orderBy('name')
             ->get();
@@ -59,8 +59,8 @@ class ProductTypeController extends Controller
 
         $product_type->load([
             'groups.attributeGroup:id,name,code',
-            'groups.groupAttributes.attribute:id,name,code,type,required,is_filterable',
-            'variants.axes.attribute:id,name,code,type,required,is_filterable',
+            'groups.groupAttributes.attribute:id,name,code,type,required,is_unique,is_filterable',
+            'variants.axes.attribute:id,name,code,type,required,is_unique,is_filterable',
             'variants.variantAttributes:id,name,code,type,required,is_filterable',
         ]);
 
@@ -70,12 +70,12 @@ class ProductTypeController extends Controller
             ->get();
 
         $allAttributes = Attribute::query()
-            ->select(['id', 'name', 'code', 'type', 'required', 'is_filterable'])
+            ->select(['id', 'name', 'code', 'type', 'required', 'is_unique', 'is_filterable'])
             ->orderBy('name')
             ->get();
 
         $selectAttributes = Attribute::query()
-            ->select(['id', 'name', 'code', 'type', 'required', 'is_filterable'])
+            ->select(['id', 'name', 'code', 'type', 'required', 'is_unique', 'is_filterable'])
             ->whereIn('type', ['select', 'multiselect', 'checkbox', 'radio'])
             ->orderBy('name')
             ->get();
@@ -106,8 +106,8 @@ class ProductTypeController extends Controller
 
         $productType->load([
             'groups.attributeGroup:id,name,code',
-            'groups.groupAttributes.attribute:id,name,code,type,required,is_filterable',
-            'variants.axes.attribute:id,name,code,type,required,is_filterable',
+            'groups.groupAttributes.attribute:id,name,code,type,required,is_unique,is_filterable',
+            'variants.axes.attribute:id,name,code,type,required,is_unique,is_filterable',
             'variants.variantAttributes:id,name,code,type,required,is_filterable',
         ]);
 
@@ -122,8 +122,8 @@ class ProductTypeController extends Controller
 
         $product_type->load([
             'groups.attributeGroup:id,name,code',
-            'groups.groupAttributes.attribute:id,name,code,type,required,is_filterable',
-            'variants.axes.attribute:id,name,code,type,required,is_filterable',
+            'groups.groupAttributes.attribute:id,name,code,type,required,is_unique,is_filterable',
+            'variants.axes.attribute:id,name,code,type,required,is_unique,is_filterable',
             'variants.variantAttributes:id,name,code,type,required,is_filterable',
         ]);
 
@@ -146,8 +146,8 @@ class ProductTypeController extends Controller
 
         $product_type->load([
             'groups.attributeGroup:id,name,code',
-            'groups.groupAttributes.attribute:id,name,code,type,required,is_filterable',
-            'variants.axes.attribute:id,name,code,type,required,is_filterable',
+            'groups.groupAttributes.attribute:id,name,code,type,required,is_unique,is_filterable',
+            'variants.axes.attribute:id,name,code,type,required,is_unique,is_filterable',
             'variants.variantAttributes:id,name,code,type,required,is_filterable',
         ]);
 

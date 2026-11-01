@@ -34,6 +34,7 @@ class ProductTypeResource extends JsonResource
                                 'code' => $attr->code,
                                 'type' => $attr->type,
                                 'required' => (bool) $attr->required,
+                                'is_unique' => (bool) $attr->is_unique,
                                 'is_filterable' => (bool) $attr->is_filterable,
                                 'position' => $ga->position,
                             ];
